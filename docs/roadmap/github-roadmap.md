@@ -22,125 +22,9 @@ Labels used below:
 
 ## Current Priority
 
-The v1.6.0 release-sized work is archived below. The REST API, TrackDraw-side live overlay preparation, and first stability pass are now complete. The next TrackDraw priority is UI/UX polish and reliability across existing workflows before opening larger new product surfaces.
+The v1.7.0 release-sized work is archived below. The REST API, live race overlay preparation, UI/UX polish, and stability pass are now complete. The next TrackDraw priority is race-day workflow depth and account-backed project lifecycle follow-up.
 
 ## Follow-up
-
-- [x] UI/UX polish and reliability pass (`No account required`)
-      Fine-tune existing editor, mobile, share, export, and account/project flows before starting larger new features.
-  - [x] Project Manager and Account dialog polish
-        Tighten empty, loading, destructive, and sync states where users decide whether work is local, account-backed, shared, revoked, or recoverable.
-  - [x] Account project conflict action polish
-        Wired account-project conflict actions to the existing conflict resolver instead of presenting a no-op resolve action in the account project list.
-  - [x] Project Manager loading-state polish
-        Added explicit loading text and status semantics for account projects and published shares instead of skeleton-only loading states.
-  - [x] Destructive action copy polish
-        Clarified that Project Manager delete removes the local browser copy, and that revoking an API key removes integration access.
-  - [x] Account deletion clarity
-        Clarified that deleting an account removes account projects, published links, API keys, and profile data, with coverage that deletion remains gated by the DELETE confirmation.
-  - [x] Editor interaction polish
-        Smooth small selection, locked-state, hover, touch-target, and inspector feedback details without changing the editor model.
-  - [x] Locked inspector feedback polish
-        Added a clear locked-shape note in the inspector so users understand that canvas movement, resizing, and path continuation are blocked until unlock.
-  - [x] Mobile drawer and toolbar polish
-        Review compact mobile panels, drawers, toolbar spacing, and touch affordances for repeated venue-side use.
-  - [x] Mobile multi-select locked-state polish
-        Added a clearer locked-selection hint to the mobile multi-select overlay so users know to unlock before moving or resizing.
-  - [x] Mobile path-builder status polish
-        Clarified the mobile path-builder status when a loop is already connected and made its overlay actions explicit button actions.
-  - [x] Export and share confidence polish
-        Clarify export/share disabled states, progress states, filename choices, and handoff wording where the user needs confidence before sending output.
-  - [x] Mobile export option label polish
-        Renamed the mobile export toggle from generic numbers to route numbers so users know it affects route-number overlays in 2D outputs.
-  - [x] Focus and accessibility polish
-        Keep icon-only, hover-only, destructive, and status actions discoverable through labels, focus states, and keyboard paths.
-  - [x] Mobile overlay button semantics
-        Made mobile multi-select overlay actions explicit button actions and covered the locked-state action semantics.
-
-- [x] Stability and usability pass (`No account required`)
-      Improve reliability, clarity, and confidence across the shipped editor, share, export, mobile, and account-backed project flows before adding new product surfaces.
-  - [x] Editor interaction regression pass
-        Re-tested selection, drag/nudge, resize, rotate, undo/redo, snapping, route editing, inspector updates, and mobile touch behavior with focused automated coverage.
-  - [x] Locked-shape movement regression coverage
-        Added store coverage that locked-only nudges do not move shapes or create history, and mixed locked/editable selections only move editable shapes.
-  - [x] Route waypoint history regression coverage
-        Added store coverage that route waypoint insertion clears stale segment selection, preserves the selected route during the edit, and remains undoable/redoable.
-  - [x] Shape resize history regression coverage
-        Added store coverage that dimension changes are timestamped and remain undoable/redoable.
-  - [x] Share and export smoke pass
-        Verified JSON import/export, PNG, SVG, PDF, Race Pack, shared views, embeds, gallery cards, and account-published share flows with focused automated smoke coverage.
-  - [x] Race Pack PDF automated smoke
-        Added coverage that the race-day PDF export renders a Race Pack, includes the published share QR section, and saves the requested PDF filename.
-  - [x] Standard PDF automated smoke
-        Added coverage that the standard PDF export renders the track map, writes footer metadata, and saves the requested PDF filename.
-  - [x] PNG export automated smoke
-        Added coverage that the 2D PNG export renders through canvas, creates a PNG blob, assigns the requested filename, and triggers the download path.
-  - [x] SVG export automated smoke
-        Added coverage that the 2D SVG export assigns the requested filename and triggers the browser download path.
-  - [x] Velocidrone export download smoke
-        Added coverage that the experimental `.trk` export encrypts, assigns the requested filename, and triggers the browser download path.
-  - [x] JSON project export/import roundtrip smoke
-        Added coverage that serialized project JSON imports back into an editable design while preserving map reference data, shape order, and timing metadata.
-  - [x] Share/gallery/embed automated smoke
-        Ran focused coverage for share tokens, gallery validation and routes, share retention, embeds, SVG export, and Velocidrone export.
-  - [x] Automated baseline smoke
-        Ran the full Vitest suite and production build after the API, share, and inspector stability changes.
-  - [x] Mobile workflow cleanup
-        Remove practical friction in panels, drawers, selection targets, map-reference controls, share dialogs, and export dialogs without expanding scope.
-  - [x] Mobile inspector section defaults
-        Collapsed secondary single-shape inspector sections by default on mobile while keeping Transform open and active Race timing visible.
-  - [x] Mobile export 3D handoff
-        Fixed the mobile export drawer so the 3D Render row can switch to the 3D view instead of appearing actionable while disabled, with component coverage for the handoff.
-  - [x] Mobile project share actions
-        Kept Project Manager share actions visible on touch layouts and added accessible button labels for copy, open, and revoke actions.
-  - [x] Project manager device action accessibility
-        Added labels and keyboard-focus visibility for desktop device-project sync, export, rename, and delete actions.
-  - [x] Account project sync action clarity
-        Added explicit labels for pending, failed, and conflicted account-project sync actions, with coverage that conflict actions do not trigger direct sync.
-  - [x] Project manager restore action clarity
-        Added explicit restore/delete labels for restore points and covered the restore confirmation flow before closing the manager.
-  - [x] Account/project/share state clarity
-        Tightened copy, states, and edge-case coverage around signed-in versus local work, anonymous versus account-backed shares, revoked/expired links, active projects, and API-key setup.
-  - [x] Expired share state clarity
-        Clarified that temporary share links expire by chosen duration while account-published project links stay live until revoked, with copy coverage for the expired-share page.
-  - [x] Revoked or missing share fallback clarity
-        Clarified the unavailable share fallback so users know a link may have been revoked by the owner or copied incorrectly, with component coverage for the fallback page.
-  - [x] API-key setup clarity
-        Clarified that API keys grant read-only project, track package, and overlay data access, not edit access, and covered the copy with a component test.
-  - [x] API-key revoke accessibility
-        Kept the desktop API-key revoke action visible when keyboard-focused and covered the behavior with a component test.
-  - [x] Project share lifetime clarity
-        Clarified in the Project Manager that account-published links stay live until revoked while temporary anonymous links expire automatically, with component coverage for published and temporary labels.
-  - [x] Initial targeted regression tests
-        Added focused coverage for OpenAPI overlay readiness, share-token privacy and timing metadata roundtrip, mobile inspector behavior, API-key clarity copy, and locked-shape movement.
-  - [x] Performance and bundle check
-        Measure the current startup/editor path and clean up only concrete regressions or obvious weight, avoiding speculative refactors.
-  - [x] Production build and chunk baseline
-        Verified the production build, checked the Studio entry chunk set, measured the current static JS/CSS output at about 5.5 MB across 100 JS chunks, and confirmed there was no obvious eager export/3D bundle pull-in from the `/studio` page.
-
-- [x] TrackDraw REST API (`Account-backed`)
-      Add a versioned read-only REST API for external tools, backed by account-created expiring API keys and OpenAPI documentation.
-  - [x] API product boundary and auth matrix
-        Lock the account-only API key model, read-only v1 permissions, public-versus-authenticated endpoint policy, and first endpoint list.
-  - [x] API key management
-        Let signed-in users create, list, and revoke permissioned expiring API keys through the Better Auth API Key plugin.
-  - [x] Throttling and rate limits
-        Enforce per-key API budgets, stable `429` responses, stricter limits for export-oriented endpoints, and cleanup for expired or revoked API keys after the visible retention window.
-  - [x] First authenticated read endpoints
-        Add bearer-authenticated project reads such as `/api/v1/me`, `/api/v1/projects`, and project track data.
-  - [x] OpenAPI docs
-        Serve an OpenAPI schema and API docs page so external tools can integrate against an explicit contract.
-  - [x] RotorHazard livestream data endpoint
-        Add a compact account-project `/api/v1/projects/[projectId]/overlay` package for route, numbered obstacle, and timing marker data; defer shares and full project exports until a concrete non-overlay consumer needs them.
-
-- [x] Base UI to Radix UI migration
-      Replace `@base-ui/react` with Radix UI primitives across all UI components to fix mobile touch handling inside dialogs. The immediate trigger is that Base UI's `Select` and `Menu` primitives fail to respond to touch events on mobile inside a dialog focus trap.
-  - [x] Phase 1: migrate `select` and `dropdown-menu` to `@radix-ui/react-select` and `@radix-ui/react-dropdown-menu`; fix mobile expiry select in Account dialog
-  - [x] Phase 2: migrate `dialog` and `sheet` to `@radix-ui/react-dialog`
-  - [x] Phase 3: migrate `popover`, `tooltip`, and `context-menu`
-  - [x] Phase 4: migrate `collapsible`, `tabs`, `scroll-area`, `slider`, and `avatar`
-  - [x] Phase 5: migrate utility-only components (`button`, `input`, `separator`, `breadcrumb`, `sidebar`)
-  - [x] Phase 6: remove `@base-ui/react` from the dependency tree
 
 - [ ] Velocidrone experimental export stabilization (`No account required`)
       The first experimental `.trk` export is already shipped. Keep this parked until there is appetite to validate more real layouts and tighten prefab mapping and orientation edge cases.
@@ -192,27 +76,7 @@ The v1.6.0 release-sized work is archived below. The REST API, TrackDraw-side li
     - [ ] Race director page layout
           Turn that metadata into a dedicated Race Pack page.
 
-- [x] Live race overlay preparation (`No account required`)
-      Prepare TrackDraw projects for a future `rh-stream-overlays` map-overlay integration without making TrackDraw the live OBS overlay runtime.
-  - [x] Single race line rule
-        Keep one race line per track as the supported model. Overlay readiness blocks missing or ambiguous route setups instead of adding active-route selection.
-  - [x] Timing role metadata
-        Reuse the race-day timing marker model for overlay preparation, including start/finish and split timing identifiers on relevant shapes.
-  - [x] Timing setup validation
-        Warn or block overlay-oriented export when the race route is missing, timing roles are duplicated, or marked timing points cannot be mapped onto route progress.
-  - [x] TrackDraw REST overlay contract pass
-        Document the compact REST overlay package and the fields `rh-stream-overlays` should consume.
-  - [x] Overlay package endpoint
-        Added an account-project `/api/v1/projects/[projectId]/overlay` endpoint for route, numbered obstacle, and timing marker data without exposing full editor JSON.
-
-- [ ] Route duration estimate for live overlays (`No account required`)
-      Give `rh-stream-overlays` a better first-lap baseline before RotorHazard has real lap data, while keeping live race estimation in the overlay runtime.
-  - [x] Duration model definition
-        Added a small `duration_estimate` contract for `trackdraw.overlay.v1`, including estimated lap milliseconds, route length, assumed speed, source, and confidence.
-  - [x] TrackDraw-side baseline controls
-        Decided the first version uses a conservative fixed club pace derived from route length, with no user-facing setup controls. This keeps race management and live estimation in the overlay runtime.
-  - [x] Overlay package extension
-        Added the optional duration estimate to the REST overlay package without making it a required schema field. The plugin should keep falling back to its own conservative default when the field is absent.
+- [ ] Route duration estimate follow-up (`No account required`)
   - [ ] Race Pack and setup copy
         Surface the estimate only where it helps race-day setup, such as timing/overlay preparation notes, and avoid presenting it as a guaranteed race result prediction.
   - [ ] Validation against real heats
@@ -304,6 +168,32 @@ The v1.6.0 release-sized work is archived below. The REST API, TrackDraw-side li
   - [ ] Relationship to starter layouts
         Keep templates distinct from starter layouts, project duplication, and saved projects.
 
+## v1.7.0 Archive
+
+<details>
+<summary>Completed release work archived with v1.7.0</summary>
+
+- [x] UI/UX polish and reliability pass (`No account required`)
+      Fine-tuned editor, mobile, share, export, and account/project flows. Includes Project Manager and Account dialog states, locked inspector feedback, mobile multi-select and path-builder polish, export/share confidence copy, and focus/accessibility improvements.
+
+- [x] Stability and usability pass (`No account required`)
+      Improved reliability across editor, share, export, mobile, and account-backed project flows. Includes regression coverage for selection, route editing, export smoke tests, mobile workflow cleanup, and account/project/share state clarity.
+
+- [x] TrackDraw REST API (`Account-backed`)
+      Versioned read-only REST API for external tools with expiring API keys, rate limiting, and OpenAPI docs.
+  - [x] API key management: create, list, and revoke expiring keys with scoped permissions
+  - [x] Authenticated endpoints: `/api/v1/me`, `/api/v1/projects`, `/api/v1/projects/[projectId]`, `/api/v1/projects/[projectId]/track`
+  - [x] RotorHazard overlay endpoint: `/api/v1/projects/[projectId]/overlay` with route, obstacles, timing markers, split indices, readiness status, and optional lap duration estimate
+  - [x] OpenAPI docs at `/api/v1/openapi.json` and `/api/docs`
+
+- [x] Live race overlay preparation (`Account-backed`)
+      TrackDraw projects are now ready for use with [rh-stream-overlays](https://github.com/dutchdronesquad/rh-stream-overlays). Includes overlay readiness validation, split index support, and optional route duration estimate in the overlay package.
+
+- [x] Base UI to Radix UI migration
+      Replaced `@base-ui/react` with Radix UI primitives across all UI components to fix mobile touch handling inside dialogs.
+
+</details>
+
 ## v1.6.0 Archive
 
 <details>
@@ -327,42 +217,3 @@ The v1.6.0 release-sized work is archived below. The REST API, TrackDraw-side li
 
 </details>
 
-## v1.5.0 Archive
-
-<details>
-<summary>Completed release work archived with v1.5.0</summary>
-
-- [x] Published gallery (`Account-backed`)
-      Shipped opt-in public gallery discovery for account-published tracks, including owner-managed listings and moderator/admin dashboard controls.
-
-- [x] Embeddable shared views (`Account-backed`)
-      Shipped account-only published embeds through `/embed/[token]`, including iframe copy, 2D/3D start modes, unavailable states, and lifecycle rules that keep anonymous shares temporary and non-embeddable.
-
-- [x] Editor workflow follow-up (`No account required`)
-      Shipped route-derived numbering validation, route-line and waypoint-aware snapping, x/y object-alignment snapping, and lightweight inspector cues without replacing the current derived workflow model.
-  - [x] Obstacle numbering validation and controls
-        Added shared route-derived numbering validation, layout inspector status, missing-route/off-route issue states, and item-list cues without replacing the current derived model.
-  - [x] Advanced snapping follow-up
-        Added route-line snapping, waypoint-aware snapping, x/y object-alignment snapping, and kept the existing angle/grid behavior on the same lightweight snap resolver.
-
-- [x] Map field reference (`No account required`)
-      Shipped an editor-only satellite map reference for lining a project up with a real venue. Users can search for a location, choose the field center, align rotation, adjust opacity, and render the saved reference behind the 2D layout through a non-interactive Konva tile layer.
-  - [x] Map picker and field footprint
-        Added a desktop dialog and mobile drawer with Esri World Imagery tiles, typeahead location search, current-location jump, center selection, touch/pointer panning, pinch/wheel zoom, and a field footprint derived from project dimensions.
-  - [x] Editor rendering and inspector controls
-        Added a locked, non-interactive Konva tile renderer plus Layout inspector controls for add/edit, show/hide, opacity, rotation, and remove.
-  - [x] Persistence and share/export boundary
-        Persisted map reference metadata in project JSON and stripped it from share/export serialization so public outputs do not expose map references in v1.
-
-- [x] Bundle size reduction (`No account required`)
-      Shipped measured startup-weight reductions and verified that heavier editor, 3D, and export paths stay behind the workflows that need them.
-  - [x] Studio toolbar chunk reduction
-        Reduced avoidable weight in the main Studio toolbar so secondary controls do not all ship in the first editor load.
-  - [x] TrackCanvas editor-only interaction split
-        Kept editor-only interaction code separated from the base 2D canvas path where that lowers startup cost without risking core viewing behavior.
-  - [x] 3D preview hotspot audit
-        Re-measured the shared 3D preview stack and kept further splitting limited to concrete hotspots.
-  - [x] Export dependency audit
-        Confirmed that heavier export dependencies stay fully deferred behind export flows.
-
-</details>

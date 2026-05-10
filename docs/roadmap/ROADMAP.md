@@ -1,6 +1,6 @@
 # TrackDraw Roadmap
 
-This roadmap reflects the current state of TrackDraw. The core design loop is now in place across desktop, shared read-only viewing, public gallery discovery, practical mobile use, venue-aligned editing, account-published embeds, export/share handoff, and the first account-backed REST integration surface. The roadmap should now focus primarily on UI/UX polish and reliability before adding larger new product surfaces.
+This roadmap reflects the current state of TrackDraw and is updated with each release.
 
 ## Current Focus
 
@@ -14,15 +14,15 @@ TrackDraw is now strong in these areas:
 - Real venue alignment through editor-only satellite map references
 - Practical mobile editing for quick venue-side changes
 - Portable outputs through PNG, SVG, PDF, 3D render capture, and JSON project files
+- Account-backed REST API with API key management and a live race overlay data endpoint
 
-The most useful next product move is a UI/UX polish and reliability pass across the shipped product:
+The most useful next product move is deepening the race-day workflow and refining the account-backed project model:
 
-- Fine-tune Project Manager, Account, share, export, mobile, and editor states that users touch repeatedly
-- Smooth small interaction details around selection, locked states, destructive actions, disabled states, touch targets, and inspector feedback
-- Keep focused regression coverage around workflows where UI polish could accidentally affect persistence, sharing, export, or mobile behavior
-- Clean up confusing states and copy around local projects, account-backed projects, published shares, expired/revoked links, and API-key setup
+- Race director page with pilot line, timing/start box placement, and ops notes
+- Share version history so owners can update a published track without surprising existing links
+- Gallery collections for curated browsing beyond the current featured bucket
 
-Larger product ideas such as venue libraries, share version history, gallery collections, and deeper race-day operations should stay parked until there is clearer need or until the shipped foundation has had a quality pass.
+Larger product ideas such as real-time collaboration, venue libraries, and build mode should stay parked until there is clearer need.
 
 ## Product Principles
 
@@ -43,31 +43,7 @@ Labels used below:
 - `Account-backed`: depends on ownership, sync, identity, or shared persistence
 - `Research`: still primarily exploratory
 
-### 1. UI/UX Polish And Reliability Pass (`No account required`)
-
-The next TrackDraw slice should make shipped workflows feel calmer, clearer, and more dependable rather than opening another broad feature track.
-
-Why now:
-
-- The main stability pass is complete, so the highest-value work is now removing practical friction in the flows users already have
-- Small UI/UX inconsistencies in selection, mobile panels, sharing, export, account-backed project state, or API setup can make the product feel less reliable than it is
-- Focused polish keeps the product moving without committing to speculative feature surfaces
-
-Focus:
-
-- Project Manager and Account dialog polish: empty, loading, destructive, sync, share, and recovery states
-- Editor interaction polish: small selection, locked-state, hover, touch-target, and inspector feedback details
-- Mobile drawer and toolbar polish: compact panels, drawer hierarchy, spacing, and repeated venue-side touch use
-- Export and share confidence polish: disabled states, progress states, filename choices, and handoff wording
-- Focus and accessibility polish: labels, focus states, keyboard paths, and icon-only action clarity
-
-Done state:
-
-- Existing workflows feel more consistent and self-explanatory without adding new product scope
-- High-risk polish changes have focused tests where behavior could regress
-- The roadmap can reopen larger product work with a clearer product-quality baseline
-
-### 2. Accounts And Ownership Model (`Research`)
+### 1. Accounts And Ownership Model (`Research`)
 
 TrackDraw now has the first account foundation in place through sign-in, profile management, role-aware dashboard access, and internal role management. The next question is how far account-backed project continuity should go beyond that shipped foundation.
 
@@ -129,38 +105,9 @@ Current shipped foundation:
 - Role-aware dashboard access and internal role management
 - Initial account-backed schema and project/share ownership groundwork
 
-### 3. Account-Backed Follow-up (`Account-backed`)
+### 2. Account-Backed Follow-up (`Account-backed`)
 
 These items are now follow-up work rather than intentionally blocked. The first ownership model is clear enough that they can move forward when priority allows.
-
-#### REST API And Integration Surface
-
-TrackDraw now has a versioned REST API as an account-backed integration surface for external tools, starting with read-only access to account projects and compact livestream overlay data.
-
-Supporting documents:
-
-- `docs/research/trackdraw-rest-api.md`
-- `docs/pva/trackdraw-rest-api-pva.md`
-
-Why:
-
-- `rh-stream-overlays`, RotorHazard-adjacent plugins, club sites, event dashboards, and briefing tools need stable machine-readable track data
-- API keys are a natural account-only feature because they require identity, expiry, permissions, revocation, and ownership
-- OpenAPI documentation should make TrackDraw integration explicit rather than relying on ad hoc JSON exports or share-page scraping
-
-Shipped:
-
-- Better Auth API Key plugin integration with plugin-compatible D1 `apikey` storage
-- Browser-session API key management for signed-in users
-- Bearer-authenticated project reads at `/api/v1/me`, `/api/v1/projects`, `/api/v1/projects/[projectId]`, and `/api/v1/projects/[projectId]/track`
-- Livestream map-overlay data at `/api/v1/projects/[projectId]/overlay`, including route data, numbered obstacles, timing markers, route positions, and overlay readiness details
-- OpenAPI docs at `/api/v1/openapi.json` and `/api/docs`
-- API key throttling, stable rate-limit errors, audit events, cleanup behavior, and test coverage for the shipped v1 boundaries
-
-Future follow-up:
-
-- Defer public unauthenticated REST reads, write APIs, and share endpoints until concrete integrations require them
-- Add stricter package-endpoint budgets only if real usage requires them
 
 #### Share Lifecycle Follow-up
 
@@ -218,7 +165,7 @@ Focus:
 - Surface selected collections on `/gallery` while keeping every card destination on `/share/[token]`
 - Keep collection pages or deep collection routing out of the first slice unless the gallery needs it later
 
-### 3. Race-Day Follow-up (`No account required`)
+### 3. Race-Day Follow-up (`No account required`, `Account-backed`)
 
 TrackDraw now has a real Race Pack, numbering handoff, shared-view QR codes, and explicit timing markers. The immediate QR/timing-marker slice is archived with v1.6.0; the remaining work here is broader race-day operations follow-up.
 
@@ -230,7 +177,6 @@ Current first pass:
 Later slices:
 
 - Race director page once TrackDraw can extend the existing start/finish and timing-marker foundation with the supporting race-day metadata and ops elements it depends on, including pilot line, director position, timing/start box placement, cable routing, and ops notes
-- Live race overlay preparation once the `rh-stream-overlays` side is ready to consume TrackDraw-authored route and timing metadata
 
 Important boundary:
 
@@ -238,44 +184,7 @@ Important boundary:
 - A future Build mode should be treated as a separate operational product surface, not as "just a bigger PDF"
 - Live race overlay rendering, OBS presentation, RotorHazard event handling, and position estimation should stay in `rh-stream-overlays`, not in TrackDraw
 
-#### Live Race Overlay Preparation
-
-TrackDraw's role in the live race overlay work is course preparation, not live broadcast rendering.
-The same start/finish and split timing markers should first serve TrackDraw's own race-day planning surfaces, then become overlay preparation metadata when `rh-stream-overlays` consumes the project.
-
-Current state:
-
-- The REST API now exposes a compact project overlay package for route, numbered obstacle, and timing marker data
-- Route and timing-role authoring exists, and TrackDraw now exposes overlay readiness details for the `rh-stream-overlays` runtime to consume
-
-TrackDraw scope:
-
-- Treat a design with exactly one race line as overlay-prep eligible and block missing or ambiguous route setups
-- Reuse the race-day timing marker model, `shape.meta.timing`, for start/finish and split points
-- Keep editor controls for assigning timing roles on relevant shapes in a way that also improves Race Pack and race director output
-- Reuse overlay-preparation validation for missing race route, duplicate timing roles, missing timing identifiers, and timing-marked shapes that cannot be mapped onto route progress
-- Use the `trackdraw.overlay.v1` contract builder as the TrackDraw-side source for the first map-overlay prototype
-- Provide an optional route-duration estimate in the overlay package so `rh-stream-overlays` has a better first-lap baseline before RotorHazard has real lap data
-
-Out of TrackDraw scope:
-
-- OBS-facing map overlay rendering
-- RotorHazard event ingestion
-- estimated pilot position logic
-- stale, reconnect, and race-state behavior
-- live race control or timing dashboard UX
-
-Suggested first slices:
-
-- Shipped: typed timing metadata helpers and normalization for `shape.meta.timing`
-- Shipped: inspector controls for `start_finish` and `split` roles on relevant gates or timing shapes
-- Shipped: timing markers surfaced in editor, 3D, Race Pack, and race director-oriented output before treating them as overlay-only metadata
-- Shipped: overlay-preparation validation and route-progress mapping helper for future export/setup UI
-- Shipped: `trackdraw.overlay.v1` REST package with route data, numbered obstacles, timing markers, route positions, and readiness details
-- Shipped: one-race-line overlay preparation rule; no active-route selector is planned for v1
-- Shipped: optional route-duration estimate in the overlay package, including estimated lap time, assumed speed, source, and confidence
-
-### 4. Real-Time Collaboration Evaluation (`Research`)
+### 3. Real-Time Collaboration Evaluation (`Research`)
 
 Evaluate whether TrackDraw should support shared real-time editing for race track design, but do not actively invest in enabling collaboration until the sync, presence, and conflict model clearly justify the editor complexity.
 
@@ -287,7 +196,7 @@ Suggested first slices:
 - Treat host-led review with optional presence as the strongest smaller step if TrackDraw wants live collaboration-adjacent value before full co-editing
 - Only revisit active co-editing investment after the editor state, persistence, and undo boundaries are stronger for the solo workflow too
 
-### 5. Backlog And Research Tracks
+### 4. Backlog And Research Tracks
 
 These remain valuable, but they are not the current build target.
 
@@ -388,7 +297,7 @@ Suggested first slices:
   - Clarify how browse, duplicate, insert, and fork flows should work without overlapping confusingly with starter layouts or ordinary projects
   - Define ownership and visibility boundaries for private, club, team, or published template libraries
 
-### 6. Accounts Boundary
+### 5. Accounts Boundary
 
 Be deliberate about what should stay usable without an account versus what actually benefits from account identity and continuity.
 
@@ -408,6 +317,42 @@ Likely account-backed follow-up:
 - Curated gallery collections
 - Shared venue or club records, including shared inventory profiles
 - Identity-aware comments, review threads, and future collaboration
+
+## v1.7.0 Archive
+
+<details>
+<summary>Completed release work archived with v1.7.0</summary>
+
+### UI/UX Polish And Reliability Pass (`No account required`)
+
+Shipped workflows across Project Manager, Account, share, export, mobile, and editor now feel more consistent and self-explanatory. Selection, locked states, destructive actions, disabled states, touch targets, and inspector feedback are more predictable across desktop and mobile.
+
+### REST API And Integration Surface (`Account-backed`)
+
+TrackDraw now has a versioned REST API as an account-backed integration surface for external tools, starting with read-only access to account projects and compact livestream overlay data.
+
+Included:
+
+- Browser-session API key management for signed-in users: create named keys with configurable expiry (7/30/90 days or 1 year), view active keys with last-used timestamps, and revoke at any time
+- Bearer-authenticated project reads at `/api/v1/me`, `/api/v1/projects`, `/api/v1/projects/[projectId]`, and `/api/v1/projects/[projectId]/track`
+- Livestream map-overlay data at `/api/v1/projects/[projectId]/overlay`, including route data, numbered obstacles, timing markers with split indices, route positions, overlay readiness status, and an optional estimated lap duration
+- OpenAPI documentation at `/api/v1/openapi.json` and `/api/docs`
+- API key throttling, stable rate-limit errors, audit events, cleanup behavior, and test coverage for the shipped v1 boundaries
+- API project ID visible and copyable from the Project Manager
+
+### Live Race Overlay Preparation (`Account-backed`)
+
+TrackDraw's side of the live race overlay integration is complete. Account projects are ready to use with [rh-stream-overlays](https://github.com/dutchdronesquad/rh-stream-overlays).
+
+Included:
+
+- Overlay-preparation validation: readiness status (`ready` or `blocked`) with specific issue types for missing route, missing start/finish, duplicate timing IDs, timing points off-route, and ambiguous multi-route setups
+- Split-index support for each timing marker so `rh-stream-overlays` can display per-split progress
+- Optional route-duration estimate in the overlay package, including estimated lap time, assumed speed, source, and confidence flag
+
+Out of TrackDraw scope: OBS-facing map overlay rendering, RotorHazard event ingestion, pilot position estimation, and live race control.
+
+</details>
 
 ## v1.6.0 Archive
 
@@ -561,383 +506,6 @@ The production runtime and deployment path are now treated as validated. Develop
 ### Inventory And Buildability Validation (`No account required`)
 
 This initial release is also complete. TrackDraw now supports local inventory entry, required-vs-available comparison, buildability warnings, and Race Pack setup estimates. The next work from here belongs to `Build mode / setup sequence`, not to more expansion of the basic inventory comparison layer.
-
-</details>
-
-## v1.0.0 Archive
-
-<details>
-<summary>Completed v1 foundation and release work</summary>
-
-## Recently Completed
-
-### Core Editor Baseline
-
-TrackDraw now has a much stronger editing baseline than earlier roadmap versions assumed.
-
-Included:
-
-- Refined 2D drag behavior with more readable snap feedback
-- Better desktop and mobile interaction consistency
-- Multi-select support on mobile with quick actions
-- Better mobile venue-side quick actions including single-selection adjust controls and mobile undo/redo access
-- Inspector cleanup and broader property editing polish
-- Better status and version visibility inside the app shell
-
-Why it matters:
-
-- The editor now feels materially more dependable during real layout work
-- The roadmap can shift away from foundation work toward workflow acceleration
-
-### Path Authoring And Route Preview
-
-Path editing has moved from a rough capability into a meaningful planning tool.
-
-Included:
-
-- Stronger polyline editing and selection behavior
-- Resume and close-path flows for route authoring
-- Better path-related inspector support
-- Smoother 3D route rendering and adaptive curve handling
-- Improved elevation chart and inspector integration
-
-Why it matters:
-
-- Route planning is now valuable enough to build analysis and briefing features on top of it
-- "Path authoring UX" is no longer a vague future item; the first serious pass is already shipped
-
-### Shared View, Export, And Persistence
-
-The product now has a more complete handoff story from planning to sharing.
-
-Included:
-
-- Cleaner read-only shared view and intro overlay
-- Clearer "Open Studio" path from shared links back into editing
-- Native and copy-link sharing improvements
-- JSON project export/import for reusable backups
-- Theme-aware PNG/SVG export, PDF export, 3D render capture, and cinematic FPV WebM export
-- Background progress handling and explicit theme selection for cinematic FPV export
-- Ongoing local persistence for in-browser work
-
-Why it matters:
-
-- TrackDraw now supports both quick sharing and reliable project reuse, including a first motion-based handoff path
-- The next roadmap step should be better project structure, not basic file survival
-
-### Starter Flows And Project Reset First Pass
-
-The blank-canvas experience now has better early guidance and a clearer reset path than earlier roadmap versions assumed.
-
-Included:
-
-- A first-use starter surface inside Studio with guided and blank entry paths
-- Contextual starter guidance tied to initial layout work
-- A dedicated new-project confirmation flow across desktop and mobile
-
-Why it matters:
-
-- The roadmap can treat onboarding as an active product track with real groundwork already shipped
-- The next step is broader starter content and project structure, not basic "how do I begin" or "how do I safely reset" coverage
-
-## Release Cleanup
-
-### Share Route Deprecation Before v1 ✓
-
-Completed. The legacy `/share?d=...` redirect and its query-param token normalization have been removed. `/share/[token]` is now the sole canonical read-only route. No query-param share links remain in the codebase or product copy.
-
-## Near-Term Priorities
-
-### 1. Project Workflow And Recovery ✓
-
-Completed. Projects dialog, project list with title/shape count/last-modified, create/open/rename/delete, autosave, restore points before destructive actions, manual snapshots via Cmd+S, periodic snapshots every 5 minutes, up to 10 restore points retained.
-
-### 2. Share And Publish Workflow ✓
-
-Completed for v1. Distinct error pages for invalid vs oversized share tokens. Read-only view UX polish with improved overlay copy, correct deep-linking, fit-to-window on desktop, and mobile drawer aligned with studio.
-
-Follow-up:
-
-- Better published-link management for repeated use in Studio
-- Revisit link replacement/regeneration only once account-backed ownership exists
-
-### 3. Path And Flow Review ✓
-
-Completed. Tight-turn warnings (hairpin), steep grade warnings, close-point warnings, stub path warning (fewer than 2 waypoints), and 3D obstacle rotation and dive gate tilt controls.
-
-Follow-up:
-
-- Suspicious obstacle spacing
-- Heatmap and flow density overlays
-
-### 4. Studio Onboarding And Starter Flows ✓
-
-Completed. First-use starter surface with guided ("Start by placing gates") and blank entry paths. Dedicated new-project confirmation flow across desktop and mobile. Contextual hints for gate placement, path drawing, 3D preview, 3D review, and post-path nudge toward preview — all dismissible and localStorage-persisted.
-
-## Mid-Term Priorities
-
-### 5. Runtime And Deployment Migration ✓
-
-Completed in foundation form. TrackDraw is now set up around a real application runtime path instead of GitHub Pages, with Cloudflare Workers/OpenNext in the repo, development and production deploy workflows, and Vercel reduced to pull request previews.
-
-Why now:
-
-- The current app is already stretching beyond static-export assumptions
-- Dynamic share metadata and OG image generation now conflict directly with static hosting
-- Database-backed shares require a real runtime and backend connectivity
-- This migration unblocks the next generation of share and publish work
-
-Included:
-
-- Vercel continues to handle pull request previews
-- Cloudflare Workers becomes the runtime for `main` as a development environment
-- Cloudflare Workers becomes the production runtime on `release.published`
-- Cloudflare D1 is now the first persisted backend for share objects, but the app should avoid hard-coupling to provider-specific assumptions
-
-Why it matters:
-
-- Dynamic share metadata and OG image generation are no longer blocked by static export
-- The app now has a viable path for backend-backed share storage
-- The remaining work is operational validation and deployment hardening, not architecture selection
-
-Remaining:
-
-- Operational maintenance and rollout monitoring only
-
-### 6. Stable Share Links And Share Storage ✓
-
-Completed in first production-facing form. TrackDraw now supports persisted share objects behind the canonical `/share/[token]` route, with database-backed publish/read flows and stored-state-driven metadata generation.
-
-Included:
-
-- Stored share publishing with shorter, durable tokens
-- Database-backed share reads
-- Share metadata and social image generation driven by stored share state
-- Legacy payload-in-URL share support retired behind a safe failure path
-- Share expiry support with a default lifecycle window
-- Automatic cleanup for revoked shares and expired links beyond the retention window
-- A calmer publish flow that separates link creation from follow-up actions like copy, open, and native share
-
-Constraints:
-
-- Share publishing and retrieval should continue to be modeled in TrackDraw domain terms first, not around storage schema details
-- The first backend integration should still leave room for later migration to another relational backend or another hosting platform
-
-Remaining:
-
-- Decide how much share administration should live in the product UI
-- Keep refining the publish dialog around repeated use in Studio without regressing the current flow
-- Revisit any replace/regenerate flow only once account-backed ownership exists
-
-### 10. Velocidrone Experimental Export Follow-up (`No account required`)
-
-TrackDraw can already generate an experimental `.trk` export that imports into Velocidrone. The open work is now turning that proof of concept into a more dependable best-effort workflow.
-
-Current status:
-
-- The core compatibility question is now answered
-- A first experimental `.trk` export already exists and can be imported into Velocidrone
-- A first best-effort object mapping pass already exists for the main track items
-- A centralized orientation layer now exists for export plus 2D/3D rotation guides
-- First-pass 2D and 3D front/back validation cues now exist in the editor
-- The workflow is already positioned product-wise as an experimental base export
-- The workflow is still too early to treat as fully supported or stable
-
-Why:
-
-- Creates a bridge from planning into simulator testing
-- Makes TrackDraw more useful beyond static design and briefing
-- Could become a strong differentiator if the export is reliable enough
-
-Constraints:
-
-- There is no public API or official export documentation to build against
-- The reverse engineering phase produced a working export path, but the object mapping still remains approximate in places
-- Legal, maintenance, and breakage risk must be considered before promising user-facing support
-
-Recommended approach:
-
-- Treat this as an experimental export follow-up, not as a blank research question
-- Keep iterating on the current proof-of-concept export instead of restarting discovery from zero
-- Treat the current object mapping as a best-effort base layer, then tighten it through validation rather than promising perfect 1:1 conversion
-- Keep refining the new centralized orientation model so per-shape export offsets and editor guides stay aligned
-- Keep improving the 2D front/back affordance now that the first cue is attached to the rotation guide
-- Keep improving the 3D orientation validation now that the first guide pass follows the same orientation mapping
-- Keep positioning it as an experimental base export until the workflow is stable enough to maintain
-
-### 11. Heatmap And Flow Analysis
-
-Add lightweight visual feedback for rhythm, density, and bottlenecks after validation basics are in place.
-
-Suggested first slices:
-
-- Basic density overlay for obstacle clusters and repeated turns
-- Suspicious spacing warnings between obstacles or route sections
-- Route rhythm cues before any heavier timing or simulation work
-- Heatmap polish only after the simpler warnings prove actionable
-
-### 12. Adaptive Mobile UI ✓
-
-Completed. `ExportDialog`, `ImportDialog`, and the studio keyboard-shortcuts dialog now use the newer modal style on desktop and bottom-drawer presentation on mobile.
-
-### 13. Codebase Architecture And Performance Refactor
-
-This area now has meaningful groundwork, but it should stay on the roadmap as an ongoing internal quality track rather than being treated as fully complete.
-
-Sub-items:
-
-- [x] Lightweight performance instrumentation
-      Add render and autosave instrumentation for development-time performance visibility.
-- [x] Editor and canvas modularisation
-      Split key interaction and rendering responsibilities across more focused hooks, selectors, and utility modules.
-- [x] Base UI to Radix UI migration
-      Replace `@base-ui/react` with Radix UI primitives across all UI components. The immediate trigger is that Base UI's `Select` and `Menu` primitives fail to respond to touch events on mobile inside a dialog focus trap. Migrate component-by-component keeping the exported API identical so call sites require no changes.
-      Supporting document: `docs/pva/base-ui-to-radix-ui-migration-pva.md`
-- [ ] Remaining maintainability and state-flow refactor pass
-      Further reduce complexity in large rendering surfaces, persistence flow, and state-heavy editor paths.
-- [ ] File structure and large-file decomposition pass
-      Revisit folder structure, introduce more focused subdirectories, and split oversized components and modules into smaller ownership boundaries.
-      Shipped: `ProjectManagerDialog` split into `src/components/dialogs/ProjectManager/` with separate `DeviceTab`, `AccountTab`, `RestoreTab`, `SharesTab`, and `shared` modules.
-
-Why:
-
-- The editor is gaining more product structure, which increases pressure on state and component architecture
-- Better internal boundaries can reduce feature risk and make future work faster
-- Performance and code clarity should be improved deliberately instead of through scattered one-off changes
-- Some core files are growing too broad, which makes navigation, ownership, and safe iteration harder than it should be
-
-## Long-Term Priorities
-
-## Product Opportunities
-
-These ideas are not part of the immediate delivery sequence yet, but they fit the product direction especially well and are worth keeping visible.
-
-### A. Obstacle Inventory And Setup Estimate
-
-Automatically summarize what a layout requires in practical setup terms: obstacle counts, key sections, and a lightweight estimate of setup complexity.
-
-Why it fits:
-
-- Builds directly on existing export and handoff flows
-- Translates design work into race-day preparation value
-- Creates a natural bridge toward marshal packs and build-oriented outputs
-
-### B. Venue Library And Constraints
-
-Support reusable venue records with field dimensions, recurring boundaries, fixed no-go zones, and known setup constraints.
-
-Why it fits:
-
-- Extends the local-first project model in a practical direction
-- Makes repeat event planning much faster
-- Adds realism to planning without becoming a mapping product first
-
-### C. Revision Compare
-
-Make it easy to compare two layout states and see what changed between versions, snapshots, or variants.
-
-Why it fits:
-
-- Pairs naturally with snapshots and layout variants
-- Helps race directors communicate changes between iterations
-- Makes TrackDraw stronger as a planning and review tool, not just a drawing surface
-
-### D. Marshal Mode
-
-Create a race-day view focused on marshal readability, sectors, references, and obstacle clarity rather than editing.
-
-Why it fits:
-
-- Different users need a different view than the editor or pilot briefing mode
-- Builds on existing share and output strengths
-- Reinforces TrackDraw's usefulness during live event operations
-
-### E. Build Mode / Setup Sequence
-
-Turn a finished layout into a structured setup order so crews can build the course in a clearer sequence.
-
-Why it fits:
-
-- Moves TrackDraw from design into execution support
-- Complements obstacle inventory and marshal-oriented outputs
-- Feels genuinely differentiated from generic diagram tools
-
-### F. Desktop And Mobile Wrapper Evaluation
-
-Evaluate whether an Electron desktop wrapper or a Capacitor mobile wrapper would materially improve TrackDraw beyond the web app.
-
-Why it fits:
-
-- TrackDraw is already local-first, which makes filesystem, offline, and installability questions product-relevant
-- Desktop and mobile wrappers could improve import/export, local project handling, and venue-side launch ergonomics
-- The app now has enough real workflow depth that wrapper work can be judged against concrete user value instead of hypothetical future needs
-
-Research outcome:
-
-- no wrapper needed yet
-- Electron proof of concept
-- Capacitor proof of concept
-- or a clear decision to stay web-first for the foreseeable future
-
-### G. PWA Evaluation
-
-Evaluate whether TrackDraw should add a deliberate Progressive Web App layer for installability and limited offline resilience.
-
-Why it fits:
-
-- TrackDraw already behaves like an application more than a document site
-- mobile and venue-side usage make installability and launch behavior relevant
-- PWA may solve part of the "app-like" need without wrapper complexity
-
-Research outcome:
-
-- stay a standard web app
-- add a narrow installable PWA layer
-- or expand into a stronger offline/app-shell strategy later
-
-### H. Accounts And Cross-Device Projects
-
-Evaluate whether optional user accounts should unlock cloud-backed project storage, project management, and cross-device continuation.
-
-Why it fits:
-
-- local-first project work is already valuable, but browser-local persistence has obvious long-term limits
-- cross-device access and safer project storage may matter before real-time collaboration does
-- the current share and runtime model already points toward future ownership and project boundaries
-
-Research outcome:
-
-- stay fully local-first
-- add optional cloud backup only
-- add account-linked project libraries and sync
-- or later expand toward broader team workflows
-
-### 13. Map And Field Overlay
-
-Support background references such as venue plans, field maps, or imagery.
-
-### 14. Lap Simulator
-
-Estimate route timing and flow once lighter analysis tools have proven useful.
-
-### 15. Real-Time Collaboration Evaluation
-
-Evaluate whether TrackDraw should support shared real-time editing, and define the sync, presence, and conflict model before treating collaboration as a committed product surface.
-
-## Recommended Sequence
-
-### v1
-
-The v1 scope is complete. All items are done: project workflow, share route deprecation, share/publish UX, path and flow review (including stub warning), contextual hints, mobile dialogs, onboarding, and codebase refactor.
-
-### Current Roadmap
-
-3. Race-day communication and briefing
-4. Layout acceleration (obstacle presets, selection grouping, venue templates)
-5. Published share lifecycle controls
-6. Velocidrone experimental export follow-up
-
-This sequence keeps the roadmap focused on extending workflow depth rather than plugging product gaps.
 
 </details>
 
