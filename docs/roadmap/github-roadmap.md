@@ -216,4 +216,3 @@ The v1.7.0 release-sized work is archived below. The REST API, live race overlay
         Added filters, clearer entity labels, and detail views that make account, role, share, and gallery actions easier to inspect.
 
 </details>
-
