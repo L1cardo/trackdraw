@@ -6,8 +6,7 @@
   "dependencyDashboard": true,
   "labels": ["dependencies"],
   "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true
+    "enabled": false
   },
   "commitMessagePrefix": "⬆️",
   "packageRules": [
