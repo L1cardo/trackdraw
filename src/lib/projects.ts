@@ -43,6 +43,15 @@ export interface RestorePointMeta {
   shapeCount: number;
 }
 
+export type LocalPersistenceResult = {
+  ok: boolean;
+  error?: unknown;
+};
+
+export type SaveProjectResult = LocalPersistenceResult & {
+  meta: ProjectMeta;
+};
+
 export const LOCAL_DRAFT_KEY = "trackdraw-design";
 const PROJECT_LIST_KEY = "trackdraw-project-list";
 const RESTORE_LIST_KEY = "trackdraw-restore-list";
@@ -91,11 +100,12 @@ function readJson<T>(key: string): T | null {
   }
 }
 
-function writeJson(key: string, value: unknown): void {
+function writeJson(key: string, value: unknown): LocalPersistenceResult {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* quota errors ignored */
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error };
   }
 }
 
@@ -117,8 +127,8 @@ export function hasMeaningfulProjectContent(design: TrackDesign): boolean {
   );
 }
 
-export function saveLocalDraft(design: TrackDesign): void {
-  writeJson(LOCAL_DRAFT_KEY, serializeDesign(design));
+export function saveLocalDraft(design: TrackDesign): LocalPersistenceResult {
+  return writeJson(LOCAL_DRAFT_KEY, serializeDesign(design));
 }
 
 export function loadLocalDraft(): TrackDesign | null {
@@ -143,7 +153,7 @@ export function listProjects(): ProjectMeta[] {
  * Save (or overwrite) a project entry for the given design.
  * The full design data is stored separately under `trackdraw-project-{id}`.
  */
-export function saveProject(design: TrackDesign): ProjectMeta {
+export function saveProjectWithResult(design: TrackDesign): SaveProjectResult {
   const serialized = serializeDesign(design);
   const shapeCount = serialized.shapes.length;
 
@@ -155,13 +165,30 @@ export function saveProject(design: TrackDesign): ProjectMeta {
     shapeCount,
   };
 
-  // Update or insert in list (most-recent first)
+  const projectWrite = writeJson(`trackdraw-project-${design.id}`, serialized);
+  if (!projectWrite.ok) {
+    return {
+      meta,
+      ok: false,
+      error: projectWrite.error,
+    };
+  }
+
+  // Update or insert in list (most-recent first) only after the full payload
+  // exists, so the list cannot point at missing project data.
   const list = listProjects().filter((p) => p.id !== meta.id);
   list.unshift(meta);
-  writeJson(PROJECT_LIST_KEY, list);
-  writeJson(`trackdraw-project-${design.id}`, serialized);
+  const listWrite = writeJson(PROJECT_LIST_KEY, list);
 
-  return meta;
+  return {
+    meta,
+    ok: listWrite.ok,
+    error: listWrite.error,
+  };
+}
+
+export function saveProject(design: TrackDesign): ProjectMeta {
+  return saveProjectWithResult(design).meta;
 }
 
 export function loadProject(id: string): TrackDesign | null {
