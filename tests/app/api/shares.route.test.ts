@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDefaultDesign } from "@/lib/track/design";
 import type { StoredShare, UserShare } from "@/lib/server/shares";
 
@@ -70,6 +70,10 @@ function postRequest(body: unknown) {
 describe("shares API route", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("creates anonymous temporary shares with requested expiry", async () => {
@@ -176,6 +180,26 @@ describe("shares API route", () => {
       error: "Project-linked publish requires an authenticated user",
     });
     expect(createShare).not.toHaveBeenCalled();
+  });
+
+  it("returns a recoverable publish failure when share creation fails", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    vi.mocked(getCurrentUserFromHeaders).mockResolvedValue(null);
+    vi.mocked(createShare).mockRejectedValue(new Error("D1 unavailable"));
+
+    const response = await POST(postRequest({ design: createDefaultDesign() }));
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      ok: false,
+      error: "Failed to publish share",
+    });
+    expect(consoleError).toHaveBeenCalledWith(
+      "[TrackDraw] Failed to publish share",
+      expect.objectContaining({ error: expect.any(Error) })
+    );
   });
 
   it("returns a user's active project share", async () => {
