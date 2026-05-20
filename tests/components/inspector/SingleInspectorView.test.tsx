@@ -105,6 +105,12 @@ describe("SingleInspectorView race timing controls", () => {
     renderSingleInspector(gate, { mobileInline: true });
 
     expect(
+      screen.getByRole("button", { name: "Transform" }).className
+    ).toContain("min-h-9");
+    expect(
+      screen.getByRole("button", { name: "Transform" }).className
+    ).toContain("lg:min-h-6");
+    expect(
       screen
         .getByRole("button", { name: "Transform" })
         .getAttribute("aria-expanded")
