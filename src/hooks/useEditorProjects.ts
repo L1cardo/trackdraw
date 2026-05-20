@@ -20,9 +20,11 @@ import {
   type RestorePointMeta,
 } from "@/lib/projects";
 import { decodeDesign } from "@/lib/share";
+import { nowIso } from "@/lib/track/design";
 import { recordPerfSample } from "@/lib/perf";
 import { useEditor } from "@/store/editor";
 import { toast } from "sonner";
+import { nanoid } from "nanoid";
 import type { TrackDesign } from "@/lib/types";
 
 function formatLocalSaveTime(date = new Date()) {
@@ -38,6 +40,25 @@ function toLocalSaveError(error: unknown) {
   return new Error("Could not save local project data.");
 }
 
+function getSharedEditableCopyTitle(title: string) {
+  const trimmed = title.trim();
+  if (!trimmed) return "Untitled track copy";
+  if (/^copy of /i.test(trimmed)) return trimmed;
+  return `Copy of ${trimmed}`;
+}
+
+function createSharedEditableCopy(design: TrackDesign): TrackDesign {
+  const timestamp = nowIso();
+
+  return {
+    ...design,
+    id: nanoid(),
+    title: getSharedEditableCopyTitle(design.title),
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
+
 export function useEditorProjects({
   readOnly,
   seedToken,
@@ -45,6 +66,7 @@ export function useEditorProjects({
   historyPaused,
   interactionSessionDepth,
   replaceDesign,
+  onSeedTokenImported,
 }: {
   readOnly: boolean;
   seedToken?: string;
@@ -52,6 +74,7 @@ export function useEditorProjects({
   historyPaused: boolean;
   interactionSessionDepth: number;
   replaceDesign: (design: TrackDesign) => void;
+  onSeedTokenImported?: () => void;
 }) {
   const [projects, setProjects] = useState<ProjectMeta[]>([]);
   const [restorePoints, setRestorePoints] = useState<RestorePointMeta[]>([]);
@@ -79,7 +102,7 @@ export function useEditorProjects({
   }, []);
 
   const reportLocalSaveFailure = useCallback(
-    (error: unknown) => {
+    (error: unknown, onRecovered?: () => void) => {
       const localSaveError = toLocalSaveError(error);
 
       setSaveStatusLabel("Local save failed");
@@ -92,6 +115,7 @@ export function useEditorProjects({
           onClick: () => {
             try {
               saveDesignLocally(useEditor.getState().track.design);
+              onRecovered?.();
               toast.success("Local save recovered", {
                 description: "The latest local copy was saved.",
               });
@@ -121,11 +145,30 @@ export function useEditorProjects({
     if (seedToken) {
       const shared = decodeDesign(seedToken);
       if (shared) {
-        replaceDesign(shared);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSaveStatusLabel("Loaded from shared link");
-        setProjects(listProjects());
-        setRestorePoints(listRestorePointsForProject(shared.id));
+        const editableCopy = createSharedEditableCopy(shared);
+        replaceDesign(editableCopy);
+        try {
+          const startedAt = performance.now();
+          const draftResult = saveLocalDraft(editableCopy);
+          const projectResult = saveProjectWithResult(editableCopy);
+
+          if (!draftResult.ok || !projectResult.ok) {
+            throw toLocalSaveError(draftResult.error ?? projectResult.error);
+          }
+
+          recordPerfSample(
+            "autosave:localStorage",
+            performance.now() - startedAt
+          );
+          onSeedTokenImported?.();
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setSaveStatusLabel("Editable copy created");
+        } catch (error) {
+          reportLocalSaveFailure(error, onSeedTokenImported);
+        } finally {
+          setProjects(listProjects());
+        }
+        setRestorePoints([]);
         setInitialized(true);
         return;
       }

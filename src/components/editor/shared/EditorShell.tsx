@@ -58,17 +58,21 @@ const MobilePanels = dynamic(() => import("./MobilePanels"), { ssr: false });
 export default function EditorShell({
   initialTab = "2d",
   embedMode = false,
+  title,
   studioHref,
   existingShareMode = false,
 }: {
   initialTab?: EditorView;
   embedMode?: boolean;
+  title?: string;
   studioHref?: string;
   existingShareMode?: boolean;
 }) {
   usePerfMetric("render:share/EditorShell");
 
   const hasPath = useEditor(selectHasPath);
+  const designTitle = useEditor((state) => state.track.design.title);
+  const effectiveTitle = title ?? (designTitle || "Untitled track");
   const isMobile = useIsMobile();
   const router = useRouter();
   const pathname = usePathname();
@@ -135,6 +139,7 @@ export default function EditorShell({
             tab={tab}
             onTabChange={handleTabChange}
             embedMode={embedMode}
+            title={effectiveTitle}
             studioHref={studioHref}
             showObstacleNumbers={showObstacleNumbers}
             onToggleObstacleNumbers={() =>
@@ -199,7 +204,7 @@ export default function EditorShell({
             onTabChange={handleTabChange}
             onSetReadOnlyMenuOpen={setReadOnlyMenuOpen}
             readOnlyMenuOpen={readOnlyMenuOpen}
-            saveStatusLabel={embedMode ? "Embedded track" : "Shared review"}
+            saveStatusLabel={embedMode ? "Embedded track" : "Shared preview"}
             studioHref={studioHref}
             tab={tab}
           />
