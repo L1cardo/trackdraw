@@ -12,9 +12,11 @@ import {
   SITE_AUTHOR,
   getSiteMediaUrl,
   getSiteUrl,
+  serializeJsonLd,
 } from "@/lib/seo";
 
-const title = "Gallery — TrackDraw";
+const title = "FPV Drone Race Track Gallery";
+const socialTitle = "TrackDraw | FPV Drone Race Track Gallery";
 const description =
   "Browse FPV drone race track designs shared by the TrackDraw community.";
 
@@ -26,7 +28,7 @@ export const metadata: Metadata = {
     canonical: "/gallery",
   },
   openGraph: {
-    title,
+    title: socialTitle,
     description,
     url: "/gallery",
     images: [
@@ -39,7 +41,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    title,
+    title: socialTitle,
     description,
     images: [DEFAULT_SOCIAL_IMAGE],
   },
@@ -85,7 +87,7 @@ export default async function GalleryPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(itemListJsonLd) }}
       />
 
       <div className="bg-background min-h-screen overflow-x-clip">
