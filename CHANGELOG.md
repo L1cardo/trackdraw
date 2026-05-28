@@ -4,6 +4,22 @@ All notable shipped changes to TrackDraw should be documented in this file.
 
 This changelog is intentionally concise. GitHub Releases and Release Drafter can continue to carry the fuller change list.
 
+## [Unreleased]
+
+## [1.7.2]
+
+### Easier public discovery
+
+TrackDraw is now presented more clearly as a drone race track builder across public pages, browser titles, and link previews. The Studio and gallery have clearer search titles, the sitemap now includes Studio and public gallery track links, and public gallery tracks can appear as their own discoverable share pages while private, expired, and unsupported links stay out of search results.
+
+### Richer public track previews
+
+Public track pages now expose richer preview details for search engines and social cards, including gallery titles, descriptions, preview images, field size, and obstacle counts where available. TrackDraw also now safely serializes structured data before injecting it into pages, so gallery-provided text cannot break out of JSON-LD script tags.
+
+### Public service pages
+
+TrackDraw now includes public Privacy Policy and Terms of Service pages, linked from the footer, so account, sharing, gallery, embed, and API behavior has clearer public service guidance.
+
 ## [1.7.1]
 
 ### Cloud sync conflict resolution

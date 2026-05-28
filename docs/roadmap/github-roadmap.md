@@ -22,79 +22,9 @@ Labels used below:
 
 ## Current Priority
 
-The v1.7.0 release-sized work is archived below. The REST API, live race overlay preparation, UI/UX polish, and stability pass are now complete. The next TrackDraw priority is race-day workflow depth, editor reliability, and account-backed project lifecycle follow-up.
+The completed release-sized work is archived below. The REST API, live race overlay preparation, account project lifecycle polish, UI/UX polish, and stability pass are now complete. The next TrackDraw priority is race-day workflow depth, editor reliability follow-up, and account-backed project lifecycle depth beyond the shipped conflict/retry baseline.
 
 ## Follow-up
-
-- [x] Account project lifecycle polish (`Account-backed`)
-      Keep signed-in project continuity trustworthy while preserving local-first editing.
-  - [x] Stale save conflict protection
-        Detect when another device has changed the account copy and route the user into version review instead of silently overwriting newer account work.
-  - [x] Failed sync retry paths
-        Let users retry failed account sync directly from the editor status indicator and autosync failure toast.
-  - [x] Last-known-good local fallback
-        Save the latest local copy when account sync fails and show that fallback state in project management.
-  - [x] Account and device project clarity
-        Clarify account copies, local copies, and device-only projects in Project Manager without turning them into separate product concepts.
-
-- [x] Usability and reliability pass (`No account required`, `Account-backed`)
-      Finite release-hardening pass for the next release candidate. Keep the completed work below as a record, but use the remaining checklist as the stop condition; do not add after-the-fact checked items to keep this pass alive.
-  - [x] Desktop editor smoke
-        Manual browser smoke gate. Verify create/edit/select/transform, route waypoint editing, snapping, rotation, resize handles, duplicate/delete, lock behavior, undo/redo, autosave reload, and Project Manager actions from `/studio`.
-  - [x] Mobile editor smoke
-        Manual browser smoke gate. Verify the mobile app menu, Project Manager, inspector drawers, path builder, multi-select overlay, map reference controls, and import/export actions at phone-width and tablet-width layouts.
-  - [x] Recovery and failure-flow drill
-        Exercised invalid import files, unreadable/non-TrackDraw JSON, local storage failure, failed JSON export, share publish failure, and account sync failure through targeted regression tests. Fix only cases where the user cannot understand what happened or recover safely.
-  - [x] Export and share handoff drill
-        Covered JSON, SVG, PNG, PDF, and Velocidrone `.trk` export paths, JSON re-import, share publishing, managed share limitation copy, and `/share/[token]` read-only handoff behavior through targeted regression tests.
-  - [x] Selection and transform edge-case drill
-        Tested locked objects, mixed locked/unlocked selections, grouped selections, route waypoint mutations, keyboard shortcuts, context menus, mobile overlay actions, and undo/redo after mutation paths through targeted store and component coverage.
-  - [x] Large-layout stability drill
-        Stressed dense practical layouts with many obstacles, a long route, map reference, 3D preview component rendering, obstacle numbering, and PDF/SVG/PNG export through targeted regression tests.
-  - [x] Release triage cutoff
-        Automated hardening found no remaining release-blocking issues to keep in this pass. The only open items are the explicit manual desktop and mobile browser smoke gates.
-  - [x] Final release validation
-        `npm run lint`, `npm run type`, `npm run test`, and `npm run build` pass after the fixes from this pass.
-  - [x] Automated validation baseline
-        `npm run lint`, `npm run type`, `npm run test`, and `npm run build` pass before the remaining release checklist starts.
-  - [x] Editor recovery and failure states
-        Must-fix scope: make the common autosave, import, export, and share/account-sync failures visible and recoverable enough for release. Defer rare runtime edge cases unless they risk data loss.
-    - [x] Local autosave failure state
-          Surface local persistence failures with a retry path instead of silently ignoring storage/quota errors.
-    - [x] Import failure clarity
-          Differentiate invalid JSON, wrong file type, unreadable files, and non-TrackDraw project data with visible recovery guidance.
-    - [x] Project JSON export feedback
-          Reuse one JSON download path and report Project Manager export failures instead of silently doing nothing when local project data cannot be loaded.
-  - [x] Mobile editor ergonomics pass
-        Must-fix scope: touch targets and flows that block venue-side editing on small screens. Defer broader responsive redesign.
-    - [x] Mobile app menu touch targets
-          Make project, share, import, export, account, dashboard, and sign-out actions easier to hit and scan in the mobile app menu.
-    - [x] Mobile editing overlay touch targets
-          Give path builder, quick adjust, and multi-select overlay actions steadier tap targets for venue-side editing on small screens.
-    - [x] Mobile map reference controls
-          Make map reference actions and opacity adjustment easier to use from the mobile layout inspector.
-    - [x] Mobile inspector section targets
-          Make collapsible inspector sections easier to open and close on touch screens while preserving compact desktop density.
-    - [x] Mobile Project Manager action targets
-          Make local-project action menus easier to open and scan from the mobile Project Manager.
-  - [x] Selection and transform reliability pass
-        Must-fix scope: regressions that can mutate locked objects, lose selection intent, break route editing, or leave undo/redo inconsistent. Defer speculative transform polish unless a real bug is found during smoke testing.
-    - [x] Locked shape mutation guards
-          Block store-level patch, batch patch, and route waypoint mutations for locked shapes so resize, inspector, and route-edit calls cannot bypass lock state.
-    - [x] Locked destructive action guards
-          Keep duplicate and delete actions from mutating selections that include locked shapes, including keyboard shortcuts, context menus, mobile overlays, and clear shortcut feedback.
-  - [x] Export/share confidence pass
-        Must-fix scope: users should understand which outputs are editable backups, visual handoffs, read-only review links, or experimental simulator exports. Defer new export formats or share-management features.
-    - [x] Export output purpose copy
-          Clarify read-only visual outputs, editable JSON backups, PDF handoff intent, and experimental simulator limitations in export and share flows.
-    - [x] Managed share limitation copy
-          Clarify in Project Manager that managed shares are read-only review links and JSON export is the editable handoff path.
-  - [x] Performance and large-layout stability
-        Must-fix scope: prevent obvious hangs, runaway export output, or numbering/export instability on large practical layouts. Defer deep profiling unless release smoke testing exposes a blocking slowdown.
-    - [x] Bounded dense-grid export rendering
-          Clamp very fine export grid spacing so SVG/PDF/PNG exports from large or dense layouts do not generate excessive grid markup.
-    - [x] Long-route obstacle numbering coverage
-          Precompute route segments and bound per-obstacle scans so numbering stays stable on long routes with many gates.
 
 - [ ] Velocidrone experimental export stabilization (`No account required`)
       The first experimental `.trk` export is already shipped. Keep this parked until there is appetite to validate more real layouts and tighten prefab mapping and orientation edge cases.
@@ -237,6 +167,83 @@ The v1.7.0 release-sized work is archived below. The REST API, live race overlay
         Clarify browse, insert, duplicate, and fork behavior.
   - [ ] Relationship to starter layouts
         Keep templates distinct from starter layouts, project duplication, and saved projects.
+
+## v1.7.1 Archive
+
+<details>
+<summary>Completed release work archived with v1.7.1</summary>
+
+- [x] Account project lifecycle polish (`Account-backed`)
+      Keep signed-in project continuity trustworthy while preserving local-first editing.
+  - [x] Stale save conflict protection
+        Detect when another device has changed the account copy and route the user into version review instead of silently overwriting newer account work.
+  - [x] Failed sync retry paths
+        Let users retry failed account sync directly from the editor status indicator and autosync failure toast.
+  - [x] Last-known-good local fallback
+        Save the latest local copy when account sync fails and show that fallback state in project management.
+  - [x] Account and device project clarity
+        Clarify account copies, local copies, and device-only projects in Project Manager without turning them into separate product concepts.
+
+- [x] Usability and reliability pass (`No account required`, `Account-backed`)
+      Finite release-hardening pass for the next release candidate. Keep the completed work below as a record, but use the remaining checklist as the stop condition; do not add after-the-fact checked items to keep this pass alive.
+  - [x] Desktop editor smoke
+        Manual browser smoke gate. Verify create/edit/select/transform, route waypoint editing, snapping, rotation, resize handles, duplicate/delete, lock behavior, undo/redo, autosave reload, and Project Manager actions from `/studio`.
+  - [x] Mobile editor smoke
+        Manual browser smoke gate. Verify the mobile app menu, Project Manager, inspector drawers, path builder, multi-select overlay, map reference controls, and import/export actions at phone-width and tablet-width layouts.
+  - [x] Recovery and failure-flow drill
+        Exercised invalid import files, unreadable/non-TrackDraw JSON, local storage failure, failed JSON export, share publish failure, and account sync failure through targeted regression tests. Fix only cases where the user cannot understand what happened or recover safely.
+  - [x] Export and share handoff drill
+        Covered JSON, SVG, PNG, PDF, and Velocidrone `.trk` export paths, JSON re-import, share publishing, managed share limitation copy, and `/share/[token]` read-only handoff behavior through targeted regression tests.
+  - [x] Selection and transform edge-case drill
+        Tested locked objects, mixed locked/unlocked selections, grouped selections, route waypoint mutations, keyboard shortcuts, context menus, mobile overlay actions, and undo/redo after mutation paths through targeted store and component coverage.
+  - [x] Large-layout stability drill
+        Stressed dense practical layouts with many obstacles, a long route, map reference, 3D preview component rendering, obstacle numbering, and PDF/SVG/PNG export through targeted regression tests.
+  - [x] Release triage cutoff
+        Automated hardening found no remaining release-blocking issues to keep in this pass. The only open items are the explicit manual desktop and mobile browser smoke gates.
+  - [x] Final release validation
+        `npm run lint`, `npm run type`, `npm run test`, and `npm run build` pass after the fixes from this pass.
+  - [x] Automated validation baseline
+        `npm run lint`, `npm run type`, `npm run test`, and `npm run build` pass before the remaining release checklist starts.
+  - [x] Editor recovery and failure states
+        Must-fix scope: make the common autosave, import, export, and share/account-sync failures visible and recoverable enough for release. Defer rare runtime edge cases unless they risk data loss.
+    - [x] Local autosave failure state
+          Surface local persistence failures with a retry path instead of silently ignoring storage/quota errors.
+    - [x] Import failure clarity
+          Differentiate invalid JSON, wrong file type, unreadable files, and non-TrackDraw project data with visible recovery guidance.
+    - [x] Project JSON export feedback
+          Reuse one JSON download path and report Project Manager export failures instead of silently doing nothing when local project data cannot be loaded.
+  - [x] Mobile editor ergonomics pass
+        Must-fix scope: touch targets and flows that block venue-side editing on small screens. Defer broader responsive redesign.
+    - [x] Mobile app menu touch targets
+          Make project, share, import, export, account, dashboard, and sign-out actions easier to hit and scan in the mobile app menu.
+    - [x] Mobile editing overlay touch targets
+          Give path builder, quick adjust, and multi-select overlay actions steadier tap targets for venue-side editing on small screens.
+    - [x] Mobile map reference controls
+          Make map reference actions and opacity adjustment easier to use from the mobile layout inspector.
+    - [x] Mobile inspector section targets
+          Make collapsible inspector sections easier to open and close on touch screens while preserving compact desktop density.
+    - [x] Mobile Project Manager action targets
+          Make local-project action menus easier to open and scan from the mobile Project Manager.
+  - [x] Selection and transform reliability pass
+        Must-fix scope: regressions that can mutate locked objects, lose selection intent, break route editing, or leave undo/redo inconsistent. Defer speculative transform polish unless a real bug is found during smoke testing.
+    - [x] Locked shape mutation guards
+          Block store-level patch, batch patch, and route waypoint mutations for locked shapes so resize, inspector, and route-edit calls cannot bypass lock state.
+    - [x] Locked destructive action guards
+          Keep duplicate and delete actions from mutating selections that include locked shapes, including keyboard shortcuts, context menus, mobile overlays, and clear shortcut feedback.
+  - [x] Export/share confidence pass
+        Must-fix scope: users should understand which outputs are editable backups, visual handoffs, read-only review links, or experimental simulator exports. Defer new export formats or share-management features.
+    - [x] Export output purpose copy
+          Clarify read-only visual outputs, editable JSON backups, PDF handoff intent, and experimental simulator limitations in export and share flows.
+    - [x] Managed share limitation copy
+          Clarify in Project Manager that managed shares are read-only review links and JSON export is the editable handoff path.
+  - [x] Performance and large-layout stability
+        Must-fix scope: prevent obvious hangs, runaway export output, or numbering/export instability on large practical layouts. Defer deep profiling unless release smoke testing exposes a blocking slowdown.
+    - [x] Bounded dense-grid export rendering
+          Clamp very fine export grid spacing so SVG/PDF/PNG exports from large or dense layouts do not generate excessive grid markup.
+    - [x] Long-route obstacle numbering coverage
+          Precompute route segments and bound per-obstacle scans so numbering stays stable on long routes with many gates.
+
+</details>
 
 ## v1.7.0 Archive
 
