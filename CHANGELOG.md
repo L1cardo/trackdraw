@@ -6,6 +6,20 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+## [1.7.3]
+
+### Smoother path editing
+
+Path point editing on desktop now feels less jumpy around grid and route snapping. The editor also explains snap on/off more clearly, including when snapping follows nearby grid positions, objects, and route points.
+
+### Clearer route review guidance
+
+Route review warnings are easier to understand and prioritize. Hairpins now show as high-priority warnings, important warnings stay visible in summaries instead of being hidden behind informational notes, and the elevation chart details use clearer language for short correction segments instead of vague alignment wording.
+
+### Dashboard gallery inspection
+
+Dashboard gallery rows now include a read-only Inspect action so operators can review owner, share lifecycle, gallery state, field size, element count, preview media, and share links without leaving the gallery table. The inspection dialog also gives a cleaner review summary before opening or copying a public share.
+
 ## [1.7.2]
 
 ### Easier public discovery
