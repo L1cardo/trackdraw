@@ -6,6 +6,12 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+## [1.7.4]
+
+### Safari waypoint editing fix
+
+Waypoints on race lines can now be selected and dragged reliably in Safari again. This restores path refinement for Safari users while keeping the existing Chrome behavior unchanged.
+
 ## [1.7.3]
 
 ### Smoother path editing
