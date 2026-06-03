@@ -29,6 +29,7 @@ import { getShapeLocalBounds } from "@/components/canvas/renderers/shape-bounds"
 import { TrackShapeNode } from "@/components/canvas/renderers/shape-node";
 import { useTrackCanvasViewport } from "@/components/canvas/useTrackCanvasViewport";
 import { useHistorySession } from "@/hooks/useHistorySession";
+import { useMeasurementUnitSystem } from "@/hooks/useMeasurementUnitSystem";
 import { usePerfMetric } from "@/hooks/usePerfMetric";
 import {
   useSessionActions,
@@ -42,7 +43,12 @@ import {
   selectPrimaryPolyline,
   selectShapeRecordMap,
 } from "@/store/selectors";
-import { m2px, px2m } from "@/lib/track/units";
+import {
+  formatCompactFieldSize,
+  formatMeasurement,
+  m2px,
+  px2m,
+} from "@/lib/track/units";
 import {
   buildSnapIndex,
   getNearbySnapCandidates as getNearbySnapCandidatesFromIndex,
@@ -334,6 +340,7 @@ const TrackCanvas = memo(
     ref
   ) {
     usePerfMetric("render:TrackCanvas");
+    const { unitSystem } = useMeasurementUnitSystem();
     const design = useEditor((state) => state.track.design);
     const designShapes = useEditor(selectDesignShapes);
     const [zmin, zmax] = useEditor(selectDesignPolylineZRange);
@@ -341,6 +348,14 @@ const TrackCanvas = memo(
     const primaryPolylineId = useEditor(
       (state) => selectPrimaryPolyline(state)?.id ?? null
     );
+    const fieldLabel = formatCompactFieldSize(
+      design.field.width,
+      design.field.height,
+      unitSystem
+    );
+    const gridLabel = formatMeasurement(design.field.gridStep, unitSystem, {
+      precision: 1,
+    });
     const selection = useEditor((state) => state.session.selection);
     const {
       setSelection,
@@ -1895,18 +1910,18 @@ const TrackCanvas = memo(
                     <>
                       <span className="text-border/80">·</span>
                       <span className="text-foreground/70 font-medium tabular-nums">
-                        {draftLengthWithCursor.toFixed(1)} m
+                        {formatMeasurement(draftLengthWithCursor, unitSystem, {
+                          precision: 1,
+                        })}
                       </span>
                     </>
                   )}
                 </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span>
-                    {design.field.width}m × {design.field.height}m
-                  </span>
+                  <span>{fieldLabel}</span>
                   <span className="text-border">·</span>
-                  <span>Grid {design.field.gridStep}m</span>
+                  <span>Grid {gridLabel}</span>
                   <span className="text-border">·</span>
                   <span>
                     {snapEnabled
@@ -1985,7 +2000,7 @@ const TrackCanvas = memo(
                   widthPx={widthPx}
                 />
                 <StableFieldContent
-                  designField={design.field}
+                  fieldLabel={fieldLabel}
                   grid={grid}
                   heightPx={heightPx}
                   isDark={isDark}
@@ -2291,6 +2306,7 @@ const TrackCanvas = memo(
                       gridStep={design.field.gridStep}
                       length={viewportSize.width - RULER_SIZE}
                       isDark={isDark}
+                      unitSystem={unitSystem}
                     />
                   </div>
                 </div>
@@ -2315,6 +2331,7 @@ const TrackCanvas = memo(
                       gridStep={design.field.gridStep}
                       length={viewportSize.height - RULER_SIZE}
                       isDark={isDark}
+                      unitSystem={unitSystem}
                     />
                   </div>
                 </div>
