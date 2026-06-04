@@ -98,6 +98,101 @@ openssl rand -base64 32
 Add deployed auth and mail secrets to Cloudflare Worker secrets for the matching environment, not to the repository.
 Keep non-secret mail configuration in [`wrangler.jsonc`](../../wrangler.jsonc) so GitHub-driven deploys do not drift from dashboard-only vars.
 
+## Production protection
+
+TrackDraw should protect the Worker both in code and at Cloudflare's edge.
+
+The repository-level guard in [`custom-worker.ts`](../../custom-worker.ts) rejects unsafe non-API page methods before requests reach OpenNext. This specifically protects against invalid Server Action probes such as `POST /studio` with a bogus `next-action` header. TrackDraw does not use Server Actions, and page routes are expected to be `GET`, `HEAD`, or `OPTIONS` only. Legitimate writes should go through `/api/*`.
+
+Recommended Cloudflare dashboard setup:
+
+### Block invalid page writes
+
+Create this as a WAF custom rule.
+
+Where to create it:
+
+- New Cloudflare dashboard: select the `trackdraw.app` zone, open `Security` → `Security rules`, then choose `Create rule` → `Custom rule`.
+
+Rule settings:
+
+- Rule name: `Block unsafe methods on page routes`
+- Field/expression mode: use `Edit expression`
+- Expression:
+  ```text
+  not (
+    http.request.uri.path eq "/api"
+    or starts_with(http.request.uri.path, "/api/")
+  )
+  and http.request.method in {"POST" "PUT" "PATCH" "DELETE"}
+  ```
+- Action: `Block`
+- Deploy after saving.
+
+Create a second WAF custom rule for obvious POST Server Action probes:
+
+- Rule name: `Block invalid Server Action probes`
+- Field/expression mode: use `Edit expression`
+- Expression:
+  ```text
+  http.request.method eq "POST"
+  and http.request.headers["next-action"][0] ne ""
+  and not (
+    http.request.uri.path eq "/api"
+    or starts_with(http.request.uri.path, "/api/")
+  )
+  ```
+- Action: `Block`
+- Deploy after saving.
+- Keep this rule `POST`-only. Do not block `GET` or `HEAD` requests just because a crawler or proxy sends an unexpected `next-action` header; discovery paths such as `/robots.txt`, `/robot.txt`, and `/sitemap.xml` should remain crawlable.
+
+### Rate-limit CPU-sensitive pages
+
+Create this as a WAF rate limiting rule for public routes that can create meaningful Worker rendering load.
+
+Where to create it:
+
+- New Cloudflare dashboard: select the `trackdraw.app` zone, open `Security` → `Security rules`, then choose `Create rule` → `Rate limiting rules`.
+
+Use route families instead of a hand-maintained list of individual pages. Keep API writes and account/dashboard pages out of this rule; they need endpoint-specific protection.
+
+Rule settings:
+
+- Rule name: `Limit CPU-sensitive public routes`
+- Field/expression mode: use `Edit expression`
+- Expression:
+  ```text
+  not cf.client.bot
+  and (
+    http.request.uri.path eq "/studio"
+    or http.request.uri.path eq "/gallery"
+    or starts_with(http.request.uri.path, "/share/")
+    or starts_with(http.request.uri.path, "/embed/")
+  )
+  ```
+- Scope: covers Studio, gallery, shared tracks, and embeds. Add new route families here only when they render user/content-heavy pages.
+- Characteristics: use `IP`.
+- Threshold: `120 requests` per `10 seconds`.
+- Action: `Block`.
+- Duration: `10 seconds`.
+
+Additional guidance:
+
+- Do not add every new public route to Cloudflare manually. Add only route families that are proven to create meaningful Worker rendering load.
+- Keep API rate limits separate and endpoint-specific. `/api/*` has different write semantics, authentication behavior, and user-impact risks than public page rendering.
+- Keep verified bots allowed for public gallery/share discovery. The rate limiting expression excludes them through `not cf.client.bot`.
+- Keep `/robots.txt`, common typo probes such as `/robot.txt`, and `/sitemap.xml` out of this rate limit. These requests are crawler-driven by design, and not every useful crawler is guaranteed to match Cloudflare's verified bot field.
+- When investigating `Worker exceeded CPU time limit`, group events by `http.request.uri.path`, method, user agent, and timestamp. If the spike aligns with the daily cron in [`wrangler.jsonc`](../../wrangler.jsonc), inspect retention cleanup. Otherwise prioritize public SSR/API traffic.
+
+Cloudflare references:
+
+- Workers CPU limits: <https://developers.cloudflare.com/workers/platform/limits/>
+- Workers error observability: <https://developers.cloudflare.com/workers/observability/errors/>
+- WAF custom rules in the dashboard: <https://developers.cloudflare.com/waf/custom-rules/create-dashboard/>
+- WAF rate limiting rules: <https://developers.cloudflare.com/waf/rate-limiting-rules/>
+- Create rate limiting rules in the dashboard: <https://developers.cloudflare.com/waf/rate-limiting-rules/create-zone-dashboard/>
+- Rate limiting best practices: <https://developers.cloudflare.com/waf/rate-limiting-rules/best-practices/>
+
 ### R2-backed public site media
 
 If a landing-page or other public site asset is too large for `public/`, store it in a public R2 bucket and expose it through the fixed site media host `https://media.trackdraw.app`.

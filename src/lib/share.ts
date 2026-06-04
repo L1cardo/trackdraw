@@ -68,18 +68,21 @@ export type ShareDecodeError = "too-large" | "invalid";
 /**
  * Like decodeDesign, but distinguishes between a token that is too long for
  * browsers/apps to pass intact ("too-large") and one that is simply corrupt or
- * miscopied ("invalid"). The heuristic is: if the token itself exceeds
- * MAX_SAFE_TOKEN_LENGTH the decode failure is most likely due to truncation.
+ * miscopied ("invalid"). Tokens over MAX_SAFE_TOKEN_LENGTH are rejected before
+ * decompression, so callers should not expect a best-effort decode for
+ * long-but-valid tokens.
  */
 export function decodeDesignWithReason(
   token: string
 ): { ok: true; design: TrackDesign } | { ok: false; reason: ShareDecodeError } {
   const normalized = normalizeShareToken(token);
+  if (normalized.length > MAX_SAFE_TOKEN_LENGTH) {
+    return { ok: false, reason: "too-large" };
+  }
+
   const design = decodeDesign(token);
   if (design) return { ok: true, design };
-  const reason: ShareDecodeError =
-    normalized.length > MAX_SAFE_TOKEN_LENGTH ? "too-large" : "invalid";
-  return { ok: false, reason };
+  return { ok: false, reason: "invalid" };
 }
 
 export function getShareTitle(design: TrackDesign) {
