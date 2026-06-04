@@ -6,6 +6,24 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+## [1.8.0]
+
+### Official gate types
+
+TrackDraw now includes common MultiGP-style gate types, including Standard Gate 5x5 and Championship Gate 7x6. The regular TrackDraw Gate is still available when you want to choose your own size.
+
+Official gate types keep their correct size, colors, frame details, and branding in the editor, exports, 3D preview, and flythrough videos. You can also change an existing gate to another type without deleting it first. Its position, rotation, race-line connections, and timing markers stay in place.
+
+### Metric and Imperial units
+
+TrackDraw can now show measurements in Metric or Imperial units. It picks a sensible default from your browser, but you can change it yourself. You can enter common feet and inches values, while project files stay compatible by storing the design in meters.
+
+### Clearer editing and previews
+
+On desktop, the right-side editor panel can now collapse into a narrow rail so you have more room for the track. Your selected item stays selected, and the left toolbar remembers whether it was collapsed after a refresh.
+
+The 3D preview now has clearer lighting and cleaner shadows in the editor, shared views, and gallery previews. Large tracks should look more consistent, and the race line no longer casts a dark line on the ground.
+
 ## [1.7.4]
 
 ### Safari waypoint editing fix

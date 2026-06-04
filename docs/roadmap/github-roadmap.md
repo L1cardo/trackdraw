@@ -22,29 +22,9 @@ Labels used below:
 
 ## Current Priority
 
-The completed release-sized work is archived below. The REST API, live race overlay preparation, account project lifecycle polish, UI/UX polish, and stability pass are now complete. The next TrackDraw priority is race-day workflow depth, editor reliability follow-up, catalog-backed official track elements, 3D preview improvements, generated flightpath assistance, regional measurement support and multilingual-readiness for international users, and account-backed project lifecycle depth beyond the shipped conflict/retry baseline.
+The completed release-sized work is archived below. The next TrackDraw priority is race-day workflow depth, editor reliability follow-up, MultiGP obstacle catalog expansion, focused 3D item controls, generated flightpath assistance, multilingual-readiness for international users, and account-backed project lifecycle depth beyond the shipped conflict/retry baseline.
 
 ## Follow-up
-
-- [x] Track element catalog (`Research`, `No account required`)
-      Built a catalog-backed element model for official gates with typed entries for names, dimensions, source references, 2D/3D rendering, and export compatibility. Includes placement selection, inspector identity display, in-place type switching, and catalog-driven visual rendering across 2D, 3D, and export paths.
-  - [x] Local element catalog foundation
-        Define typed catalog entries for official names, dimensions, source references, 2D defaults, 3D render hints, and export compatibility while keeping saved project geometry meter-based.
-  - [x] Official gate and obstacle entries
-        Covered by the placement selector, catalog identity in inspector, and in-place type switching sub-items. MultiGP-style gates are accessible through deliberate placement and inspector UI, custom sizing remains on the standard TrackDraw Gate, and no existing projects were migrated.
-  - [x] MultiGP gate placement selector
-        Keep Gate as the primary placement tool while letting users switch the active gate type between the generic TrackDraw gate and catalog-backed MultiGP-style 5x5 and 7x6 variants through compact desktop and mobile type pickers.
-  - [x] Catalog identity in inspector
-        Show placed catalog-backed elements with their official type, source, official size, and dimension status while keeping official gate width and height fixed in normal editing.
-  - [x] In-place catalog type switching (`No account required`)
-        Let users change the catalog type of an already-placed gate directly from the inspector without needing to delete and re-place. The type picker uses the shadcn Select and shows for all placed gates, including frame-only TrackDraw gates. Switching resets to the target entry's defaults while preserving position, rotation, and route connections, and preserves non-catalog meta such as timing markers. The source organization links to the entry's first source URL. getCatalogEntriesByKind replaces the gate-specific helper to support future element types.
-
-- [x] 3D preview realism and lighting (`Research`, `No account required`)
-      Improved the 3D preview's readability and realism with stronger contrast, sun/directional lighting, shadows, and more recognizable gates/flags while keeping mobile performance safe. Catalog metadata drives official variant rendering, including a realistic MultiGP Standard Gate 5x5.
-  - [x] 3D readability and realism pass
-        Tuned directional lighting with a warm sun tint, lowered ambient intensity for stronger shadow contrast, raised shadow map resolution to 2048, set shadow camera frustum to track bounds to eliminate shadow coverage gaps on large tracks, added shadow-bias to prevent acne, and removed polyline shadow casting to reduce visual noise. Unified the lighting theme across editor, share, and gallery into a single shared constant.
-  - [x] Catalog-aware 3D element rendering
-        Use catalog-owned visual metadata to render catalog-backed MultiGP-style 5x5 and 7x6 gates with recognizable panel sizes, PVC frame placement, colors, and branding treatment across 2D canvas/SVG output, the live preview, and flythrough export while keeping generic gates lightweight.
 
 - [ ] MultiGP obstacle catalog expansion (`No account required`)
       Extend the catalog with additional official MultiGP obstacles beyond gates, such as flags and ladders, so users can place and identify standard competition obstacles with the same catalog-backed identity, visual rendering, and inspector treatment already in place for gates.
@@ -62,24 +42,6 @@ The completed release-sized work is archived below. The REST API, live race over
       Research generated flightpaths from placed elements as an optional drafting/review aid that users can accept and edit.
   - [ ] Generated flightpath research
         Prototype flightpath generation from placed elements as an assistive review/drafting feature that can be accepted or edited, not as a replacement for explicit race-line authoring.
-
-- [x] Collapsible inspector workspace (`No account required`)
-      Let desktop/tablet users collapse the inspector sidebar to reclaim canvas space during dense editing while preserving selection context.
-  - [x] Collapsible inspector workspace
-        Add the collapse control to the inspector header, keep a reopen control in the collapsed rail, persist desktop workspace density locally, and verify it does not regress mobile drawer behavior.
-
-- [x] Regional measurement units (`No account required`)
-      Support regional Metric and Imperial display/input presets without changing the internal meter-based design model.
-  - [x] Unit preference model
-        Add a project-safe and user-friendly Metric/Imperial preference, with a Metric default that fits most international users and does not break existing projects.
-  - [x] Locale-informed defaults
-        Use browser locale signals to choose an initial measurement default when no explicit preference exists, while keeping the detected value transparent and manually overrideable.
-  - [x] Editor display formatting
-        Replace direct `m` labels in field size, rulers, inspectors, route/elevation summaries, gallery metadata, and export previews with shared unit formatting.
-  - [x] Unit-aware numeric input
-        Let users enter common Metric and Imperial values such as meters, feet, and inches while storing normalized meter values in the design.
-  - [x] Export and share presentation
-        Show the selected measurement preset in PDF/Race Pack/share-facing summaries while keeping JSON/API geometry and speed values compatible and meter-based/SI.
 
 - [ ] Multilingual product experience (`Research`, `No account required`)
       Use the regional measurement work as a first locale-aware foundation, then evaluate a full i18n layer for the public site, editor, share pages, and exported handoff copy.
@@ -107,7 +69,7 @@ The completed release-sized work is archived below. The REST API, live race over
       Improve dashboard visibility for public gallery tracks, published shares, contextual diagnostics, and API usage after higher-priority editor and catalog work settles.
 
 - [ ] Race-day communication and briefing (`No account required`)
-      The first Race Pack release is shipped, and the immediate QR/timing-marker slice is archived with v1.6.0. The remaining work here is larger race-day operations follow-up.
+      The first Race Pack release and immediate QR/timing-marker slice are shipped. The remaining work here is larger race-day operations follow-up.
   - [ ] Race director page in Race Pack
         Add a race-director-oriented page to the Race Pack.
     - [ ] Race-day ops elements around the existing start area
@@ -183,128 +145,47 @@ The completed release-sized work is archived below. The REST API, live race over
   - [ ] Platform recommendation
         Recommend web-first, Electron, Capacitor, or no wrapper for now.
 
-## v1.7.1 Archive
+## v1.8.0 Archive
 
 <details>
-<summary>Completed release work archived with v1.7.1</summary>
+<summary>Completed release work archived with v1.8.0</summary>
 
-- [x] Account project lifecycle polish (`Account-backed`)
-      Keep signed-in project continuity trustworthy while preserving local-first editing.
-  - [x] Stale save conflict protection
-        Detect when another device has changed the account copy and route the user into version review instead of silently overwriting newer account work.
-  - [x] Failed sync retry paths
-        Let users retry failed account sync directly from the editor status indicator and autosync failure toast.
-  - [x] Last-known-good local fallback
-        Save the latest local copy when account sync fails and show that fallback state in project management.
-  - [x] Account and device project clarity
-        Clarify account copies, local copies, and device-only projects in Project Manager without turning them into separate product concepts.
+- [x] Track element catalog (`Research`, `No account required`)
+      Built a catalog-backed element model for official gates with typed entries for names, dimensions, source references, 2D/3D rendering, and export compatibility. Includes placement selection, inspector identity display, in-place type switching, and catalog-driven visual rendering across 2D, 3D, and export paths.
+  - [x] Local element catalog foundation
+        Define typed catalog entries for official names, dimensions, source references, 2D defaults, 3D render hints, and export compatibility while keeping saved project geometry meter-based.
+  - [x] Official gate and obstacle entries
+        Covered by the placement selector, catalog identity in inspector, and in-place type switching sub-items. MultiGP-style gates are accessible through deliberate placement and inspector UI, custom sizing remains on the standard TrackDraw Gate, and no existing projects were migrated.
+  - [x] MultiGP gate placement selector
+        Keep Gate as the primary placement tool while letting users switch the active gate type between the generic TrackDraw gate and catalog-backed MultiGP-style 5x5 and 7x6 variants through compact desktop and mobile type pickers.
+  - [x] Catalog identity in inspector
+        Show placed catalog-backed elements with their official type, source, official size, and dimension status while keeping official gate width and height fixed in normal editing.
+  - [x] In-place catalog type switching (`No account required`)
+        Let users change the catalog type of an already-placed gate directly from the inspector without needing to delete and re-place. The type picker uses the shadcn Select and shows for all placed gates, including frame-only TrackDraw gates. Switching resets to the target entry's defaults while preserving position, rotation, and route connections, and preserves non-catalog meta such as timing markers. The source organization links to the entry's first source URL. getCatalogEntriesByKind replaces the gate-specific helper to support future element types.
 
-- [x] Usability and reliability pass (`No account required`, `Account-backed`)
-      Finite release-hardening pass for the next release candidate. Keep the completed work below as a record, but use the remaining checklist as the stop condition; do not add after-the-fact checked items to keep this pass alive.
-  - [x] Desktop editor smoke
-        Manual browser smoke gate. Verify create/edit/select/transform, route waypoint editing, snapping, rotation, resize handles, duplicate/delete, lock behavior, undo/redo, autosave reload, and Project Manager actions from `/studio`.
-  - [x] Mobile editor smoke
-        Manual browser smoke gate. Verify the mobile app menu, Project Manager, inspector drawers, path builder, multi-select overlay, map reference controls, and import/export actions at phone-width and tablet-width layouts.
-  - [x] Recovery and failure-flow drill
-        Exercised invalid import files, unreadable/non-TrackDraw JSON, local storage failure, failed JSON export, share publish failure, and account sync failure through targeted regression tests. Fix only cases where the user cannot understand what happened or recover safely.
-  - [x] Export and share handoff drill
-        Covered JSON, SVG, PNG, PDF, and Velocidrone `.trk` export paths, JSON re-import, share publishing, managed share limitation copy, and `/share/[token]` read-only handoff behavior through targeted regression tests.
-  - [x] Selection and transform edge-case drill
-        Tested locked objects, mixed locked/unlocked selections, grouped selections, route waypoint mutations, keyboard shortcuts, context menus, mobile overlay actions, and undo/redo after mutation paths through targeted store and component coverage.
-  - [x] Large-layout stability drill
-        Stressed dense practical layouts with many obstacles, a long route, map reference, 3D preview component rendering, obstacle numbering, and PDF/SVG/PNG export through targeted regression tests.
-  - [x] Release triage cutoff
-        Automated hardening found no remaining release-blocking issues to keep in this pass. The only open items are the explicit manual desktop and mobile browser smoke gates.
-  - [x] Final release validation
-        `npm run lint`, `npm run type`, `npm run test`, and `npm run build` pass after the fixes from this pass.
-  - [x] Automated validation baseline
-        `npm run lint`, `npm run type`, `npm run test`, and `npm run build` pass before the remaining release checklist starts.
-  - [x] Editor recovery and failure states
-        Must-fix scope: make the common autosave, import, export, and share/account-sync failures visible and recoverable enough for release. Defer rare runtime edge cases unless they risk data loss.
-    - [x] Local autosave failure state
-          Surface local persistence failures with a retry path instead of silently ignoring storage/quota errors.
-    - [x] Import failure clarity
-          Differentiate invalid JSON, wrong file type, unreadable files, and non-TrackDraw project data with visible recovery guidance.
-    - [x] Project JSON export feedback
-          Reuse one JSON download path and report Project Manager export failures instead of silently doing nothing when local project data cannot be loaded.
-  - [x] Mobile editor ergonomics pass
-        Must-fix scope: touch targets and flows that block venue-side editing on small screens. Defer broader responsive redesign.
-    - [x] Mobile app menu touch targets
-          Make project, share, import, export, account, dashboard, and sign-out actions easier to hit and scan in the mobile app menu.
-    - [x] Mobile editing overlay touch targets
-          Give path builder, quick adjust, and multi-select overlay actions steadier tap targets for venue-side editing on small screens.
-    - [x] Mobile map reference controls
-          Make map reference actions and opacity adjustment easier to use from the mobile layout inspector.
-    - [x] Mobile inspector section targets
-          Make collapsible inspector sections easier to open and close on touch screens while preserving compact desktop density.
-    - [x] Mobile Project Manager action targets
-          Make local-project action menus easier to open and scan from the mobile Project Manager.
-  - [x] Selection and transform reliability pass
-        Must-fix scope: regressions that can mutate locked objects, lose selection intent, break route editing, or leave undo/redo inconsistent. Defer speculative transform polish unless a real bug is found during smoke testing.
-    - [x] Locked shape mutation guards
-          Block store-level patch, batch patch, and route waypoint mutations for locked shapes so resize, inspector, and route-edit calls cannot bypass lock state.
-    - [x] Locked destructive action guards
-          Keep duplicate and delete actions from mutating selections that include locked shapes, including keyboard shortcuts, context menus, mobile overlays, and clear shortcut feedback.
-  - [x] Export/share confidence pass
-        Must-fix scope: users should understand which outputs are editable backups, visual handoffs, read-only review links, or experimental simulator exports. Defer new export formats or share-management features.
-    - [x] Export output purpose copy
-          Clarify read-only visual outputs, editable JSON backups, PDF handoff intent, and experimental simulator limitations in export and share flows.
-    - [x] Managed share limitation copy
-          Clarify in Project Manager that managed shares are read-only review links and JSON export is the editable handoff path.
-  - [x] Performance and large-layout stability
-        Must-fix scope: prevent obvious hangs, runaway export output, or numbering/export instability on large practical layouts. Defer deep profiling unless release smoke testing exposes a blocking slowdown.
-    - [x] Bounded dense-grid export rendering
-          Clamp very fine export grid spacing so SVG/PDF/PNG exports from large or dense layouts do not generate excessive grid markup.
-    - [x] Long-route obstacle numbering coverage
-          Precompute route segments and bound per-obstacle scans so numbering stays stable on long routes with many gates.
+- [x] 3D preview realism and lighting (`Research`, `No account required`)
+      Improved the 3D preview's readability and realism with stronger contrast, sun/directional lighting, shadows, and more recognizable gates/flags while keeping mobile performance safe. Catalog metadata drives official variant rendering, including a realistic MultiGP Standard Gate 5x5.
+  - [x] 3D readability and realism pass
+        Tuned directional lighting with a warm sun tint, lowered ambient intensity for stronger shadow contrast, raised shadow map resolution to 2048, set shadow camera frustum to track bounds to eliminate shadow coverage gaps on large tracks, added shadow-bias to prevent acne, and removed polyline shadow casting to reduce visual noise. Unified the lighting theme across editor, share, and gallery into a single shared constant.
+  - [x] Catalog-aware 3D element rendering
+        Use catalog-owned visual metadata to render catalog-backed MultiGP-style 5x5 and 7x6 gates with recognizable panel sizes, PVC frame placement, colors, and branding treatment across 2D canvas/SVG output, the live preview, and flythrough export while keeping generic gates lightweight.
 
-</details>
+- [x] Collapsible inspector workspace (`No account required`)
+      Let desktop/tablet users collapse the inspector sidebar to reclaim canvas space during dense editing while preserving selection context.
+  - [x] Collapsible inspector workspace
+        Add the collapse control to the inspector header, keep a reopen control in the collapsed rail, persist desktop workspace density locally, and verify it does not regress mobile drawer behavior.
 
-## v1.7.0 Archive
-
-<details>
-<summary>Completed release work archived with v1.7.0</summary>
-
-- [x] UI/UX polish and reliability pass (`No account required`)
-      Fine-tuned editor, mobile, share, export, and account/project flows. Includes Project Manager and Account dialog states, locked inspector feedback, mobile multi-select and path-builder polish, export/share confidence copy, and focus/accessibility improvements.
-
-- [x] Stability and usability pass (`No account required`)
-      Improved reliability across editor, share, export, mobile, and account-backed project flows. Includes regression coverage for selection, route editing, export smoke tests, mobile workflow cleanup, and account/project/share state clarity.
-
-- [x] TrackDraw REST API (`Account-backed`)
-      Versioned read-only REST API for external tools with expiring API keys, rate limiting, and OpenAPI docs.
-  - [x] API key management: create, list, and revoke expiring keys with scoped permissions
-  - [x] Authenticated endpoints: `/api/v1/me`, `/api/v1/projects`, `/api/v1/projects/[projectId]`, `/api/v1/projects/[projectId]/track`
-  - [x] RotorHazard overlay endpoint: `/api/v1/projects/[projectId]/overlay` with route, obstacles, timing markers, split indices, readiness status, and optional lap duration estimate
-  - [x] OpenAPI docs at `/api/v1/openapi.json` and `/api/docs`
-
-- [x] Live race overlay preparation (`Account-backed`)
-      TrackDraw projects are now ready for use with [rh-stream-overlays](https://github.com/dutchdronesquad/rh-stream-overlays). Includes overlay readiness validation, split index support, and optional route duration estimate in the overlay package.
-
-- [x] Base UI to Radix UI migration
-      Replaced `@base-ui/react` with Radix UI primitives across all UI components to fix mobile touch handling inside dialogs.
-
-</details>
-
-## v1.6.0 Archive
-
-<details>
-<summary>Completed release work archived with v1.6.0</summary>
-
-- [x] Race-day handoff next slice (`No account required`)
-      Built on the shipped Race Pack, published shares, and editor numbering work with small release-sized improvements that make briefing and setup easier without turning TrackDraw into a race-control product.
-  - [x] Shared view QR code in Race Pack
-        Embedded a QR code linking to the canonical published shared view in the Race Pack PDF, so pilots and crew can scan directly from a printed or on-screen briefing.
-  - [x] Timing gate markers
-        Let specific gates be marked as start/finish or split timing points so race directors can identify timing hardware placement clearly in the editor, Race Pack, and future overlay preparation.
-
-- [x] Admin dashboard operations follow-up (`Account-backed`)
-      Improved operator visibility for shipped account, share, and gallery surfaces without adding public reporting flows.
-  - [x] Dashboard table facet filters
-        Added a consistent search-and-facet toolbar across gallery, users, and audit tables, including gallery state/share lifecycle, user role, and audit category/action filters.
-  - [x] Share lifecycle visibility
-        Gave operators a clearer view of active, expired, revoked, and gallery-linked shares for support and debugging.
-  - [x] Audit log usability
-        Added filters, clearer entity labels, and detail views that make account, role, share, and gallery actions easier to inspect.
+- [x] Regional measurement units (`No account required`)
+      Support regional Metric and Imperial display/input presets without changing the internal meter-based design model.
+  - [x] Unit preference model
+        Add a project-safe and user-friendly Metric/Imperial preference, with a Metric default that fits most international users and does not break existing projects.
+  - [x] Locale-informed defaults
+        Use browser locale signals to choose an initial measurement default when no explicit preference exists, while keeping the detected value transparent and manually overrideable.
+  - [x] Editor display formatting
+        Replace direct `m` labels in field size, rulers, inspectors, route/elevation summaries, gallery metadata, and export previews with shared unit formatting.
+  - [x] Unit-aware numeric input
+        Let users enter common Metric and Imperial values such as meters, feet, and inches while storing normalized meter values in the design.
+  - [x] Export and share presentation
+        Show the selected measurement preset in PDF/Race Pack/share-facing summaries while keeping JSON/API geometry and speed values compatible and meter-based/SI.
 
 </details>
