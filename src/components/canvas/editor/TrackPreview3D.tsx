@@ -31,6 +31,10 @@ import {
   selectSelectedPolyline,
   selectShapeRecordMap,
 } from "@/store/selectors";
+import {
+  getTrackElementCatalogEntry,
+  getTrackElementCatalogIdentity,
+} from "@/lib/track/elements/catalog";
 import { useEditor } from "@/store/editor";
 import {
   useSessionActions,
@@ -369,6 +373,15 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
                 !selectedIdSet.has(shape.id) ||
                 shape.locked ||
                 shape.kind !== "ladder"
+              ) {
+                return null;
+              }
+              const catalogEntry = getTrackElementCatalogEntry(
+                getTrackElementCatalogIdentity(shape.meta)?.elementId
+              );
+              if (
+                catalogEntry?.kind === "ladder" &&
+                catalogEntry.editable?.dimensions === false
               ) {
                 return null;
               }
