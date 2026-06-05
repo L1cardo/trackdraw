@@ -31,7 +31,7 @@ describe("editor tool helpers", () => {
       kind: "gate",
       x: 12,
       y: 7,
-      rotation: 180,
+      rotation: 0,
       width: 2,
       height: 2,
       thick: 0.2,
@@ -64,7 +64,9 @@ describe("editor tool helpers", () => {
       "gate",
       { x: 3, y: 4 },
       {
-        gateElementId: MULTIGP_STANDARD_GATE_5X5_ELEMENT_ID,
+        activePlacementElementId: {
+          gate: MULTIGP_STANDARD_GATE_5X5_ELEMENT_ID,
+        },
       }
     );
 
@@ -72,7 +74,7 @@ describe("editor tool helpers", () => {
       kind: "gate",
       x: 3,
       y: 4,
-      rotation: 180,
+      rotation: 0,
       width: feetToMeters(5),
       height: feetToMeters(5),
       meta: {
@@ -90,13 +92,15 @@ describe("editor tool helpers", () => {
       "gate",
       { x: 6, y: 8 },
       {
-        gateElementId: MULTIGP_CHAMPIONSHIP_GATE_7X6_ELEMENT_ID,
+        activePlacementElementId: {
+          gate: MULTIGP_CHAMPIONSHIP_GATE_7X6_ELEMENT_ID,
+        },
       }
     );
 
     expect(shape).toMatchObject({
       kind: "gate",
-      rotation: 180,
+      rotation: 0,
       width: feetToMeters(7),
       height: feetToMeters(6),
       meta: {
@@ -115,7 +119,7 @@ describe("editor tool helpers", () => {
         "gate",
         { x: 1, y: 2 },
         {
-          gateElementId: TRACKDRAW_FLAG_ELEMENT_ID,
+          activePlacementElementId: { gate: TRACKDRAW_FLAG_ELEMENT_ID },
         }
       )
     ).toMatchObject({

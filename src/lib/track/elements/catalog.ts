@@ -9,9 +9,15 @@ export const TRACKDRAW_START_FINISH_ELEMENT_ID =
   "trackdraw-generic-start-finish";
 export const TRACKDRAW_LADDER_ELEMENT_ID = "trackdraw-generic-ladder";
 export const TRACKDRAW_DIVE_GATE_ELEMENT_ID = "trackdraw-generic-dive-gate";
+
 export const MULTIGP_STANDARD_GATE_5X5_ELEMENT_ID = "multigp-standard-gate-5x5";
 export const MULTIGP_CHAMPIONSHIP_GATE_7X6_ELEMENT_ID =
   "multigp-championship-gate-7x6";
+export const MULTIGP_CORNER_FLAG_ELEMENT_ID = "multigp-corner-flag";
+export const MULTIGP_STANDARD_LADDER_5X5_ELEMENT_ID =
+  "multigp-standard-ladder-5x5";
+export const MULTIGP_CHAMPIONSHIP_LADDER_7X6_ELEMENT_ID =
+  "multigp-championship-ladder-7x6";
 
 export type TrackElementCatalogId =
   | typeof TRACKDRAW_GATE_ELEMENT_ID
@@ -22,7 +28,10 @@ export type TrackElementCatalogId =
   | typeof TRACKDRAW_LADDER_ELEMENT_ID
   | typeof TRACKDRAW_DIVE_GATE_ELEMENT_ID
   | typeof MULTIGP_STANDARD_GATE_5X5_ELEMENT_ID
-  | typeof MULTIGP_CHAMPIONSHIP_GATE_7X6_ELEMENT_ID;
+  | typeof MULTIGP_CHAMPIONSHIP_GATE_7X6_ELEMENT_ID
+  | typeof MULTIGP_CORNER_FLAG_ELEMENT_ID
+  | typeof MULTIGP_STANDARD_LADDER_5X5_ELEMENT_ID
+  | typeof MULTIGP_CHAMPIONSHIP_LADDER_7X6_ELEMENT_ID;
 
 type PlaceableCatalogShape = Exclude<Shape, PolylineShape>;
 export type TrackElementShapeDraft = ShapeDraft<PlaceableCatalogShape>;
@@ -90,7 +99,34 @@ export interface PanelFrameGateVisualSpec {
 }
 
 export type GateVisualSpec = FrameOnlyGateVisualSpec | PanelFrameGateVisualSpec;
-export type TrackElementVisualSpec = GateVisualSpec;
+
+export interface CornerMarkerFlagVisualSpec {
+  kind: "flag";
+  variant: "corner-marker";
+  poleColor: string;
+  panelUpperColor: string;
+  panelLowerColor: string;
+}
+
+export type FlagVisualSpec = CornerMarkerFlagVisualSpec;
+
+export interface PanelFrameLadderVisualSpec {
+  kind: "ladder";
+  variant: "panel-frame";
+  panels: {
+    left: GatePanelVisualSpec;
+    right: GatePanelVisualSpec;
+    top: GateTopPanelVisualSpec;
+  };
+  frame: GateFrameVisualSpec;
+  branding: GateBrandingVisualSpec;
+}
+
+export type LadderVisualSpec = PanelFrameLadderVisualSpec;
+export type TrackElementVisualSpec =
+  | GateVisualSpec
+  | FlagVisualSpec
+  | LadderVisualSpec;
 
 export interface TrackElementCatalogEntry {
   id: TrackElementCatalogId;
@@ -172,7 +208,7 @@ const frameOnlyGateDefaults = {
   kind: "gate",
   x: 0,
   y: 0,
-  rotation: 180,
+  rotation: 0,
   width: 2,
   height: 2,
   thick: 0.2,
@@ -328,6 +364,42 @@ export const trackElementCatalog = [
     exportHints: { simulatorFriendly: true },
   },
   {
+    id: MULTIGP_CORNER_FLAG_ELEMENT_ID,
+    name: "MultiGP Corner Flag",
+    organization: "MultiGP",
+    kind: "flag",
+    official: true,
+    editable: { color: false, dimensions: false },
+    dimensions: {
+      radiusMeters: 0.2,
+      heightMeters: feetToMeters(10),
+      display: { unitSystem: "imperial", label: "10 ft" },
+    },
+    defaultShape: {
+      ...flagDefaults,
+      radius: 0.2,
+      poleHeight: feetToMeters(10),
+      color: "#b91c1c",
+    } satisfies TrackElementShapeDraft,
+    tags: ["race", "practice", "multigp", "marker"],
+    sources: [
+      {
+        label: "MultiGP Drone Racing Flag",
+        url: "https://shop.multigp.com/product/drone-racing-flag-fabric/",
+      },
+    ],
+    render2d: { icon: "flag" },
+    render3d: { modelHint: "flag-pole" },
+    visual: {
+      kind: "flag",
+      variant: "corner-marker",
+      poleColor: "#1c1c1c",
+      panelUpperColor: "#f8fafc",
+      panelLowerColor: "#7f1d1d",
+    } satisfies FlagVisualSpec,
+    exportHints: { simulatorFriendly: true },
+  },
+  {
     id: TRACKDRAW_CONE_ELEMENT_ID,
     name: "TrackDraw Cone",
     organization: "TrackDraw",
@@ -415,6 +487,124 @@ export const trackElementCatalog = [
     tags: ["technical", "practice"],
     render2d: { icon: "ladder" },
     render3d: { modelHint: "ladder-gate" },
+    exportHints: { simulatorFriendly: true },
+  },
+  {
+    id: MULTIGP_STANDARD_LADDER_5X5_ELEMENT_ID,
+    name: "MultiGP Standard Ladder 5x5",
+    organization: "MultiGP",
+    kind: "ladder",
+    official: true,
+    editable: { color: false, dimensions: false },
+    dimensions: {
+      widthMeters: feetToMeters(5),
+      heightMeters: feetToMeters(5) * 3,
+      display: {
+        unitSystem: "imperial",
+        label: "5 ft wide, 3 × 5 ft sections",
+      },
+    },
+    defaultShape: {
+      kind: "ladder",
+      x: 0,
+      y: 0,
+      rotation: 0,
+      width: feetToMeters(5),
+      height: feetToMeters(5) * 3,
+      rungs: 3,
+      elevation: 0,
+      color: "#f8fafc",
+    } satisfies TrackElementShapeDraft,
+    tags: ["race", "technical", "multigp"],
+    sources: [
+      {
+        label: "MultiGP Drone Race Course Obstacles",
+        url: "https://www.multigp.com/multigp-drone-race-course-obstacles/",
+      },
+    ],
+    render2d: { icon: "ladder" },
+    render3d: { modelHint: "ladder-gate" },
+    visual: {
+      kind: "ladder",
+      variant: "panel-frame",
+      panels: {
+        left: { widthMeters: feetToMeters(1), color: "#f8fafc" },
+        right: { widthMeters: feetToMeters(1), color: "#f8fafc" },
+        top: { heightMeters: feetToMeters(1), color: "#202e5d" },
+      },
+      frame: {
+        placement: "outer",
+        material: "pvc",
+        color: "#f8fafc",
+        diameterMeters: 0.055,
+      },
+      branding: {
+        label: "MULTIGP",
+        markColor: "#f8fafc",
+        accentColor: "#dc2626",
+        checkerColor: "#111827",
+        style: "multigp",
+      },
+    } satisfies LadderVisualSpec,
+    exportHints: { simulatorFriendly: true },
+  },
+  {
+    id: MULTIGP_CHAMPIONSHIP_LADDER_7X6_ELEMENT_ID,
+    name: "MultiGP Championship Ladder 7x6",
+    organization: "MultiGP",
+    kind: "ladder",
+    official: true,
+    editable: { color: false, dimensions: false },
+    dimensions: {
+      widthMeters: feetToMeters(7),
+      heightMeters: feetToMeters(6) * 3,
+      display: {
+        unitSystem: "imperial",
+        label: "7 ft wide, 3 × 6 ft openings",
+      },
+    },
+    defaultShape: {
+      kind: "ladder",
+      x: 0,
+      y: 0,
+      rotation: 0,
+      width: feetToMeters(7),
+      height: feetToMeters(6) * 3,
+      rungs: 3,
+      elevation: 0,
+      color: "#f8fafc",
+    } satisfies TrackElementShapeDraft,
+    tags: ["championship", "race", "technical", "multigp"],
+    sources: [
+      {
+        label: "MultiGP Drone Race Course Obstacles",
+        url: "https://www.multigp.com/multigp-drone-race-course-obstacles/",
+      },
+    ],
+    render2d: { icon: "ladder" },
+    render3d: { modelHint: "ladder-gate" },
+    visual: {
+      kind: "ladder",
+      variant: "panel-frame",
+      panels: {
+        left: { widthMeters: feetToMeters(1), color: "#f8fafc" },
+        right: { widthMeters: feetToMeters(1), color: "#f8fafc" },
+        top: { heightMeters: feetToMeters(1), color: "#202e5d" },
+      },
+      frame: {
+        placement: "outer",
+        material: "pvc",
+        color: "#f8fafc",
+        diameterMeters: 0.055,
+      },
+      branding: {
+        label: "MULTIGP",
+        markColor: "#f8fafc",
+        accentColor: "#b91c1c",
+        checkerColor: "#111827",
+        style: "multigp",
+      },
+    } satisfies LadderVisualSpec,
     exportHints: { simulatorFriendly: true },
   },
   {
