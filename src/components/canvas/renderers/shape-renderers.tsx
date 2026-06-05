@@ -8,6 +8,7 @@ import {
   Shape as KonvaShape,
   Text,
 } from "react-konva";
+import { useTheme } from "@/hooks/useTheme";
 import { m2px } from "@/lib/track/units";
 import {
   getCone2DShape,
@@ -87,6 +88,50 @@ export function renderLockedIndicator(
         opacity={opacity}
         lineCap="round"
         lineJoin="round"
+      />
+    </Group>
+  );
+}
+
+export function LockedPathSelectBadge({
+  shape,
+  ppm,
+}: {
+  shape: Shape;
+  ppm: number;
+}) {
+  const isDark = useTheme() === "dark";
+
+  if (shape.kind !== "polyline") return null;
+  const bounds = getShapeLocalBounds(shape, ppm);
+  if (!bounds) return null;
+
+  const pad = 6;
+  const width = 46;
+  const height = 16;
+  const x = bounds.x - pad;
+  const y = bounds.y - pad - height - 5;
+
+  return (
+    <Group x={x} y={y}>
+      <Rect
+        width={width}
+        height={height}
+        fill={isDark ? "#451a03" : "#fffbeb"}
+        stroke="#f59e0b"
+        strokeWidth={1}
+        cornerRadius={999}
+        opacity={0.94}
+      />
+      <Text
+        width={width}
+        height={height}
+        text="Locked"
+        fill={isDark ? "#fde68a" : "#92400e"}
+        fontSize={9}
+        fontStyle="600"
+        align="center"
+        verticalAlign="middle"
       />
     </Group>
   );

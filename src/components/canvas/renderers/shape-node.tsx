@@ -9,6 +9,7 @@ import { m2px, px2m } from "@/lib/track/units";
 import type { PolylinePoint, Shape } from "@/lib/types";
 import {
   renderLockedIndicator,
+  LockedPathSelectBadge,
   renderHoverIndicator,
   renderGate,
   renderFlag,
@@ -371,6 +372,9 @@ function TrackShapeNodeComponent({
         )}
       </Group>
       {shape.locked && renderLockedIndicator(shape, highlighted, designPpm)}
+      {shape.locked && allowInteraction && (
+        <LockedPathSelectBadge shape={shape} ppm={designPpm} />
+      )}
     </Group>
   );
 }
