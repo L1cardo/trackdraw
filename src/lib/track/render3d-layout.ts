@@ -9,6 +9,37 @@ export const PANEL_FRAME_TEXTURE_SURFACE_OFFSET = 0.0015;
 export const TEXTURED_PANEL_FRAME_TUBE_SCALE = 0.58;
 const MULTIGP_FEATHER_FLAG_TEXTURE_ASPECT = 1134 / 5811;
 
+/**
+ * When a gate uses the same texture URL for both panels (symmetric), the right
+ * panel texture is mirrored by rotating 180° around Z so the branding faces the
+ * correct direction on each side.
+ *
+ * Pass `loaded` as `[leftLoaded, rightLoaded]` (the first two entries from
+ * `useTexture` or `loadPanelTextures`). Returns the resolved panel textures and
+ * the Z-rotation to apply to the left-panel mesh.
+ */
+export function resolvePanelTextureMapping<T>(
+  textureUrls: { left: string; right: string },
+  loaded: readonly [T, T]
+): { leftPanel: T; rightPanel: T; leftRotationZ: number } {
+  const symmetric = textureUrls.left === textureUrls.right;
+  return {
+    leftPanel: symmetric ? loaded[0] : loaded[1],
+    rightPanel: loaded[0],
+    leftRotationZ: symmetric ? Math.PI : 0,
+  };
+}
+
+function shouldRenderLadderTopPanel(
+  visual: PanelFrameLadderVisualSpec,
+  sectionIndex: number,
+  rungs: number
+) {
+  return (
+    visual.topPanelPlacement !== "lower-sections" || sectionIndex < rungs - 1
+  );
+}
+
 export function getPanelFrameGateLayout(
   shape: GateShape,
   visual: PanelFrameGateVisualSpec
@@ -71,8 +102,31 @@ export function getPanelFrameLadderLayout(
   const outerW = outerRightX - outerLeftX;
   const bannerH = topPanelHeight;
   const openingH = totalOpeningH / rungs;
-  const gateH = openingH + bannerH;
-  const totalH = gateH * rungs;
+  const topPanelCount =
+    visual.topPanelPlacement === "lower-sections"
+      ? Math.max(0, rungs - 1)
+      : rungs;
+  const totalH = openingH * rungs + bannerH * topPanelCount;
+  const sections = Array.from({ length: rungs }, (_, index) => {
+    const renderedTopPanelsBefore =
+      visual.topPanelPlacement === "lower-sections"
+        ? Math.min(index, Math.max(0, rungs - 1))
+        : index;
+    const sectionY = index * openingH + renderedTopPanelsBefore * bannerH;
+    const hasTopPanel = shouldRenderLadderTopPanel(visual, index, rungs);
+    const barY = sectionY + openingH + (hasTopPanel ? bannerH : 0);
+    const bannerMidY = sectionY + openingH + bannerH / 2;
+    const openingMidY = sectionY + openingH / 2;
+
+    return {
+      bannerMidY,
+      barY,
+      hasTopPanel,
+      isIntermediate: index < rungs - 1,
+      openingMidY,
+      sectionY,
+    };
+  });
   const frontZ = -(panelDepth / 2 + PANEL_FRAME_TEXTURE_SURFACE_OFFSET);
   const tJunctionRadius = frameTube * 0.8;
 
@@ -82,7 +136,6 @@ export function getPanelFrameLadderLayout(
     frameTube,
     frameZ,
     frontZ,
-    gateH,
     leftPanelWidth,
     openingH,
     outerLeftX,
@@ -91,6 +144,7 @@ export function getPanelFrameLadderLayout(
     panelDepth,
     rightPanelWidth,
     rungs,
+    sections,
     tJunctionRadius,
     totalH,
     totalOpeningH,

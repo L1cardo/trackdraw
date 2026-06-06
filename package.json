@@ -20,6 +20,9 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "type": "next typegen && tsc --noEmit",
+    "assets:multigp:extract": "node scripts/extract_glb_textures.mjs",
+    "assets:multigp:optimize": "node scripts/optimize_multigp_textures.mjs",
+    "assets:multigp:refresh": "node scripts/extract_glb_textures.mjs && node scripts/optimize_multigp_textures.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -90,6 +93,7 @@
     "pg": "^8.20.0",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^6.0.0",
     "typescript-eslint": "^8.59.0",

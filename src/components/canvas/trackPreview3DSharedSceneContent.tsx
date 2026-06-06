@@ -24,6 +24,7 @@ import {
   getLadderRenderedHeight,
   getPanelFrameGateLayout,
   getPanelFrameLadderLayout,
+  resolvePanelTextureMapping,
 } from "@/lib/track/render3d-layout";
 import {
   getFlagVisualSpec,
@@ -41,6 +42,7 @@ import type {
   PanelFrameGateVisualSpec,
   PanelFrameLadderVisualSpec,
 } from "@/lib/track/elements/catalog";
+import { getTrackElementCatalogTexturePaths } from "@/lib/track/elements/catalog";
 import type {
   ConeShape,
   DiveGateShape,
@@ -90,6 +92,20 @@ export function ScreenshotHelper({
     onReady(() => gl.domElement.toDataURL("image/png"));
   }, [gl, onReady]);
   return null;
+}
+
+const CATALOG_TEXTURE_PATHS = getTrackElementCatalogTexturePaths();
+
+export function useCatalogTextureWarmup() {
+  useEffect(() => {
+    // Populate the Three.js texture cache in parallel immediately on mount.
+    // In the editor the browser HTTP cache is already warm (seeded by
+    // EditorWorkspace). In the share view this is the first fetch, but loading
+    // all textures in parallel is still faster than the old sequential approach.
+    for (const path of CATALOG_TEXTURE_PATHS) {
+      useTexture.preload(path);
+    }
+  }, []);
 }
 
 export function CameraAxisTracker({
@@ -168,7 +184,7 @@ export function WheelBridge({
       const currentDist = camera.position.distanceTo(controls.target);
       const base = targetDistanceRef.current ?? currentDist;
       const capped = Math.sign(rawDeltaY) * Math.min(Math.abs(rawDeltaY), 30);
-      const factor = Math.exp(capped * 0.012);
+      const factor = Math.exp(capped * 0.007);
       targetDistanceRef.current = Math.max(
         minDistance,
         Math.min(maxDistance, base * factor)
@@ -233,7 +249,7 @@ export function WheelBridge({
         return;
       }
 
-      const syntheticDeltaY = -Math.log(scaleRatio) / 0.012;
+      const syntheticDeltaY = -Math.log(scaleRatio) / 0.007;
       queueZoomDistance(syntheticDeltaY);
     };
 
@@ -290,7 +306,7 @@ export function WheelBridge({
     const currentDist = offset.length();
     const dir = offset.normalize();
 
-    const next = currentDist + (target - currentDist) * 0.15;
+    const next = currentDist + (target - currentDist) * 0.1;
     const settled = Math.abs(target - next) < 0.05;
     const applied = settled ? target : next;
 
@@ -465,8 +481,12 @@ function PanelFrameGateTexturePlanes({
   const [leftTexture, rightTexture, topTexture] = useTexture([
     textures.left,
     textures.right,
-    textures.top,
+    textures.top ?? textures.left,
   ]) as THREE.Texture[];
+  const { leftPanel, rightPanel, leftRotationZ } = resolvePanelTextureMapping(
+    textures,
+    [leftTexture, rightTexture]
+  );
 
   useEffect(() => {
     for (const texture of [leftTexture, rightTexture, topTexture]) {
@@ -478,10 +498,13 @@ function PanelFrameGateTexturePlanes({
 
   return (
     <>
-      <mesh position={[leftPanelX, h / 2, frontZ]} rotation={[0, Math.PI, 0]}>
+      <mesh
+        position={[leftPanelX, h / 2, frontZ]}
+        rotation={[0, Math.PI, leftRotationZ]}
+      >
         <planeGeometry args={[leftPanelWidth, h]} />
         <meshStandardMaterial
-          map={leftTexture}
+          map={leftPanel}
           roughness={0.72}
           metalness={0.01}
           side={THREE.FrontSide}
@@ -490,7 +513,7 @@ function PanelFrameGateTexturePlanes({
       <mesh position={[rightPanelX, h / 2, frontZ]} rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[rightPanelWidth, h]} />
         <meshStandardMaterial
-          map={rightTexture}
+          map={rightPanel}
           roughness={0.72}
           metalness={0.01}
           side={THREE.FrontSide}
@@ -513,6 +536,7 @@ function PanelFrameLadderSectionTexturePlanes({
   bannerH,
   bannerMidY,
   frontZ,
+  hasTopPanel,
   leftPanelWidth,
   openingH,
   openingMidY,
@@ -524,6 +548,7 @@ function PanelFrameLadderSectionTexturePlanes({
   bannerH: number;
   bannerMidY: number;
   frontZ: number;
+  hasTopPanel: boolean;
   leftPanelWidth: number;
   openingH: number;
   openingMidY: number;
@@ -534,11 +559,18 @@ function PanelFrameLadderSectionTexturePlanes({
 }) {
   const leftPanelX = -w / 2 - leftPanelWidth / 2;
   const rightPanelX = w / 2 + rightPanelWidth / 2;
+  const shouldRenderTopTexture = Boolean(
+    hasTopPanel && textures.top && bannerH > 0
+  );
   const [leftTexture, rightTexture, topTexture] = useTexture([
     textures.left,
     textures.right,
-    textures.top,
+    textures.top ?? textures.left,
   ]) as THREE.Texture[];
+  const { leftPanel, rightPanel, leftRotationZ } = resolvePanelTextureMapping(
+    textures,
+    [leftTexture, rightTexture]
+  );
 
   useEffect(() => {
     for (const texture of [leftTexture, rightTexture, topTexture]) {
@@ -552,11 +584,11 @@ function PanelFrameLadderSectionTexturePlanes({
     <>
       <mesh
         position={[leftPanelX, openingMidY, frontZ]}
-        rotation={[0, Math.PI, 0]}
+        rotation={[0, Math.PI, leftRotationZ]}
       >
         <planeGeometry args={[leftPanelWidth, openingH]} />
         <meshStandardMaterial
-          map={leftTexture}
+          map={leftPanel}
           roughness={0.72}
           metalness={0.01}
           side={THREE.FrontSide}
@@ -568,21 +600,23 @@ function PanelFrameLadderSectionTexturePlanes({
       >
         <planeGeometry args={[rightPanelWidth, openingH]} />
         <meshStandardMaterial
-          map={rightTexture}
+          map={rightPanel}
           roughness={0.72}
           metalness={0.01}
           side={THREE.FrontSide}
         />
       </mesh>
-      <mesh position={[0, bannerMidY, frontZ]} rotation={[0, Math.PI, 0]}>
-        <planeGeometry args={[topPanelW, bannerH]} />
-        <meshStandardMaterial
-          map={topTexture}
-          roughness={0.68}
-          metalness={0.02}
-          side={THREE.FrontSide}
-        />
-      </mesh>
+      {shouldRenderTopTexture ? (
+        <mesh position={[0, bannerMidY, frontZ]} rotation={[0, Math.PI, 0]}>
+          <planeGeometry args={[topPanelW, bannerH]} />
+          <meshStandardMaterial
+            map={topTexture}
+            roughness={0.68}
+            metalness={0.02}
+            side={THREE.FrontSide}
+          />
+        </mesh>
+      ) : null}
     </>
   );
 }
@@ -817,13 +851,28 @@ function TexturedCornerFlagPanel3D({
     backTexturePath,
   ]) as THREE.Texture[];
 
+  const frontMap = useMemo(() => {
+    const texture = frontTexture.clone();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 4;
+    texture.needsUpdate = true;
+    return texture;
+  }, [frontTexture]);
+
+  const backMap = useMemo(() => {
+    const texture = backTexture.clone();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 4;
+    texture.needsUpdate = true;
+    return texture;
+  }, [backTexture]);
+
   useEffect(() => {
-    for (const texture of [frontTexture, backTexture]) {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.anisotropy = 4;
-      texture.needsUpdate = true;
-    }
-  }, [frontTexture, backTexture]);
+    return () => {
+      frontMap.dispose();
+      backMap.dispose();
+    };
+  }, [frontMap, backMap]);
 
   return (
     <group>
@@ -834,7 +883,7 @@ function TexturedCornerFlagPanel3D({
       >
         <planeGeometry args={[bannerTextureWidth, bannerHeight]} />
         <meshStandardMaterial
-          map={frontTexture}
+          map={frontMap}
           transparent
           roughness={0.78}
           metalness={0}
@@ -851,7 +900,7 @@ function TexturedCornerFlagPanel3D({
       >
         <planeGeometry args={[bannerTextureWidth, bannerHeight]} />
         <meshStandardMaterial
-          map={backTexture}
+          map={backMap}
           transparent
           roughness={0.78}
           metalness={0}
@@ -1210,7 +1259,7 @@ function StartFinish3D({
               args={[podW - topInset, 0.018, podD - topInset]}
               radius={0.04}
               smoothness={4}
-              position={[0, podH + 0.012, 0]}
+              position={[0, podH + 0.007, 0]}
               receiveShadow
             >
               <meshStandardMaterial
@@ -1278,13 +1327,13 @@ function PanelFrameLadder3D({
   visual: PanelFrameLadderVisualSpec;
 }) {
   const { frame, panels } = visual;
+  const topPanel = panels.top;
   const {
     bannerH,
     baseY,
     frameTube,
     frameZ,
     frontZ,
-    gateH,
     leftPanelWidth,
     openingH,
     outerLeftX,
@@ -1292,11 +1341,12 @@ function PanelFrameLadder3D({
     outerW,
     panelDepth,
     rightPanelWidth,
-    rungs,
+    sections,
     tJunctionRadius,
     totalH,
     w,
   } = getPanelFrameLadderLayout(shape, visual);
+  const hasTopFrame = sections.at(-1)?.hasTopPanel ?? true;
   const rot: [number, number, number] = [
     0,
     (-(shape.rotation + 180) * Math.PI) / 180,
@@ -1360,43 +1410,44 @@ function PanelFrameLadder3D({
         <meshStandardMaterial {...frameTubeMat} />
       </mesh>
 
-      {/* Top corner elbows — at very top (totalH) */}
-      {[outerLeftX, outerRightX].map((x, idx) => (
-        <mesh key={`elbow-${idx}`} position={[x, totalH, frameZ]} castShadow>
-          <sphereGeometry args={[frameTube * 0.66, 16, 12]} />
-          <meshStandardMaterial
-            color="#e5e7eb"
-            roughness={0.84}
-            metalness={0.01}
-          />
-        </mesh>
-      ))}
-
-      {/* Per section: bar at TOP → banner hangs below bar → opening below banner */}
-      {Array.from({ length: rungs }).map((_, i) => {
-        const sectionY = i * gateH;
-        const barY = (i + 1) * gateH; // bar at the TOP of each section
-        const bannerMidY = barY - bannerH / 2; // banner hangs BELOW the bar
-        const openingMidY = sectionY + openingH / 2;
-        const isIntermediate = i < rungs - 1;
-
-        return (
-          <group key={i}>
-            {/* Horizontal bar at top of opening */}
+      {hasTopFrame
+        ? [outerLeftX, outerRightX].map((x, idx) => (
             <mesh
-              position={[0, barY, frameZ]}
-              rotation={[0, 0, Math.PI / 2]}
+              key={`elbow-${idx}`}
+              position={[x, totalH, frameZ]}
               castShadow
             >
-              <cylinderGeometry
-                args={[frameTube / 2, frameTube / 2, outerW, 16]}
+              <sphereGeometry args={[frameTube * 0.66, 16, 12]} />
+              <meshStandardMaterial
+                color="#e5e7eb"
+                roughness={0.84}
+                metalness={0.01}
               />
-              <meshStandardMaterial {...frameTubeMat} />
             </mesh>
+          ))
+        : null}
+
+      {/* Per section: bar at TOP → banner hangs below bar → opening below banner */}
+      {sections.map((section, i) => {
+        return (
+          <group key={i}>
+            {section.hasTopPanel ? (
+              <mesh
+                position={[0, section.barY, frameZ]}
+                rotation={[0, 0, Math.PI / 2]}
+                castShadow
+              >
+                <cylinderGeometry
+                  args={[frameTube / 2, frameTube / 2, outerW, 16]}
+                />
+                <meshStandardMaterial {...frameTubeMat} />
+              </mesh>
+            ) : null}
             {/* T-junction connectors on intermediate bars */}
-            {isIntermediate &&
+            {section.hasTopPanel &&
+              section.isIntermediate &&
               [outerLeftX, outerRightX].map((x, idx) => (
-                <mesh key={idx} position={[x, barY, frameZ]}>
+                <mesh key={idx} position={[x, section.barY, frameZ]}>
                   <cylinderGeometry
                     args={[
                       tJunctionRadius,
@@ -1412,24 +1463,30 @@ function PanelFrameLadder3D({
                   />
                 </mesh>
               ))}
-            {/* Navy banner */}
-            <mesh position={[0, bannerMidY, 0]} castShadow receiveShadow>
-              <boxGeometry args={[outerW, bannerH, panelDepth]} />
-              <meshStandardMaterial
-                color={panels.top.color}
-                roughness={0.64}
-                metalness={0.03}
-                emissive={selected ? "#60a5fa" : panels.top.color}
-                emissiveIntensity={selected ? 0.28 : 0.04}
-              />
-            </mesh>
+            {section.hasTopPanel && topPanel && bannerH > 0 ? (
+              <mesh
+                position={[0, section.bannerMidY, 0]}
+                castShadow
+                receiveShadow
+              >
+                <boxGeometry args={[outerW, bannerH, panelDepth]} />
+                <meshStandardMaterial
+                  color={topPanel.color}
+                  roughness={0.64}
+                  metalness={0.03}
+                  emissive={selected ? "#60a5fa" : topPanel.color}
+                  emissiveIntensity={selected ? 0.28 : 0.04}
+                />
+              </mesh>
+            ) : null}
             <PanelFrameLadderSectionTexturePlanes
               bannerH={bannerH}
-              bannerMidY={bannerMidY}
+              bannerMidY={section.bannerMidY}
               frontZ={frontZ}
+              hasTopPanel={section.hasTopPanel}
               leftPanelWidth={leftPanelWidth}
               openingH={openingH}
-              openingMidY={openingMidY}
+              openingMidY={section.openingMidY}
               rightPanelWidth={rightPanelWidth}
               textures={visual.textures}
               topPanelW={outerW}
@@ -1437,7 +1494,7 @@ function PanelFrameLadder3D({
             />
             {/* White left panel */}
             <mesh
-              position={[-w / 2 - leftPanelWidth / 2, openingMidY, 0]}
+              position={[-w / 2 - leftPanelWidth / 2, section.openingMidY, 0]}
               castShadow
               receiveShadow
             >
@@ -1452,7 +1509,7 @@ function PanelFrameLadder3D({
             </mesh>
             {/* White right panel */}
             <mesh
-              position={[w / 2 + rightPanelWidth / 2, openingMidY, 0]}
+              position={[w / 2 + rightPanelWidth / 2, section.openingMidY, 0]}
               castShadow
               receiveShadow
             >
@@ -1466,7 +1523,7 @@ function PanelFrameLadder3D({
               />
             </mesh>
             {/* Opening fill */}
-            <mesh position={[0, openingMidY, -panelDepth / 2 - 0.004]}>
+            <mesh position={[0, section.openingMidY, -panelDepth / 2 - 0.004]}>
               <planeGeometry args={[w, openingH]} />
               <meshBasicMaterial
                 color={frame.color}
