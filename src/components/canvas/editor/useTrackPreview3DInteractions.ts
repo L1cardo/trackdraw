@@ -25,6 +25,52 @@ import {
   snapRotationDegrees,
 } from "@/components/canvas/trackPreview3DMath";
 
+const elevationDragRaycaster = new THREE.Raycaster();
+const elevationDragNdc = new THREE.Vector2();
+const elevationDragCameraDirection = new THREE.Vector3();
+const elevationDragPlaneNormal = new THREE.Vector3();
+const elevationDragPlane = new THREE.Plane();
+const elevationDragHit = new THREE.Vector3();
+
+function getVerticalDragPlaneY(
+  clientX: number,
+  clientY: number,
+  rect: DOMRect,
+  camera: THREE.Camera,
+  anchorX: number,
+  anchorZ: number
+): number | null {
+  const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+  const ndcY = -((clientY - rect.top) / rect.height) * 2 + 1;
+  elevationDragNdc.set(ndcX, ndcY);
+  elevationDragRaycaster.setFromCamera(elevationDragNdc, camera);
+
+  camera.getWorldDirection(elevationDragCameraDirection);
+  elevationDragPlaneNormal.set(
+    elevationDragCameraDirection.x,
+    0,
+    elevationDragCameraDirection.z
+  );
+  if (elevationDragPlaneNormal.lengthSq() < 0.0001) {
+    return null;
+  }
+  elevationDragPlaneNormal.normalize();
+
+  elevationDragPlane.setFromNormalAndCoplanarPoint(
+    elevationDragPlaneNormal,
+    elevationDragHit.set(anchorX, 0, anchorZ)
+  );
+  if (
+    !elevationDragRaycaster.ray.intersectPlane(
+      elevationDragPlane,
+      elevationDragHit
+    )
+  ) {
+    return null;
+  }
+  return elevationDragHit.y;
+}
+
 interface UseTrackPreview3DInteractionsParams {
   beginInteraction: () => void;
   endInteraction: () => void;
@@ -61,9 +107,12 @@ export function useTrackPreview3DInteractions({
   updateShape,
 }: UseTrackPreview3DInteractionsParams) {
   const [elevationDrag, setElevationDrag] = useState<{
+    anchorX: number;
+    anchorZ: number;
     shapeId: string;
     idx: number;
     startClientY: number;
+    startPlaneY: number | null;
     startZ: number;
   } | null>(null);
   const [elevationPreviewPoints, setElevationPreviewPoints] = useState<
@@ -102,7 +151,9 @@ export function useTrackPreview3DInteractions({
   const rotationDragAnimationFrameRef = useRef<number | null>(null);
   const tiltDragAnimationFrameRef = useRef<number | null>(null);
   const ladderElevationDragAnimationFrameRef = useRef<number | null>(null);
-  const pendingClientYRef = useRef<number | null>(null);
+  const pendingElevationClientRef = useRef<{ x: number; y: number } | null>(
+    null
+  );
   const pendingRotationClientRef = useRef<{ x: number; y: number } | null>(
     null
   );
@@ -178,13 +229,30 @@ export function useTrackPreview3DInteractions({
       event.stopPropagation();
       const point = selectedPolyline?.points[index];
       if (!selectedPolyline || !point) return;
+      const camera = cameraRef.current;
+      const container = containerRef.current;
+      const rect = container?.getBoundingClientRect();
+      const startPlaneY =
+        camera && rect
+          ? getVerticalDragPlaneY(
+              event.nativeEvent.clientX,
+              event.nativeEvent.clientY,
+              rect,
+              camera,
+              point.x,
+              point.y
+            )
+          : null;
       if (!startSession()) return;
       setSelection([selectedPolyline.id]);
       setElevationPreviewPoints(selectedPolyline.points);
       setElevationDrag({
+        anchorX: point.x,
+        anchorZ: point.y,
         shapeId: selectedPolyline.id,
         idx: index,
         startClientY: event.nativeEvent.clientY,
+        startPlaneY,
         startZ: point.z ?? 0,
       });
     },
@@ -192,12 +260,29 @@ export function useTrackPreview3DInteractions({
   );
 
   const applyElevationDrag = useCallback(
-    (clientY: number) => {
+    (clientX: number, clientY: number) => {
       const drag = elevationDragRef.current;
       if (!drag) return;
       const shape = shapeById[drag.shapeId];
       if (!shape || shape.kind !== "polyline") return;
-      const deltaMeters = (drag.startClientY - clientY) * 0.035;
+      const camera = cameraRef.current;
+      const container = containerRef.current;
+      const rect = container?.getBoundingClientRect();
+      const planeY =
+        camera && rect && drag.startPlaneY !== null
+          ? getVerticalDragPlaneY(
+              clientX,
+              clientY,
+              rect,
+              camera,
+              drag.anchorX,
+              drag.anchorZ
+            )
+          : null;
+      const deltaMeters =
+        planeY !== null && drag.startPlaneY !== null
+          ? planeY - drag.startPlaneY
+          : (drag.startClientY - clientY) * 0.02;
       const nextZ = Math.max(0, +(drag.startZ + deltaMeters).toFixed(2));
       const currentPoint =
         elevationPreviewPointsRef.current?.[drag.idx] ?? shape.points[drag.idx];
@@ -245,12 +330,16 @@ export function useTrackPreview3DInteractions({
     };
 
     const handleMouseMove = (event: MouseEvent) => {
-      pendingClientYRef.current = event.clientY;
+      pendingElevationClientRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      };
       if (dragAnimationFrameRef.current !== null) return;
       dragAnimationFrameRef.current = window.requestAnimationFrame(() => {
         dragAnimationFrameRef.current = null;
-        if (pendingClientYRef.current !== null) {
-          applyElevationDrag(pendingClientYRef.current);
+        const client = pendingElevationClientRef.current;
+        if (client) {
+          applyElevationDrag(client.x, client.y);
         }
       });
     };
@@ -258,12 +347,16 @@ export function useTrackPreview3DInteractions({
     const handleTouchMove = (event: TouchEvent) => {
       if (!event.touches.length) return;
       event.preventDefault();
-      pendingClientYRef.current = event.touches[0].clientY;
+      pendingElevationClientRef.current = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+      };
       if (dragAnimationFrameRef.current !== null) return;
       dragAnimationFrameRef.current = window.requestAnimationFrame(() => {
         dragAnimationFrameRef.current = null;
-        if (pendingClientYRef.current !== null) {
-          applyElevationDrag(pendingClientYRef.current);
+        const client = pendingElevationClientRef.current;
+        if (client) {
+          applyElevationDrag(client.x, client.y);
         }
       });
     };
