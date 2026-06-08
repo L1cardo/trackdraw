@@ -6,6 +6,24 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+## [1.9.0]
+
+### More MultiGP obstacles
+
+TrackDraw now supports more official MultiGP obstacles: Corner Flags, Standard Ladder 5x5, Championship Ladder 7x6, and Topless Ladder 7x6. They use real dimensions and recognizable MultiGP visuals across the editor, 3D preview, exports, shared views, and flythroughs.
+
+### Cleaner 3D review
+
+MultiGP gates, flags, and ladders now feel closer to the real obstacles in 3D, with textured panels and cleaner placement behavior. Textured obstacles also load more smoothly because TrackDraw warms only the textures used by the current design. Selection, rotation, flag updates, and ladder elevation controls are more dependable around catalog obstacles.
+
+### Faster catalog changes
+
+Catalog type switching is easier after placement, including batch edits. You can change a set of gates, flags, or ladders without deleting and rebuilding them. The track items list is easier to scan too, with clearer names and filters for finding the elements you want to inspect or adjust.
+
+### Smoother route editing
+
+Path and waypoint selection is more reliable while editing, especially on mobile and when adjusting elevation in 3D. Route warnings in the 3D view now stay aligned with the visible track line, so warning segments match what you see on the course.
+
 ## [1.8.0]
 
 ### Official gate types
