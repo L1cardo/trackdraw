@@ -38,6 +38,7 @@ import {
   resolveArchDiveGateBannerTextureMapping,
   resolveLaunchGateBannerTextureMapping,
   resolvePanelFrameTextureMapping,
+  resolveDiveGateElevation,
 } from "@/lib/track/render3d-layout";
 import {
   getDiveGateVisualSpec,
@@ -1973,11 +1974,13 @@ function ArchDiveGate3D({
   shape,
   outerRef,
   visual,
+  elevationOverrideRef,
 }: {
   selected: boolean;
   shape: DiveGateShape;
   outerRef?: Ref<THREE.Group>;
   visual: ArchDiveGateVisualSpec;
+  elevationOverrideRef?: RefObject<number | null>;
 }) {
   const catalogId = getTrackElementCatalogIdentity(shape.meta)?.elementId;
   const yawRad = (-shape.rotation * Math.PI) / 180;
@@ -2127,140 +2130,193 @@ function ArchDiveGate3D({
 
   const layout = getMultiGpDiveGateArchLayout(shape);
 
+  const archGroupRef = useRef<THREE.Group>(null);
+  const setArchRefs = useCallback(
+    (node: THREE.Group | null) => assignGroupRef(outerRef, node),
+    [outerRef]
+  );
+  const legMeshesRef = useRef<Array<THREE.Mesh | null>>(
+    Array(layout.legPoints.length).fill(null)
+  );
+
+  useFrame(() => {
+    if (!archGroupRef.current) return;
+    const storedElev = resolveDiveGateElevation(shape.elevation, "arch");
+    const delta =
+      elevationOverrideRef?.current != null
+        ? elevationOverrideRef.current - storedElev
+        : 0;
+    archGroupRef.current.position.y = delta;
+    for (let i = 0; i < legMeshesRef.current.length; i++) {
+      const mesh = legMeshesRef.current[i];
+      if (!mesh) continue;
+      const liveTopY = Math.max(0, layout.legPoints[i].topY + delta);
+      mesh.visible = liveTopY > 0.02;
+      if (mesh.visible) {
+        mesh.position.y = liveTopY / 2;
+        mesh.scale.y = liveTopY;
+      }
+    }
+  });
+
   const sel = selected;
   const emissive = sel ? "#60a5fa" : frameColor;
   const emissiveIntensity = sel ? 0.55 : 0.08;
 
   return (
     <group
-      ref={outerRef}
+      ref={setArchRefs}
       position={[shape.x, 0, shape.y]}
       rotation={[0, yawRad, 0]}
     >
-      {layout.pipeSegments.map(({ end, start }, index) => (
-        <PipeBetween
-          key={`pipe-${index}`}
-          start={start}
-          end={end}
-          radius={pipeRadius}
-          color={frameColor}
-          emissive={emissive}
-          emissiveIntensity={emissiveIntensity}
-        />
-      ))}
-      {layout.couplerPoints.map(({ height, postH, x, z }, index) => {
-        if (height >= postH) return null;
-
-        return (
-          <mesh key={`coupler-${index}`} position={[x, height, z]} castShadow>
-            <cylinderGeometry
-              args={[tube * 0.75, tube * 0.75, tube * 1.8, 16]}
-            />
+      {layout.legPoints.map(({ x, z, topY: legTopY }, i) =>
+        legTopY > 0.02 ? (
+          <mesh
+            key={`leg-${i}`}
+            ref={(n) => {
+              legMeshesRef.current[i] = n;
+            }}
+            position={[x, legTopY / 2, z]}
+            scale={[1, legTopY, 1]}
+            castShadow
+          >
+            <cylinderGeometry args={[pipeRadius, pipeRadius, 1, 16]} />
             <meshStandardMaterial
-              color="#d6d9de"
-              emissive={sel ? "#60a5fa" : "#d6d9de"}
-              emissiveIntensity={sel ? 0.35 : 0.04}
-              roughness={0.54}
-              metalness={0.08}
+              color={frameColor}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+              roughness={0.48}
+              metalness={0.05}
             />
           </mesh>
-        );
-      })}
+        ) : null
+      )}
+      <group ref={archGroupRef}>
+        {layout.pipeSegments.map(({ end, start }, index) => (
+          <PipeBetween
+            key={`pipe-${index}`}
+            start={start}
+            end={end}
+            radius={pipeRadius}
+            color={frameColor}
+            emissive={emissive}
+            emissiveIntensity={emissiveIntensity}
+          />
+        ))}
+        {layout.couplerPoints.map(({ height, postH, x, z }, index) => {
+          if (height >= postH) return null;
 
-      <group
-        position={[0, layout.centerY, 0]}
-        rotation={[layout.tiltRad, 0, 0]}
-      >
-        <mesh
-          position={[-layout.halfOpening - layout.sidePanelW / 2, 0, 0]}
-          castShadow
-          receiveShadow
-        >
-          <planeGeometry args={[layout.sidePanelW, layout.openingH]} />
-          <meshStandardMaterial
-            color="#ffffff"
-            map={panelTextures.left.texture}
-            roughness={0.72}
-            metalness={0.01}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-        <mesh
-          position={[layout.halfOpening + layout.sidePanelW / 2, 0, 0]}
-          rotation={[0, 0, Math.PI]}
-          castShadow
-          receiveShadow
-        >
-          <planeGeometry args={[layout.sidePanelW, layout.openingH]} />
-          <meshStandardMaterial
-            color="#ffffff"
-            map={panelTextures.right.texture}
-            roughness={0.72}
-            metalness={0.01}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-        <mesh
-          position={[0, layout.openingH / 2 + layout.bannerH / 2, 0]}
-          castShadow
-          receiveShadow
-        >
-          <planeGeometry args={[layout.outerW, layout.bannerH]} />
-          <meshStandardMaterial
-            color="#ffffff"
-            map={panelTextures.top.texture}
-            roughness={0.68}
-            metalness={0.02}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-        <mesh
-          position={[0, -layout.openingH / 2 - layout.bannerH / 2, 0]}
-          castShadow
-          receiveShadow
-        >
-          <planeGeometry args={[layout.outerW, layout.bannerH]} />
-          <meshStandardMaterial
-            color="#ffffff"
-            map={panelTextures.bottom.texture}
-            roughness={0.68}
-            metalness={0.02}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
+          return (
+            <mesh key={`coupler-${index}`} position={[x, height, z]} castShadow>
+              <cylinderGeometry
+                args={[tube * 0.75, tube * 0.75, tube * 1.8, 16]}
+              />
+              <meshStandardMaterial
+                color="#d6d9de"
+                emissive={sel ? "#60a5fa" : "#d6d9de"}
+                emissiveIntensity={sel ? 0.35 : 0.04}
+                roughness={0.54}
+                metalness={0.08}
+              />
+            </mesh>
+          );
+        })}
 
-        <mesh position={[0, layout.halfOuterH, 0]} castShadow>
-          <boxGeometry args={[layout.outerW, tube, tube]} />
-          <meshStandardMaterial
-            color={frameColor}
-            emissive={emissive}
-            emissiveIntensity={emissiveIntensity}
-          />
-        </mesh>
-        <mesh position={[0, -layout.halfOuterH, 0]} castShadow>
-          <boxGeometry args={[layout.outerW, tube, tube]} />
-          <meshStandardMaterial
-            color={frameColor}
-            emissive={emissive}
-            emissiveIntensity={emissiveIntensity}
-          />
-        </mesh>
-        <mesh position={[-layout.halfOuterW, 0, 0]} castShadow>
-          <boxGeometry args={[tube, layout.outerH, tube]} />
-          <meshStandardMaterial
-            color={frameColor}
-            emissive={emissive}
-            emissiveIntensity={emissiveIntensity}
-          />
-        </mesh>
-        <mesh position={[layout.halfOuterW, 0, 0]} castShadow>
-          <boxGeometry args={[tube, layout.outerH, tube]} />
-          <meshStandardMaterial
-            color={frameColor}
-            emissive={emissive}
-            emissiveIntensity={emissiveIntensity}
-          />
-        </mesh>
+        <group
+          position={[0, layout.centerY, 0]}
+          rotation={[layout.tiltRad, 0, 0]}
+        >
+          <mesh
+            position={[-layout.halfOpening - layout.sidePanelW / 2, 0, 0]}
+            castShadow
+            receiveShadow
+          >
+            <planeGeometry args={[layout.sidePanelW, layout.openingH]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              map={panelTextures.left.texture}
+              roughness={0.72}
+              metalness={0.01}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          <mesh
+            position={[layout.halfOpening + layout.sidePanelW / 2, 0, 0]}
+            rotation={[0, 0, Math.PI]}
+            castShadow
+            receiveShadow
+          >
+            <planeGeometry args={[layout.sidePanelW, layout.openingH]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              map={panelTextures.right.texture}
+              roughness={0.72}
+              metalness={0.01}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          <mesh
+            position={[0, layout.openingH / 2 + layout.bannerH / 2, 0]}
+            castShadow
+            receiveShadow
+          >
+            <planeGeometry args={[layout.outerW, layout.bannerH]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              map={panelTextures.top.texture}
+              roughness={0.68}
+              metalness={0.02}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          <mesh
+            position={[0, -layout.openingH / 2 - layout.bannerH / 2, 0]}
+            castShadow
+            receiveShadow
+          >
+            <planeGeometry args={[layout.outerW, layout.bannerH]} />
+            <meshStandardMaterial
+              color="#ffffff"
+              map={panelTextures.bottom.texture}
+              roughness={0.68}
+              metalness={0.02}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+
+          <mesh position={[0, layout.halfOuterH, 0]} castShadow>
+            <boxGeometry args={[layout.outerW, tube, tube]} />
+            <meshStandardMaterial
+              color={frameColor}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+          <mesh position={[0, -layout.halfOuterH, 0]} castShadow>
+            <boxGeometry args={[layout.outerW, tube, tube]} />
+            <meshStandardMaterial
+              color={frameColor}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+          <mesh position={[-layout.halfOuterW, 0, 0]} castShadow>
+            <boxGeometry args={[tube, layout.outerH, tube]} />
+            <meshStandardMaterial
+              color={frameColor}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+          <mesh position={[layout.halfOuterW, 0, 0]} castShadow>
+            <boxGeometry args={[tube, layout.outerH, tube]} />
+            <meshStandardMaterial
+              color={frameColor}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+            />
+          </mesh>
+        </group>
       </group>
     </group>
   );
@@ -2271,11 +2327,13 @@ function LaunchGate3D({
   shape,
   outerRef,
   visual,
+  elevationOverrideRef,
 }: {
   selected: boolean;
   shape: DiveGateShape;
   outerRef?: Ref<THREE.Group>;
   visual: LaunchGateVisualSpec;
+  elevationOverrideRef?: RefObject<number | null>;
 }) {
   const catalogId = getTrackElementCatalogIdentity(shape.meta)?.elementId;
   const yawRad = (-shape.rotation * Math.PI) / 180;
@@ -2388,6 +2446,36 @@ function LaunchGate3D({
     [sideTexture, topTexture, visual.banner, overrideVersion, catalogId]
   );
   const layout = getMultiGpLaunchGateLayout(shape);
+
+  const launchGroupRef = useRef<THREE.Group>(null);
+  const setLaunchRefs = useCallback(
+    (node: THREE.Group | null) => assignGroupRef(outerRef, node),
+    [outerRef]
+  );
+  const legMeshesRef = useRef<Array<THREE.Mesh | null>>(
+    Array(layout.legPoints.length).fill(null)
+  );
+
+  useFrame(() => {
+    if (!launchGroupRef.current) return;
+    const storedElev = resolveDiveGateElevation(shape.elevation, "launch");
+    const delta =
+      elevationOverrideRef?.current != null
+        ? elevationOverrideRef.current - storedElev
+        : 0;
+    launchGroupRef.current.position.y = delta;
+    for (let i = 0; i < legMeshesRef.current.length; i++) {
+      const mesh = legMeshesRef.current[i];
+      if (!mesh) continue;
+      const liveTopY = Math.max(0, layout.legPoints[i].topY + delta);
+      mesh.visible = liveTopY > 0.02;
+      if (mesh.visible) {
+        mesh.position.y = liveTopY / 2;
+        mesh.scale.y = liveTopY;
+      }
+    }
+  });
+
   const sel = selected;
   const emissive = sel ? "#60a5fa" : frameColor;
   const emissiveIntensity = sel ? 0.55 : 0.08;
@@ -2469,61 +2557,85 @@ function LaunchGate3D({
 
   return (
     <group
-      ref={outerRef}
+      ref={setLaunchRefs}
       position={[shape.x, 0, shape.y]}
       rotation={[0, yawRad, 0]}
     >
-      {layout.pipeSegments.map(({ end, start }, index) => (
-        <PipeBetween
-          key={`pipe-${index}`}
-          start={start}
-          end={end}
-          radius={pipeRadius}
-          color={frameColor}
-          emissive={emissive}
-          emissiveIntensity={emissiveIntensity}
-        />
-      ))}
-      {layout.couplerPoints.map(({ height, postH, x, z }, index) => {
-        if (height >= postH) return null;
-
-        return (
-          <mesh key={`coupler-${index}`} position={[x, height, z]} castShadow>
-            <cylinderGeometry
-              args={[tube * 0.75, tube * 0.75, tube * 1.8, 16]}
-            />
+      {layout.legPoints.map(({ x, z, topY: legTopY }, i) =>
+        legTopY > 0.02 ? (
+          <mesh
+            key={`leg-${i}`}
+            ref={(n) => {
+              legMeshesRef.current[i] = n;
+            }}
+            position={[x, legTopY / 2, z]}
+            scale={[1, legTopY, 1]}
+            castShadow
+          >
+            <cylinderGeometry args={[pipeRadius, pipeRadius, 1, 16]} />
             <meshStandardMaterial
-              color="#d6d9de"
-              emissive={sel ? "#60a5fa" : "#d6d9de"}
-              emissiveIntensity={sel ? 0.35 : 0.04}
-              roughness={0.54}
-              metalness={0.08}
+              color={frameColor}
+              emissive={emissive}
+              emissiveIntensity={emissiveIntensity}
+              roughness={0.48}
+              metalness={0.05}
             />
           </mesh>
-        );
-      })}
+        ) : null
+      )}
+      <group ref={launchGroupRef}>
+        {layout.pipeSegments.map(({ end, start }, index) => (
+          <PipeBetween
+            key={`pipe-${index}`}
+            start={start}
+            end={end}
+            radius={pipeRadius}
+            color={frameColor}
+            emissive={emissive}
+            emissiveIntensity={emissiveIntensity}
+          />
+        ))}
+        {layout.couplerPoints.map(({ height, postH, x, z }, index) => {
+          if (height >= postH) return null;
 
-      <group position={[0, layout.topY - tube * 0.12, 0]}>
-        {banners.map(({ depth, panel, rotZ, width, x, z }, index) => {
           return (
-            <group
-              key={`banner-${index}`}
-              position={[x, 0, z]}
-              rotation={[Math.PI / 2, 0, rotZ]}
-            >
-              <mesh castShadow receiveShadow>
-                <planeGeometry args={[width, depth]} />
-                <meshStandardMaterial
-                  color="#ffffff"
-                  map={panel.texture}
-                  roughness={0.68}
-                  metalness={0.02}
-                  side={THREE.DoubleSide}
-                />
-              </mesh>
-            </group>
+            <mesh key={`coupler-${index}`} position={[x, height, z]} castShadow>
+              <cylinderGeometry
+                args={[tube * 0.75, tube * 0.75, tube * 1.8, 16]}
+              />
+              <meshStandardMaterial
+                color="#d6d9de"
+                emissive={sel ? "#60a5fa" : "#d6d9de"}
+                emissiveIntensity={sel ? 0.35 : 0.04}
+                roughness={0.54}
+                metalness={0.08}
+              />
+            </mesh>
           );
         })}
+
+        <group position={[0, layout.topY - tube * 0.12, 0]}>
+          {banners.map(({ depth, panel, rotZ, width, x, z }, index) => {
+            return (
+              <group
+                key={`banner-${index}`}
+                position={[x, 0, z]}
+                rotation={[Math.PI / 2, 0, rotZ]}
+              >
+                <mesh castShadow receiveShadow>
+                  <planeGeometry args={[width, depth]} />
+                  <meshStandardMaterial
+                    color="#ffffff"
+                    map={panel.texture}
+                    roughness={0.68}
+                    metalness={0.02}
+                    side={THREE.DoubleSide}
+                  />
+                </mesh>
+              </group>
+            );
+          })}
+        </group>
       </group>
     </group>
   );
@@ -2534,11 +2646,13 @@ function DiveGate3D({
   shape,
   outerRef,
   tiltDragRef,
+  elevationOverrideRef,
 }: {
   selected?: boolean;
   shape: DiveGateShape;
   outerRef?: Ref<THREE.Group>;
   tiltDragRef?: RefObject<number | null>;
+  elevationOverrideRef?: RefObject<number | null>;
 }) {
   const visual = getDiveGateVisualSpec(shape);
   const isArch = visual?.variant === "arch";
@@ -2562,19 +2676,24 @@ function DiveGate3D({
   const postMeshesRef = useRef<Array<THREE.Mesh | null>>([]);
 
   useFrame(() => {
-    if (isArch || isLaunch || !tiltDragRef || tiltDragRef.current === null) {
-      return;
-    }
-    const liveTiltRad = (tiltDragRef.current * Math.PI) / 180;
+    if (isArch || isLaunch) return;
+    const liveTilt = tiltDragRef?.current ?? null;
+    const liveElev = elevationOverrideRef?.current ?? null;
+    if (liveTilt === null && liveElev === null) return;
+
+    const activeCenterY = liveElev ?? centerY;
+    const activeTiltRad =
+      liveTilt !== null ? (liveTilt * Math.PI) / 180 : tiltRad;
 
     if (frameGroupRef.current) {
-      frameGroupRef.current.rotation.x = -Math.PI / 2 + liveTiltRad;
+      frameGroupRef.current.position.y = activeCenterY;
+      frameGroupRef.current.rotation.x = -Math.PI / 2 + activeTiltRad;
     }
 
-    const bY = centerY - (sz / 2) * Math.sin(liveTiltRad);
-    const tY = centerY + (sz / 2) * Math.sin(liveTiltRad);
-    const bZ = (sz / 2) * Math.cos(liveTiltRad);
-    const tZ = -(sz / 2) * Math.cos(liveTiltRad);
+    const bY = activeCenterY - (sz / 2) * Math.sin(activeTiltRad);
+    const tY = activeCenterY + (sz / 2) * Math.sin(activeTiltRad);
+    const bZ = (sz / 2) * Math.cos(activeTiltRad);
+    const tZ = -(sz / 2) * Math.cos(activeTiltRad);
     const corners = [
       { x: -sz / 2, py: bY, pz: bZ },
       { x: sz / 2, py: bY, pz: bZ },
@@ -2602,6 +2721,7 @@ function DiveGate3D({
         shape={shape}
         outerRef={outerRef}
         visual={visual as ArchDiveGateVisualSpec}
+        elevationOverrideRef={elevationOverrideRef}
       />
     );
   }
@@ -2613,6 +2733,7 @@ function DiveGate3D({
         shape={shape}
         outerRef={outerRef}
         visual={visual as LaunchGateVisualSpec}
+        elevationOverrideRef={elevationOverrideRef}
       />
     );
   }
@@ -2834,15 +2955,16 @@ function getPolylineTopY(shape: PolylineShape): number {
 function getDiveGateTopY(shape: DiveGateShape): number {
   const visual = getDiveGateVisualSpec(shape);
   if (visual?.variant === "arch") {
-    return getMultiGpDiveGateArchTopY();
+    return getMultiGpDiveGateArchTopY(shape.elevation);
   }
   if (visual?.variant === "launch") {
-    return getMultiGpLaunchGateTopY();
+    return getMultiGpLaunchGateTopY(shape.elevation);
   }
 
   const tiltRad = ((shape.tilt ?? 0) * Math.PI) / 180;
   return (
-    (shape.elevation ?? 3) + ((shape.width ?? 2.8) / 2) * Math.sin(tiltRad)
+    resolveDiveGateElevation(shape.elevation, "generic") +
+    ((shape.width ?? 2.8) / 2) * Math.sin(tiltRad)
   );
 }
 
@@ -2860,8 +2982,8 @@ function getShapeTopY(shape: Shape): number {
     case "flag":
       return Math.max((shape as FlagShape).poleHeight ?? 3.5, 0.5);
     case "cone": {
-      const r = (shape as ConeShape).radius ?? 0.2;
-      return Math.max(r * 1.15, 0.1);
+      const radius = (shape as ConeShape).radius ?? 0.2;
+      return Math.max(radius * 1.15, 0.1);
     }
     case "label":
       return (shape as LabelShape).project ? 0.1 : 2.8;
@@ -2870,20 +2992,18 @@ function getShapeTopY(shape: Shape): number {
     case "startfinish":
       return 0.1;
     case "ladder": {
-      const s = shape as LadderShape;
-      const ladderVisual = getLadderVisualSpec(s);
+      const ladderShape = shape as LadderShape;
+      const ladderVisual = getLadderVisualSpec(ladderShape);
       return Math.max(
         getLadderRenderedHeight(
-          s,
+          ladderShape,
           ladderVisual?.variant === "panel-frame" ? ladderVisual : null
-        ) + (s.elevation ?? 0),
+        ) + (ladderShape.elevation ?? 0),
         0.5
       );
     }
-    case "divegate": {
-      const s = shape as DiveGateShape;
-      return Math.max(getDiveGateTopY(s), 0.5);
-    }
+    case "divegate":
+      return Math.max(getDiveGateTopY(shape as DiveGateShape), 0.5);
     default:
       return 1.0;
   }
@@ -2999,6 +3119,7 @@ function Shape3D({
             selected={isSelected}
             outerRef={outerRef}
             tiltDragRef={tiltDragRef}
+            elevationOverrideRef={elevationOverrideRef}
           />
           {isSelected && <SelectionMarker3D shape={shape} />}
         </group>

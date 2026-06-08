@@ -24,6 +24,11 @@ import {
   buildLadderCatalogTypePatch,
 } from "@/lib/editor-tools";
 import {
+  getDiveGateElevationMax,
+  getDiveGateElevationMin,
+} from "@/lib/track/elements/visual";
+import { resolveDiveGateElevation } from "@/lib/track/render3d-layout";
+import {
   getShapeTimingMarker,
   getTimingMarkerMeta,
   isTimingMarkerShape,
@@ -191,6 +196,13 @@ export function SingleInspectorView({
     selectedDiveGateShape &&
     catalogEntry?.kind === "divegate" &&
     catalogEntry.editable?.dimensions === false;
+  const fixedDiveGateElevationVariant =
+    selectedDiveGateShape &&
+    catalogEntry?.kind === "divegate" &&
+    (catalogEntry.visual?.variant === "arch" ||
+      catalogEntry.visual?.variant === "launch")
+      ? catalogEntry.visual.variant
+      : "generic";
 
   const hasFixedCatalogColor =
     catalogIdentity !== null && catalogEntry?.editable?.color === false;
@@ -913,6 +925,22 @@ export function SingleInspectorView({
                   />
                 </Row>
               </>
+            )}
+            {shape.kind === "divegate" && hasFixedDiveGateDimensions && (
+              <Row label={`Elevation (${unitLabel})`}>
+                <MeasurementNum
+                  valueMeters={resolveDiveGateElevation(
+                    shape.elevation,
+                    fixedDiveGateElevationVariant
+                  )}
+                  unitSystem={unitSystem}
+                  onChange={(value) =>
+                    updateShape(shape.id, { elevation: value })
+                  }
+                  minMeters={getDiveGateElevationMin(shape)}
+                  maxMeters={getDiveGateElevationMax(shape) ?? undefined}
+                />
+              </Row>
             )}
           </Section>
 
