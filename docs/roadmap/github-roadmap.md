@@ -22,34 +22,18 @@ Labels used below:
 
 ## Current Priority
 
-The completed release-sized work is archived below. The next TrackDraw priority is race-day workflow depth, editor reliability follow-up, focused 3D item controls, generated flightpath assistance, multilingual-readiness for international users, and account-backed project lifecycle depth beyond the shipped conflict/retry baseline.
+The completed release-sized work is archived below. The next TrackDraw priority is race-day workflow depth, editor reliability follow-up, remaining focused 3D item controls, generated flightpath assistance, multilingual-readiness for international users, and account-backed project lifecycle depth beyond the shipped conflict/retry baseline.
 
 ## Follow-up
 
-- [x] MultiGP obstacle catalog expansion (`No account required`)
-      Extended the catalog with official MultiGP flags and ladders. Users can place and identify standard competition obstacles with the same catalog-backed identity, texture-backed visual rendering, inspector treatment, and in-place type switching already in place for gates.
-  - [x] MultiGP flag and marker entries
-        Added the MultiGP Corner Flag (10 ft feather flag) with realistic 3D rendering, catalog identity, inspector type switching, and an official source link.
-  - [x] MultiGP ladder and other obstacle entries
-        Added MultiGP Standard Ladder 5x5, Championship Ladder 7x6, and Topless Ladder 7x6 with panel-frame 3D rendering matching the real obstacles, and the same catalog pipeline as gates and flags.
-  - [x] MultiGP Topless Ladder 7x6
-        Added as a ladder variant using the same catalog pipeline as the existing ladder entries. The lower two sections keep top/banner panels; the upper section omits the top/banner panel and top PVC frame.
-  - [ ] MultiGP Dive Gate 7x6
+- [ ] MultiGP Dive Gate 7x6 (`No account required`)
         Add as a catalog-backed gate variant with official dimensions and a 3D rendering that reflects the low-profile dive orientation. Shares the gate shape kind and inspector pipeline.
-  - [ ] MultiGP Launch Gate 7x6
+
+- [ ] MultiGP Launch Gate 7x6 (`No account required`)
         Add as a catalog-backed gate variant used at the race start, with official dimensions and appropriate 3D rendering. Shares the gate shape kind and inspector pipeline.
-  - [ ] MultiGP Double Gate Tower 5x5 and 7x6
+
+- [ ] MultiGP Double Gate Tower 5x5 and 7x6 (`No account required`)
         New shape kind with its own 2D representation, 3D rendering, catalog entries, and inspector pipeline. Race-line behavior is gate-like (fly through); physical structure is a two-frame tower.
-
-- [x] Flag real-time rotation in 3D (`No account required`)
-      Flags now rotate visually in real-time during 3D drag, matching gates and ladders. The fix was passing `outerRef` from `Shape3D` through `Flag3D` and `CornerMarkerFlag3D` to their root groups, so the rotation drag handler can mutate the group transform directly each animation frame.
-
-- [x] Track items list improvements (`No account required`)
-      The layout track items list now shows catalog names and supports filtering by type. The list is intentionally designed as a foundation for the upcoming auto path generator: the order of race obstacles in the list (backed by `shapeOrder`) will define the intended race sequence, which the path generator can use to connect them automatically. Drag-to-reorder is not yet exposed in the UI — it will be added as part of the path generation feature once reordering has an immediate, visible effect.
-  - [x] Catalog-aware item names
-        The primary label now resolves to the user custom name → catalog entry name (e.g. "MultiGP Standard Gate 5x5") → generic kind label. The kind label stays visible as a secondary subtitle. Filter search also matches catalog names.
-  - [x] Obstacle / all filter pills
-        Two pills — "All" and "Obstacles" — let users focus the list on race obstacles (gates, ladders, dive gates) or see everything. Non-obstacle elements (flags, cones, labels) remain visible under "All" but are not the primary focus.
 
 - [ ] Focused 3D item controls (`No account required`)
       Add direct 3D controls for common obstacle edits where they are faster than inspector-only editing and still respect lock state, undo/redo, and mobile constraints.
@@ -173,6 +157,37 @@ The completed release-sized work is archived below. The next TrackDraw priority 
         Decide whether a wrapper should load the hosted app or require its own runtime.
   - [ ] Platform recommendation
         Recommend web-first, Electron, Capacitor, or no wrapper for now.
+
+## v1.9.0 Archive
+
+<details>
+<summary>Completed release work archived with v1.9.0</summary>
+
+- [x] MultiGP obstacle catalog expansion (`No account required`)
+      Extended the catalog with official MultiGP Corner Flags, Standard Ladder 5x5, Championship Ladder 7x6, and Topless Ladder 7x6. These entries use the same catalog-backed identity, source references, inspector treatment, in-place type switching, and export/share compatibility as the existing official gates.
+  - [x] MultiGP Corner Flag
+        Added a 10 ft feather flag with realistic textured 3D rendering, catalog identity, inspector type switching, and an official source link.
+  - [x] MultiGP ladder variants
+        Added Standard Ladder 5x5, Championship Ladder 7x6, and Topless Ladder 7x6 with panel-frame 3D rendering that matches the real obstacles.
+
+- [x] 3D obstacle realism and loading (`No account required`)
+      Improved catalog-backed 3D rendering with texture-backed panels and more dependable direct manipulation around official obstacles. The 3D view now warms only the textures used by the current design so textured obstacles load more smoothly without delaying lighter scene details.
+  - [x] Texture-backed MultiGP obstacles
+        Render catalog-backed gates, ladders, and corner flags with panel artwork and shared layout helpers in the live 3D preview and flythrough export.
+  - [x] Focused 3D reliability fixes
+        Restored real-time flag rotation updates and improved selection, rotation, and ladder elevation behavior around catalog obstacles.
+
+- [x] Catalog editing and track item list improvements (`No account required`)
+      Catalog type switching now works better after placement, including batch edits. The track items list shows catalog-aware names and supports filters that make placed elements easier to find and inspect.
+  - [x] Batch catalog type editing
+        Let users change sets of gates, flags, or ladders without deleting and rebuilding them.
+  - [x] Catalog-aware item names and filters
+        Show clearer item names and let users focus the list on race obstacles or all elements.
+
+- [x] Path and route reliability follow-up (`No account required`)
+      Improved waypoint and path selection reliability, especially on mobile and when adjusting route elevation in 3D. Route warning geometry now shares the same 3D height offset as the visible route line and preview points.
+
+</details>
 
 ## v1.8.0 Archive
 

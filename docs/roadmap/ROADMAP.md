@@ -21,8 +21,8 @@ The most useful next product move is deepening the race-day workflow, keeping th
 - Race director page with pilot line, timing/start box placement, and ops notes
 - Usability and reliability pass focused on recovery states, mobile ergonomics, editor interactions, exports, sharing, and larger layouts
 - Path editing UX improvements for smoother curves and a more natural drawing experience
-- Catalog-backed official track elements, including MultiGP ladder variants, Dive Gate, Launch Gate, and a new Double Gate Tower shape kind
-- More realistic 3D review and focused 3D item controls
+- Catalog-backed official track elements beyond the shipped MultiGP gate, flag, and ladder set, including Dive Gate, Launch Gate, and a new Double Gate Tower shape kind
+- Focused 3D item controls where direct manipulation is safer and faster than inspector-only editing
 - Account-backed custom banner texture support for official-size gates, ladders, and flags, so clubs can preview their own printed banners on MultiGP-sized hardware
 - Generated flightpath research as a separate route-authoring assist
 - Editor workspace ergonomics for larger layouts, including collapsible side panels where they preserve selection context
@@ -690,6 +690,52 @@ Likely account-backed follow-up:
 - Curated gallery collections
 - Shared venue or club records, including shared inventory profiles
 - Identity-aware comments and review threads
+
+## v1.9.0 Archive
+
+<details>
+<summary>Completed release work archived with v1.9.0</summary>
+
+### MultiGP Catalog Expansion (`No account required`)
+
+TrackDraw now supports a broader official MultiGP obstacle set, including Corner Flags, Standard Ladder 5x5, Championship Ladder 7x6, and Topless Ladder 7x6. These entries use catalog-backed identity, real dimensions, source references, placement/type switching, and recognizable visuals across the editor, 3D preview, exports, shared views, and flythroughs.
+
+### 3D Review And Texture Handling (`No account required`)
+
+Catalog-backed MultiGP gates, flags, and ladders now render with more realistic textured panels and cleaner 3D behavior. The 3D view warms only the textures used by the current design, and direct controls around catalog obstacles are more dependable for selection, rotation, flag updates, and ladder elevation.
+
+### Catalog Editing And Track Items (`No account required`)
+
+Catalog type switching now works better after placement, including batch edits, so users can change sets of gates, flags, or ladders without rebuilding them. The track items list also has clearer catalog-aware names and filters to make placed elements easier to find and inspect.
+
+### Route Editing Reliability (`No account required`)
+
+Path and waypoint selection is more reliable while editing, especially on mobile and when adjusting elevation in 3D. Route warning geometry now stays aligned with the visible 3D track line by sharing the same height offset as the main route tube and preview points.
+
+</details>
+
+## v1.8.0 Archive
+
+<details>
+<summary>Completed release work archived with v1.8.0</summary>
+
+### Official Gate Catalog (`No account required`)
+
+TrackDraw introduced a catalog-backed element model for official gate types, including MultiGP-style Standard Gate 5x5 and Championship Gate 7x6. These entries include official names, dimensions, source references, placement selection, inspector identity, in-place type switching, and catalog-driven rendering across editor, 3D, share, and export paths.
+
+### Regional Measurement Units (`No account required`)
+
+TrackDraw added Metric and Imperial display/input support while keeping project geometry stored in meters. Browser locale can choose the first-run default, users can override it, and editor labels, inspectors, gallery metadata, share views, and exports now present measurements in the selected unit system.
+
+### 3D Preview Readability (`No account required`)
+
+The 3D preview became clearer and more consistent with a shared scene theme, stronger lighting and shadows, cleaner large-track rendering, and less visual noise from route-line shadows.
+
+### Workspace Ergonomics (`No account required`)
+
+Desktop users can collapse the inspector into a narrow rail to reclaim canvas space while preserving selection context. Local workspace preferences keep repeated editing sessions closer to the user's chosen layout.
+
+</details>
 
 ## v1.7.0 Archive
 
