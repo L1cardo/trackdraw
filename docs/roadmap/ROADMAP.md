@@ -272,13 +272,14 @@ Feature tracks:
 
 - 3D preview realism and lighting: improve scene readability with sun/directional lighting, shadows, contrast, and more realistic gate/flag presentation before adding heavy asset workflows
 - Catalog-aware element rendering: use catalog visual metadata such as panel sizes, PVC frame placement, and texture-backed artwork to render official elements consistently across 3D preview and export paths while keeping generic elements lightweight
-- Focused 3D item controls: add direct controls for common edits such as elevation, rotation, scaling, and orientation only where undo/redo, lock state, and mobile behavior remain safe
+- Focused 3D item controls: add direct controls for common edits such as elevation, rotation, scaling, and orientation only where undo/redo, lock state, and mobile behavior remain safe; move/rotate gizmo work is tracked in [3D Transform Controls PVA](../pva/3d-transform-controls-pva.md)
 
 Current shipped foundation:
 
 - Catalog-backed MultiGP-style gates, ladders, and corner flags now carry visual metadata for panel sizes, PVC frame placement, and texture-backed artwork; the live 3D preview and flythrough export consume shared layout helpers and extracted runtime textures while generic TrackDraw elements stay lightweight
 - MultiGP Dive Gate 7x6 and Launch Gate 7x6 are now catalog-backed with correct 3D arch and box-frame rendering respectively; banner panels cast and receive shadows correctly and texture orientations are accurate across all four panels
 - All MultiGP obstacle texture orientations (standard gate, championship gate, standard ladder, championship ladder, topless ladder, launch gate) are now correct and verified; the `ArchDiveGateVisualSpec` banner placement API mirrors the launch gate pattern so dive gate textures are fully configurable
+- Selected editable towers can be lifted directly in the 3D preview within their bounded elevation range; fixed-dimension catalog towers remain inspector- and catalog-protected
 
 Important boundary:
 

@@ -6,6 +6,24 @@ type SnapPoint = { x: number; y: number };
 const ROUTE_WAYPOINT_SNAP_RADIUS_RATIO = 0.55;
 const ROUTE_WAYPOINT_SNAP_RADIUS_MAX_METERS = 0.65;
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isFiniteSnapPoint(point: { x?: unknown; y?: unknown } | null) {
+  return Boolean(point && isFiniteNumber(point.x) && isFiniteNumber(point.y));
+}
+
+function sanitizeSnapPoint(point: { x?: unknown; y?: unknown }): {
+  x: number;
+  y: number;
+} {
+  return {
+    x: isFiniteNumber(point.x) ? point.x : 0,
+    y: isFiniteNumber(point.y) ? point.y : 0,
+  };
+}
+
 interface FindNearestSnapCandidateOptions {
   candidates: Shape[];
   excludeIds?: Iterable<string>;
@@ -39,6 +57,7 @@ function findNearestSnapCandidate({
 
   for (const candidate of candidates) {
     if (excludeIdSet?.has(candidate.id)) continue;
+    if (!isFiniteSnapPoint(candidate)) continue;
     const dist = Math.hypot(candidate.x - pos.x, candidate.y - pos.y);
     if (dist < minDist) {
       minDist = dist;
@@ -54,6 +73,13 @@ function projectPointOntoSegment(
   start: SnapPoint,
   end: SnapPoint
 ) {
+  if (
+    !isFiniteSnapPoint(point) ||
+    !isFiniteSnapPoint(start) ||
+    !isFiniteSnapPoint(end)
+  ) {
+    return null;
+  }
   const dx = end.x - start.x;
   const dy = end.y - start.y;
   const lengthSquared = dx * dx + dy * dy;
@@ -111,7 +137,7 @@ function findNearestRouteSnapPoint({
         routePoints[index - 1],
         routePoints[index]
       );
-      if (projection.distance < minDist) {
+      if (projection && projection.distance < minDist) {
         minDist = projection.distance;
         nearest = projection.point;
       }
@@ -147,6 +173,7 @@ function findNearestRouteWaypointCandidate({
     if (excludeIdSet?.has(route.id)) continue;
 
     for (const [index, point] of route.points.entries()) {
+      if (!isFiniteSnapPoint(point)) continue;
       const dist = Math.hypot(point.x - pos.x, point.y - pos.y);
       if (dist < minDist) {
         minDist = dist;
@@ -176,6 +203,7 @@ function resolveAxisAlignmentSnap({
 
   for (const candidate of candidates) {
     if (excludeIdSet?.has(candidate.id)) continue;
+    if (!isFiniteSnapPoint(candidate)) continue;
 
     const dx = Math.abs(candidate.x - pos.x);
     if (dx < bestXDistance) {
@@ -234,6 +262,10 @@ export function resolveSnapPosition({
   routeCandidates,
   excludeIds,
 }: ResolveSnapPositionOptions): { x: number; y: number } {
+  if (!isFiniteSnapPoint(pos)) {
+    return sanitizeSnapPoint(pos);
+  }
+
   if (snapToShapes) {
     const shapeSnap = findNearestSnapPoint({
       candidates,
