@@ -6,6 +6,24 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+## [1.10.0]
+
+### MultiGP Dive Gate and Launch Gate
+
+TrackDraw now supports the MultiGP Dive Gate 7x6 and Launch Gate 7x6. Both obstacles use real dimensions, textured panels, and correct proportions in the editor, 3D preview and exports. Existing designs with a legacy dive gate size are migrated automatically. Red color variants are also available for standard MultiGP gate types.
+
+### Improved 3D scene
+
+The 3D view now shows a gradient sky, giving the scene more depth and a cleaner backdrop. Lighting is also improved, with better consistency across the track and no fog artifacts in dark or light export themes. Towers can now be adjusted for elevation in 3D, matching the same inspector controls already available for other obstacles. Tower and ladder rendering is also more refined, with better proportions and placement behavior.
+
+### Smoother path drawing
+
+Curve smoothing in path drawing mode is more visible and predictable. Drawing interactions feel more responsive, with better handling of drag start, curve point placement, and visual feedback while sketching a new path. Elevation controls in the 3D view are hidden for locked paths to avoid confusion.
+
+### Corner Flag improvements
+
+MultiGP Corner Flags now render correctly on both sides in 3D, with double-sided textures applied across all color variants.
+
 ## [1.9.0]
 
 ### More MultiGP obstacles

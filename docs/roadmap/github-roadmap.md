@@ -26,15 +26,6 @@ The completed release-sized work is archived below. The next TrackDraw priority 
 
 ## Follow-up
 
-- [x] MultiGP Dive Gate 7x6 (`No account required`)
-      Catalog-backed gate variant with official 7×6 ft dimensions and a 3D arch rendering. Shares the gate shape kind and inspector pipeline. Arch panels now cast and receive shadows correctly, and texture placement is fully configurable via the `ArchDiveGateVisualSpec` banner placement API.
-
-- [x] MultiGP Launch Gate 7x6 (`No account required`)
-      Catalog-backed gate variant with official 7×6 ft dimensions and a 3D box-frame rendering with four configurable banner panels. Shares the gate shape kind and inspector pipeline. Banner panels now cast and receive shadows correctly with correct texture orientations.
-
-- [x] MultiGP Double Gate Tower 5x5 and 7x6 (`No account required`)
-      Catalog-backed tower variants now cover MultiGP Tower and Double Gate Tower 5x5 and 7x6 sizes with 2D placement, 3D rendering, texture placement, inspector support, and flythrough coverage.
-
 - [ ] Focused 3D item controls (`No account required`)
       Add direct 3D controls for common obstacle edits where they are faster than inspector-only editing and still respect lock state, undo/redo, and mobile constraints.
   - [x] Editable tower elevation handle
@@ -63,7 +54,7 @@ The completed release-sized work is archived below. The next TrackDraw priority 
   - [ ] I18n architecture and text inventory
         Audit hard-coded UI, export, share, legal-adjacent, dashboard, and error/recovery copy so translatable product text can move behind a stable message catalog without weakening type safety.
   - [ ] Language detection and override
-        Use browser language as an initial default when no explicit language preference exists, but keep language selection manually overrideable and independent from measurement units.
+        Use browser language as an initial default when no explicit language preference exists, but keep language selection manually overridable and independent from measurement units.
   - [ ] First language rollout
         Choose the first supported languages from actual user demand and translation-maintenance capacity, with English as the stable fallback for incomplete translations.
   - [ ] Translation QA boundary
@@ -71,7 +62,7 @@ The completed release-sized work is archived below. The next TrackDraw priority 
 
 ## Later Product Follow-up
 
-- [ ] Velocidrone experimental export stabilization (`Lower priority`, `No account required`)
+- [ ] VelociDrone experimental export stabilization (`Lower priority`, `No account required`)
       Keep this parked until there is appetite to validate more real layouts and tighten prefab mapping/orientation edge cases.
 
 - [ ] Share version history (`Lower priority`, `Account-backed`)
@@ -159,6 +150,40 @@ The completed release-sized work is archived below. The next TrackDraw priority 
         Decide whether a wrapper should load the hosted app or require its own runtime.
   - [ ] Platform recommendation
         Recommend web-first, Electron, Capacitor, or no wrapper for now.
+
+## v1.10.0 Archive
+
+<details>
+<summary>Completed release work archived with v1.10.0</summary>
+
+- [x] MultiGP Dive Gate 7x6 (`No account required`)
+      Catalog-backed gate variant with official 7×6 ft dimensions and a 3D arch rendering. Shares the gate shape kind and inspector pipeline. Arch panels cast and receive shadows correctly, and texture placement is fully configurable via the `ArchDiveGateVisualSpec` banner placement API.
+
+- [x] MultiGP Launch Gate 7x6 (`No account required`)
+      Catalog-backed gate variant with official 7×6 ft dimensions and a 3D box-frame rendering with four configurable banner panels. Banner panels cast and receive shadows correctly with accurate texture orientations.
+
+- [x] MultiGP Double Gate Tower 5x5 and 7x6 (`No account required`)
+      Catalog-backed tower variants covering MultiGP Tower and Double Gate Tower 5x5 and 7x6 sizes with 2D placement, 3D rendering, texture placement, inspector support, and flythrough coverage.
+
+- [x] 3D scene improvements (`No account required`)
+      Added a gradient sky for more depth and a cleaner backdrop. Improved directional lighting consistency across track layouts. Eliminated fog artifacts in dark and light export themes. Tower and ladder 3D rendering is more refined with better proportions and placement behavior.
+
+- [x] MultiGP Corner Flag double-sided textures (`No account required`)
+      Corner Flag feather banners now render correctly on both sides in 3D, with double-sided textures applied across all color variants.
+
+- [x] Red variant textures for MultiGP gates (`No account required`)
+      Added red color variants for standard and championship MultiGP gate types so clubs can represent their own gate artwork in the 3D preview and exports.
+
+- [x] Tower elevation handle (`No account required`)
+      Selected custom towers can now be lifted directly in the 3D view with live preview, undo/redo, lock-state, and mobile drag behavior. Fixed-dimension catalog towers remain protected.
+
+- [x] Path drawing interaction improvements (`No account required`)
+      Replaced the straight rubber-band preview with a live Catmull-Rom curve preview, added a persistent start-point ring during long-form drawing, and tightened the desktop minimum waypoint gap to reduce accidental duplicate placements.
+
+- [x] Automatic curve smoothing (`No account required`)
+      Catmull-Rom splines (chord-length parameterized) are now the sole rendering path for committed polylines. The drawing overlay also uses the smooth preview exclusively, making the curve shape visible from the first waypoint.
+
+</details>
 
 ## v1.9.0 Archive
 

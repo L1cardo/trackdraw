@@ -258,35 +258,6 @@ Next catalog slices:
 
 - Double Gate Tower 5x5 and 7x6: introduce as a new shape kind with its own 2D representation, 3D rendering, catalog entries, and inspector pipeline; race-line behavior is gate-like (fly through) while the physical structure resembles a two-frame tower
 
-#### 3D Preview And Direct Manipulation
-
-TrackDraw should improve 3D review and focused 3D editing as separate editor capabilities, not as part of the track element catalog.
-
-Why:
-
-- 3D review can become more useful with better lighting, contrast, sun/directional-light treatment, shadows, and more realistic gates/flags
-- Catalog metadata can tell 3D rendering which official object was placed, but the visual fidelity work itself belongs here rather than in the catalog model
-- Direct 3D controls can speed up selected item edits when they stay narrow and respect lock state, undo/redo, and mobile constraints
-
-Feature tracks:
-
-- 3D preview realism and lighting: improve scene readability with sun/directional lighting, shadows, contrast, and more realistic gate/flag presentation before adding heavy asset workflows
-- Catalog-aware element rendering: use catalog visual metadata such as panel sizes, PVC frame placement, and texture-backed artwork to render official elements consistently across 3D preview and export paths while keeping generic elements lightweight
-- Focused 3D item controls: add direct controls for common edits such as elevation, rotation, scaling, and orientation only where undo/redo, lock state, and mobile behavior remain safe; move/rotate gizmo work is tracked in [3D Transform Controls PVA](../pva/3d-transform-controls-pva.md)
-
-Current shipped foundation:
-
-- Catalog-backed MultiGP-style gates, ladders, and corner flags now carry visual metadata for panel sizes, PVC frame placement, and texture-backed artwork; the live 3D preview and flythrough export consume shared layout helpers and extracted runtime textures while generic TrackDraw elements stay lightweight
-- MultiGP Dive Gate 7x6 and Launch Gate 7x6 are now catalog-backed with correct 3D arch and box-frame rendering respectively; banner panels cast and receive shadows correctly and texture orientations are accurate across all four panels
-- All MultiGP obstacle texture orientations (standard gate, championship gate, standard ladder, championship ladder, topless ladder, launch gate) are now correct and verified; the `ArchDiveGateVisualSpec` banner placement API mirrors the launch gate pattern so dive gate textures are fully configurable
-- Selected editable towers can be lifted directly in the 3D preview within their bounded elevation range; fixed-dimension catalog towers remain inspector- and catalog-protected
-
-Important boundary:
-
-- Do not make 3D controls broad enough to destabilize the existing 2D-first editor
-- Do not bury 3D preview or direct manipulation work under the element catalog; they should remain standalone editor features
-- Do not duplicate catalog source, dimension, or visual decisions in renderers; consume catalog visual metadata and shared helpers instead
-
 #### Generated Flightpath Assistance
 
 TrackDraw should research generated flightpaths as route-authoring assistance, separate from the element catalog and separate from 3D preview rendering.
@@ -307,30 +278,6 @@ Important boundary:
 - Do not treat generated flightpaths as authoritative until they are validated against real layouts
 - Do not replace explicit race-line authoring; generated routes should remain assistive and editable
 - Do not bury generated flightpath work under the element catalog or 3D preview work; it should remain a standalone route-authoring feature
-
-#### Path Editing UX
-
-TrackDraw should make drawing and adjusting a path feel more natural, especially for curved layouts where the current waypoint model creates unwanted sharp corners or requires too many waypoints to get a smooth result.
-
-Why:
-
-- Placing waypoints one by one to approximate a curve is low-signal work: the user is fighting the tool to express a shape rather than focusing on the layout itself
-- Sharp corners between segments are a common complaint that forces extra waypoints as a workaround, which bloats the route and makes later edits harder
-- Smoother automatic curve fitting would reduce the number of waypoints needed for a clean corner and make the path easier to adjust after the fact
-- Giving users direct control over curve strength at individual waypoints is a lower-risk first step that works within the existing waypoint model
-
-Focus:
-
-- Improve the path drawing interaction so placing and adjusting waypoints feels more deliberate and less error-prone, especially on touch and trackpad
-- Evaluate automatic curve smoothing options such as Catmull-Rom splines or chord-length parameterization that produce smoother curves from the same waypoints without requiring manual handle editing
-- If automatic smoothing is not sufficient or introduces regressions on existing paths, evaluate per-waypoint curve strength control; only proceed if there is an interaction model that works comfortably on both desktop and mobile — direct canvas handles are likely too fiddly on touch, so any approach should first be validated against an inspector- or gesture-based alternative
-- Ensure any smoothing change remains backwards-compatible with saved project geometry and does not silently deform existing paths on re-open
-
-Important boundary:
-
-- Do not change the underlying waypoint data model unless a migration path for saved projects is in place
-- Do not introduce full vector-editor-style bezier handles as the default interaction; they should be optional or automatic, not the primary drawing mode
-- Keep the interaction consistent between desktop pointer and mobile touch so improvements do not regress venue-side editing
 
 #### Editor Workspace Ergonomics
 
@@ -691,6 +638,21 @@ Likely account-backed follow-up:
 - Curated gallery collections
 - Shared venue or club records, including shared inventory profiles
 - Identity-aware comments and review threads
+
+## v1.10.0 Archive
+
+<details>
+<summary>Completed release work archived with v1.10.0</summary>
+
+### 3D Preview And Direct Manipulation (`No account required`)
+
+The 3D scene now has a gradient sky and improved lighting, with better consistency across track layouts and no fog artifacts in dark or light export themes. Catalog-backed MultiGP gates, ladders, corner flags, dive gates, and launch gates render with correct panel dimensions, accurate texture orientations, and double-sided materials. Red color variants are available for standard and championship gate types. Tower elevation can now be adjusted directly in the 3D preview within a bounded elevation range. Tower and ladder rendering is more refined, with better proportions and placement behavior.
+
+### Path Editing UX (`No account required`)
+
+Curve smoothing in path drawing mode is now more visible and predictable. Drawing interactions are more responsive, with improved handling of drag start, curve point placement, and visual feedback while sketching a path. These improvements are backwards-compatible with saved project geometry.
+
+</details>
 
 ## v1.9.0 Archive
 
