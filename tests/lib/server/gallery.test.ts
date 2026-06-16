@@ -142,18 +142,20 @@ describe("gallery server helpers", () => {
   });
 
   it("deletes the R2 preview when a gallery entry is deleted", async () => {
-    const deleteStatement = createStatement({
+    const previewStatement = createStatement({
       first: { gallery_preview_image: "gallery/previews/entry-1.webp" },
     });
-    installStatements([deleteStatement]);
+    const deleteStatement = createStatement();
+    installStatements([previewStatement, deleteStatement]);
 
     await deleteGalleryEntry("share-1");
 
+    expect(previewStatement.sql).toContain("select gallery_preview_image");
+    expect(previewStatement.bind).toHaveBeenCalledWith("share-1");
     expect(mocks.deleteGalleryPreviewImage).toHaveBeenCalledWith(
       "gallery/previews/entry-1.webp"
     );
     expect(deleteStatement.sql).toContain("delete from gallery_entries");
-    expect(deleteStatement.sql).toContain("returning gallery_preview_image");
     expect(deleteStatement.bind).toHaveBeenCalledWith("share-1");
   });
 

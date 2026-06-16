@@ -420,20 +420,31 @@ export async function moveGalleryEntryToUnlisted(shareToken: string) {
 
 export async function deleteGalleryEntry(shareToken: string) {
   const db = await getDatabase();
-  const deleted = await db
+  const row = await db
     .prepare(
       `
-        delete from gallery_entries
+        select gallery_preview_image
+        from gallery_entries
         where share_token = ?
-        returning gallery_preview_image
+        limit 1
       `
     )
     .bind(shareToken)
     .first<{ gallery_preview_image: string | null }>();
 
-  if (deleted?.gallery_preview_image) {
-    await deleteGalleryPreviewImage(deleted.gallery_preview_image);
+  if (row?.gallery_preview_image) {
+    await deleteGalleryPreviewImage(row.gallery_preview_image);
   }
+
+  await db
+    .prepare(
+      `
+        delete from gallery_entries
+        where share_token = ?
+      `
+    )
+    .bind(shareToken)
+    .run();
 }
 
 export async function moveGalleryEntryToListed(shareToken: string) {
