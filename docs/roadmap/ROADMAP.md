@@ -20,10 +20,11 @@ The most useful next product move is deepening the race-day workflow, keeping th
 
 - Race director page with pilot line, timing/start box placement, and ops notes
 - Usability and reliability pass focused on recovery states, mobile ergonomics, editor interactions, exports, sharing, and larger layouts
-- Path editing UX improvements for smoother curves and a more natural drawing experience
-- Catalog-backed official track elements beyond the shipped MultiGP gate, flag, ladder, dive gate, launch gate, and tower set
+- Path editing UX improvements for smoother curves and a more natural drawing experience, including research into how powerloops can be represented in the route line
+- Catalog-backed official track elements beyond the shipped MultiGP gate, flag, ladder, dive gate, launch gate, and tower set, including a new barrier category covering hurdles, banners, fencing, and nets
 - Focused 3D item controls where direct manipulation is safer and faster than inspector-only editing
 - Account-backed custom banner texture support for official-size gates, ladders, and flags, so clubs can preview their own printed banners on MultiGP-sized hardware
+- User-defined layout presets that replace the current hard-coded list with a local-first and account-backed preset library built from canvas selections
 - Generated flightpath research as a separate route-authoring assist
 - Editor workspace ergonomics for larger layouts, including collapsible side panels where they preserve selection context
 - Regional measurement units so international users can work with familiar Metric or Imperial presets while TrackDraw keeps meter-based geometry internally
@@ -257,6 +258,7 @@ Current shipped foundation:
 Next catalog slices:
 
 - Double Gate Tower 5x5 and 7x6: introduce as a new shape kind with its own 2D representation, 3D rendering, catalog entries, and inspector pipeline; race-line behavior is gate-like (fly through) while the physical structure resembles a two-frame tower
+- Barriers: introduce a shared element category for obstacles that block sightlines, mark field boundaries, or otherwise serve as physical barriers rather than fly-through gates; initial candidates include the MultiGP Hurdle (fly-over), standalone printed banners, fencing panels, and net sections; these share a common race-line behavior (non-traversable, no gate-pass logic) and a common 2D visual language while each having their own dimensions, catalog entries, and 3D representation; the hurdle follows official MultiGP dimensions while banners, fencing, and nets remain freely sizeable; inventory and Race Pack material counts should reflect the barrier category separately from gates and ladders
 
 #### Generated Flightpath Assistance
 
@@ -307,6 +309,40 @@ Current shipped foundation:
 ### 3. Account-Backed Follow-up (`Account-backed`)
 
 These items are now follow-up work rather than intentionally blocked. The first ownership model is clear enough that they can move forward when priority allows.
+
+#### User-Defined Layout Presets (`No account required`, `Account-backed`)
+
+The current preset system ships four hard-coded layout presets in `layout-presets.ts`. These should be replaced with user-created presets so clubs and race directors can save, name, and reuse their own section arrangements without depending on TrackDraw-supplied examples.
+
+Why now:
+
+- The hard-coded presets were shipped as a first acceleration layer in v1.1.0, and the archived note already flags that the next work should be polish and learning, not a broader static template system
+- Race directors and clubs have repeating section patterns that are specific to their equipment, field size, and style — a user-driven model reflects real usage better than curated examples
+- Account-backed storage makes presets durable across devices, which is the main reason they become more useful than the current local-only approach
+
+Focus:
+
+- Let users select one or more placed shapes on the canvas and save them as a named preset; positions are normalized to a centroid-relative coordinate system so placement is anchor-based, consistent with how the existing placement helper already works
+- Support local-first preset storage so logged-out users can create and reuse presets without an account; store these in browser-local storage using the same shape payload format so no separate code path is needed for placement
+- Store account-backed presets under the user's account in the database with owner, name, shape payload, and timestamps; the shape format should stay compatible with the existing `LayoutPreset` shape array so `placeLayoutPreset` continues to work without changes
+- Offer to migrate locally saved presets into the account when a user signs in, following the same migration pattern used for local projects
+- Provide rename and delete actions per preset in the picker UI, with an empty-state that guides new users toward creating their first preset from a selection
+- Remove the four hard-coded presets from `layout-presets.ts` entirely; the preset picker should show only user-created presets, with an empty state that guides new users toward saving their first preset from a canvas selection
+- Route lines and paths must never be captured in a preset regardless of whether they are part of the selection; the existing `PlaceablePresetShape = Exclude<Shape, PolylineShape>` type already enforces this at the type level
+
+Open question:
+
+- Should local presets be presented with a clear "browser-only" caveat so users understand they may be lost if they clear browser data or switch devices, or is that level of copy noise too much friction for a feature that already works like local projects?
+
+Important boundary:
+
+- Do not add a preset store in the first slice; the data model should not block it later, but the first version is private and account-owned — a community store where users publish and browse each other's presets is a deliberate follow-up once the account-backed storage model is solid
+- Do not change the placement behavior or canvas interaction model; presets should remain a select-a-preset-then-click-on-canvas flow
+- Do not auto-migrate existing projects or retroactively tag placed shapes with new preset IDs
+
+Supporting design doc:
+
+- `docs/pva/obstacle-presets-pva.md`
 
 #### REST API Route And Integration Packages
 

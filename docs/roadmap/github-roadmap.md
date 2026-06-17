@@ -22,7 +22,7 @@ Labels used below:
 
 ## Current Priority
 
-The completed release-sized work is archived below. The next TrackDraw priority is race-day workflow depth, editor reliability follow-up, remaining focused 3D item controls, generated flightpath assistance, multilingual-readiness for international users, and account-backed project lifecycle depth beyond the shipped conflict/retry baseline.
+The completed release-sized work is archived below. The next TrackDraw priority is race-day workflow depth, editor reliability follow-up, remaining focused 3D item controls, generated flightpath assistance, multilingual-readiness for international users, account-backed project lifecycle depth beyond the shipped conflict/retry baseline, a barrier element category covering hurdles, banners, fencing, and nets, user-defined layout presets replacing the current hard-coded list, and powerloop representation research in the route path.
 
 ## Follow-up
 
@@ -33,6 +33,36 @@ The completed release-sized work is archived below. The next TrackDraw priority 
   - [ ] 3D transform gizmo and edit mode toolbar
         Draft PVA: [3D Transform Controls PVA](../pva/3d-transform-controls-pva.md). Prototype selected-item move and rotate controls with orbit-friendly camera behavior only where the interaction is predictable across 2D and 3D. Do not add dimension handles until move/rotate are accepted.
 
+- [ ] User-defined layout presets (`No account required`, `Account-backed`)
+      Replace the current hard-coded preset list with user-created presets. A user selects shapes on the canvas and saves them as a named preset. For logged-out users the preset is stored in browser-local storage; for signed-in users it is stored in the database under their account. Both paths use the same shape payload format so placement behavior is identical. Paths and route lines are never captured in a preset — only non-polyline shapes. When a user signs in, locally saved presets can be migrated to their account. Sharing a preset with others is a follow-up, but the data model should not block it.
+  - [ ] Selection-to-preset creation flow
+        Let the user select one or more non-path shapes and trigger a "Save as preset" action. Prompt for a name, then store the normalized shape set (positions relative to centroid, no absolute coordinates) as a new preset record. Paths must be excluded from the captured shape set regardless of whether they are part of the selection; the existing `PlaceablePresetShape` type already enforces this.
+  - [ ] Local preset storage (no account required)
+        Persist user presets in browser-local storage for logged-out users using the same `LayoutPreset` shape array format. Presets are browser-local and may be lost if the user clears browser data or switches devices.
+  - [ ] Account-backed preset storage
+        Define a database schema for user presets: owner account, name, shape data, creation and update timestamps. Keep the shape payload format compatible with the existing `LayoutPreset` shape array so the placement helper (`placeLayoutPreset`) can work without changes.
+  - [ ] Local-to-account migration on sign-in
+        When a user signs in and has locally saved presets, offer to migrate them into their account following the same pattern used for local projects.
+  - [ ] Preset management UI
+        Show user presets in the preset picker with rename and delete actions per entry. Rename should be inline or in a lightweight dialog. Delete should ask for confirmation. Empty-state copy should guide users toward creating their first preset from a canvas selection.
+  - [ ] Remove hard-coded presets
+        Remove the four hard-coded presets from `layout-presets.ts` entirely. The preset picker should show only user-created presets; an empty state guides new users toward saving their first one.
+  - [ ] Preset store (`Lower priority`, `Account-backed`)
+        Let users publish a preset to a public store where others can find and add it to their own preset library. Think of it as a community-driven catalog of reusable track sections — users contribute, others browse and save. Keep this out of the first implementation slice; the account-backed storage model needs to be solid first.
+
+- [ ] Barriers (`No account required`)
+      Introduce a shared element category for obstacles that block sightlines, mark field boundaries, or otherwise serve as physical barriers rather than fly-through gates. Initial candidates include the MultiGP Hurdle (fly-over), standalone printed banners, fencing panels, and net sections. These share a common non-traversable race-line behavior (no gate-pass logic) while each carrying their own dimensions, catalog entries, 2D visual language, and 3D representation. The MultiGP Hurdle follows official dimensions; banners, fencing, and nets remain freely sizeable. Inventory counts and Race Pack material lists should reflect the barrier category separately from gates and ladders.
+  - [ ] Barrier kind, catalog entries
+        Define the shared barrier kind, catalog entries for the MultiGP Hurdle, banner, fence panel, and net section, with official dimensions where applicable and free sizing elsewhere.
+  - [ ] 2D representation
+        Give each barrier type a recognizable 2D footprint that visually distinguishes it from gates and ladders without cluttering dense layouts.
+  - [ ] 3D representation
+        Render barriers in the 3D preview with proportional geometry. The hurdle should resemble the real obstacle; banners, fencing, and nets should be lightweight but readable.
+  - [ ] Inspector and type switching
+        Show barrier catalog identity, source reference where applicable, and allow in-place type switching between barrier variants the same way gates and ladders already support it.
+  - [ ] Inventory and Race Pack integration
+        Count barriers as a distinct material category in the inventory validator and Race Pack setup output.
+
 - [ ] Path editing UX (`No account required`)
       Make drawing and adjusting a path feel more natural, especially for curved layouts where the current waypoint model forces extra points to avoid sharp corners.
   - [x] Path drawing interaction improvements
@@ -41,6 +71,8 @@ The completed release-sized work is archived below. The next TrackDraw priority 
         Catmull-Rom splines (chord-length parameterized) were already the sole rendering path for committed polylines. The drawing overlay now also relies on the smooth preview exclusively, making the curve shape visible from the first waypoint onwards.
   - [ ] Per-waypoint curve strength (`Research`)
         Only pursue if automatic smoothing is not sufficient and if there is an interaction model that works on both desktop and mobile. Direct canvas handles are likely too fiddly on touch; validate an inspector- or gesture-based alternative first before committing to an approach.
+  - [ ] Powerloop representation (`Research`)
+        A powerloop passes through a gate twice in a single lap — once on the initial entry and once after completing a full vertical loop. In a 2D top-down canvas the path self-intersects at the gate position, which is geometrically ambiguous without additional context. Research how to mark a waypoint or route segment as a powerloop so the route line, 3D preview, obstacle numbering, and Race Pack output can all reflect that the gate is traversed twice and that the second pass is a looped re-entry rather than a separate gate. Validate whether the right authoring model is a waypoint flag, a special segment annotation, or a dedicated powerloop route mode before committing to an implementation.
 
 - [ ] Generated flightpath assistance (`Research`, `No account required`)
       Research generated flightpaths from placed obstacles as an optional drafting aid. The intended race sequence is defined by the obstacle order in the track items list (backed by `shapeOrder`), which users can set via drag-to-reorder once this feature ships. The generator connects obstacles in that order and produces an editable race line — it assists authoring rather than replacing it.
