@@ -29,9 +29,10 @@ import {
 } from "@/lib/editor/tool-registry";
 import type { TrackElementCatalogId } from "@/lib/track/elements/catalog";
 import {
-  getLayoutPresetById,
+  findPresetById,
   placeLayoutPreset,
 } from "@/lib/planning/layout-presets";
+import { useUserPresets } from "@/store/user-presets";
 import {
   normalizeRect,
   type CursorState,
@@ -76,6 +77,7 @@ interface TrackCanvasInteractionsParams {
   snapEnabled: boolean;
   selection: string[];
   setActiveTool: (tool: EditorTool) => void;
+  setActivePresetId: (id: string | null) => void;
   setCursor: React.Dispatch<React.SetStateAction<CursorState | null>>;
   setDraftPath: (
     value: DraftPoint[] | ((previous: DraftPoint[]) => DraftPoint[])
@@ -134,6 +136,7 @@ export function useTrackCanvasInteractions({
   snapEnabled,
   selection,
   setActiveTool,
+  setActivePresetId,
   setCursor,
   setDraftPath,
   setDraftForceClosed,
@@ -619,13 +622,15 @@ export function useTrackCanvasInteractions({
 
       if (activeTool !== "select" && activeTool !== "grab" && !readOnly) {
         if (activeTool === "preset") {
-          const preset = getLayoutPresetById(activePresetId);
+          const preset = findPresetById(
+            activePresetId,
+            useUserPresets.getState().userPresets
+          );
           if (!preset) return;
           const ids = addShapes(placeLayoutPreset(preset, meters));
           setSelection(ids);
-          if (isMobile) {
-            setActiveTool("select");
-          }
+          setActivePresetId(null);
+          setActiveTool("select");
           touchInteractionModeRef.current = "none";
           return;
         }
@@ -665,6 +670,7 @@ export function useTrackCanvasInteractions({
       onMobileSelectedPathSegmentTap,
       pointerToMeters,
       readOnly,
+      setActivePresetId,
       setActiveTool,
       setDraftPath,
       setDraftForceClosed,
@@ -859,10 +865,15 @@ export function useTrackCanvasInteractions({
         const meters = pointerToMeters(pointer, snap, false);
         if (!meters) return;
         if (activeTool === "preset") {
-          const preset = getLayoutPresetById(activePresetId);
+          const preset = findPresetById(
+            activePresetId,
+            useUserPresets.getState().userPresets
+          );
           if (!preset) return;
           const ids = addShapes(placeLayoutPreset(preset, meters));
           setSelection(ids);
+          setActivePresetId(null);
+          setActiveTool("select");
           suppressTapRef.current = true;
           return;
         }
@@ -913,6 +924,8 @@ export function useTrackCanvasInteractions({
       pointerToMeters,
       readOnly,
       selection,
+      setActivePresetId,
+      setActiveTool,
       setMarqueeRect,
       setSelection,
       shapeRefs,

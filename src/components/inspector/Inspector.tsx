@@ -1,12 +1,13 @@
 "use client";
 
-import { memo, useState, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   MultiInspectorView,
   ProjectLayoutInspectorView,
   SingleInspectorView,
 } from "@/components/inspector/views";
+import { SaveAsPresetDialog } from "@/components/editor/SaveAsPresetDialog";
 import { usePerfMetric } from "@/hooks/usePerfMetric";
 import { cn } from "@/lib/utils";
 import {
@@ -16,6 +17,9 @@ import {
 } from "@/store/actions";
 import { useEditor } from "@/store/editor";
 import { selectDesignShapes, selectSelectedShapes } from "@/store/selectors";
+import { shapesToPreset } from "@/lib/planning/layout-presets";
+import { useAccountPresetSync } from "@/store/useAccountPresetSync";
+import { useSavePresetTrigger } from "@/store/save-preset-trigger";
 
 export interface InspectorProps {
   headerAction?: ReactNode;
@@ -68,6 +72,27 @@ function Inspector({
   const [panelOverride, setPanelOverride] = useState<
     "project" | "layout" | "selection" | null
   >(null);
+  const [saveAsPresetOpen, setSaveAsPresetOpen] = useState(false);
+  const { addUserPreset, canSavePresets } = useAccountPresetSync();
+  const { pending: savePresetPending, reset: resetSavePresetTrigger } =
+    useSavePresetTrigger();
+
+  useEffect(() => {
+    if (savePresetPending && canSavePresets) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSaveAsPresetOpen(true);
+      resetSavePresetTrigger();
+    }
+  }, [savePresetPending, canSavePresets, resetSavePresetTrigger]);
+
+  const handleSaveAsPreset = useCallback(
+    (name: string) => {
+      setSaveAsPresetOpen(false);
+      const preset = shapesToPreset(selectedShapes, name, "");
+      addUserPreset(preset);
+    },
+    [selectedShapes, addUserPreset]
+  );
   const selectionDisabled = count === 0;
   const defaultPanel = selectionDisabled ? "project" : "selection";
   const panel =
@@ -103,6 +128,9 @@ function Inspector({
         setSelection={setSelection}
         ungroupSelection={ungroupSelection}
         updateShapesCatalogType={updateShapesCatalogType}
+        onSaveAsPreset={
+          canSavePresets ? () => setSaveAsPresetOpen(true) : undefined
+        }
       />
     );
   } else if (count === 1) {
@@ -177,7 +205,7 @@ function Inspector({
                 {panel === item.id ? (
                   <motion.span
                     layoutId={activeTabIndicatorLayoutId}
-                    className="bg-foreground absolute inset-x-0 bottom-[-1px] h-0.5 rounded-full"
+                    className="bg-foreground absolute inset-x-0 -bottom-px h-0.5 rounded-full"
                     transition={{
                       type: "spring",
                       stiffness: 420,
@@ -225,6 +253,13 @@ function Inspector({
           selectionView
         )}
       </div>
+      <SaveAsPresetDialog
+        open={saveAsPresetOpen}
+        shapeCount={selectedShapes.filter((s) => s.kind !== "polyline").length}
+        pathCount={selectedShapes.filter((s) => s.kind === "polyline").length}
+        onSave={handleSaveAsPreset}
+        onCancel={() => setSaveAsPresetOpen(false)}
+      />
     </div>
   );
 }
