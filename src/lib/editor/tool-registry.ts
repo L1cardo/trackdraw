@@ -71,10 +71,10 @@ export function createShapeForTool(
       ? (defaultForTool ?? entryId)
       : entryId;
   const resolvedEntry = getTrackElementCatalogEntry(resolvedEntryId);
-
   return createCatalogShapeDraft(resolvedEntryId, {
     x: point.x,
     y: point.y,
-    includeCatalogMetadata: resolvedEntry?.official === true,
+    includeCatalogMetadata:
+      resolvedEntry?.official === true || resolvedEntry?.kind === "barrier",
   });
 }
