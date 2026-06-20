@@ -15,19 +15,17 @@ TrackDraw is now strong in these areas:
 - Practical mobile editing for quick venue-side changes
 - Portable outputs through PNG, SVG, PDF, 3D render capture, and JSON project files
 - Account-backed REST API with API key management and a live race overlay data endpoint
+- Catalog-backed official MultiGP obstacles including gates, ladders, flags, dive gate, launch gate, and a barrier category for hurdles, banners, fencing, and nets
+- Account-backed track section library where users save and reuse named canvas selections across devices
 
-The most useful next product move is deepening the race-day workflow, keeping the editor dependable, refining the account-backed project model, improving path editing UX, and expanding catalog-backed official elements, 3D review, and workspace ergonomics:
+The most useful next product move is deepening the race-day workflow, keeping the editor dependable, refining the account-backed project model, and completing the remaining 3D item control and path geometry work:
 
 - Race director page with pilot line, timing/start box placement, and ops notes
 - Usability and reliability pass focused on recovery states, mobile ergonomics, editor interactions, exports, sharing, and larger layouts
-- Path editing UX improvements for smoother curves and a more natural drawing experience, including geometry-driven 3D maneuver curve optimization for powerloops, split-S, and similar moves without requiring manual waypoint annotations
-- Catalog-backed official track elements beyond the shipped MultiGP gate, flag, ladder, dive gate, launch gate, and tower set, including a new barrier category covering hurdles, banners, fencing, and nets
+- 3D maneuver curve geometry for powerloops and split-S moves — detection and first-pass signals are shipped, true 3D curve replacement for detected maneuver sections is the remaining piece
 - Focused 3D item controls where direct manipulation is safer and faster than inspector-only editing
 - Account-backed custom banner texture support for official-size gates, ladders, and flags, so clubs can preview their own printed banners on MultiGP-sized hardware
-- User-defined track sections shipped as an account-backed section library; users save canvas selections as named sections that sync across devices
 - Generated flightpath research as a separate route-authoring assist
-- Editor workspace ergonomics for larger layouts, including collapsible side panels where they preserve selection context
-- Regional measurement units so international users can work with familiar Metric or Imperial presets while TrackDraw keeps meter-based geometry internally
 - Multilingual product experience built on the same locale-aware foundation, starting with explicit language choice and controlled translation scope
 
 Lower-priority follow-up such as share version history, gallery collections, Velocidrone export stabilization, AR, and build mode should stay parked until there is clearer need.

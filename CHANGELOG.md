@@ -6,6 +6,24 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+## [1.11.0]
+
+### Barriers
+
+TrackDraw now has a dedicated barrier category for obstacles that mark field boundaries, block sightlines, or serve as physical separators rather than fly-through gates. The first barrier set includes the MultiGP Hurdle with official dimensions and artwork, and TrackDraw banner, fence panel, and net entries for free-sized barrier variants.
+
+Barriers work the same way as gates and ladders: placement from the toolbar, type switching in the inspector, 2D and 3D rendering, inventory counts, and Race Pack material output.
+
+### Track section library
+
+Users can now save their own reusable track sections. Select any combination of shapes on the canvas, give the selection a name, and save it to a personal section library. Sections are account-backed and available across devices when signed in.
+
+The four hard-coded starter sections are replaced by this user-created library. The section picker shows only your own sections, with guidance for saving a first section from a canvas selection. Rename and delete actions are available per section.
+
+### 3D route maneuver review
+
+The 3D route review surface now highlights detected powerloop and split-S sections for quality review. Route curves are rendered more accurately and consistently across elevation changes.
+
 ## [1.10.0]
 
 ### MultiGP Dive Gate and Launch Gate

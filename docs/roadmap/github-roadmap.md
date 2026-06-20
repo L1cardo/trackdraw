@@ -33,32 +33,6 @@ The completed release-sized work is archived below. The next TrackDraw priority 
   - [ ] 3D transform gizmo and edit mode toolbar
         Draft PVA: [3D Transform Controls PVA](../pva/3d-transform-controls-pva.md). Prototype selected-item move and rotate controls with orbit-friendly camera behavior only where the interaction is predictable across 2D and 3D. Do not add dimension handles until move/rotate are accepted.
 
-- [x] User-defined track sections (`Account-backed`)
-      Replace the hard-coded section list with a user-created, account-backed section library. A user selects shapes on the canvas and saves them as a named section. Sections are account-backed only — no local storage for logged-out users in the first version. Paths and route lines are never captured — only non-polyline shapes. Local-first storage and local-to-account migration were intentionally deferred.
-  - [x] Selection-to-section creation flow
-        Users select one or more non-path shapes and trigger "Save as track section". A dialog prompts for a name and stores the normalized shape set (positions relative to centroid) as a new section record. Paths are excluded from capture; the existing `PlaceablePresetShape` type enforces this.
-  - [x] Account-backed section storage
-        Database schema with owner account, name, shape payload, and timestamps. Shape format stays compatible with the existing `LayoutPreset` array so `placeLayoutPreset` works unchanged.
-  - [x] Section management UI
-        Rename and delete actions per section in the picker. Inline rename, confirmation on delete. Empty state guides users toward saving their first section from a canvas selection.
-  - [x] Remove hard-coded sections
-        The four hard-coded presets in `layout-presets.ts` are removed. The picker shows only user-created sections.
-  - [ ] Section store (`Lower priority`, `Account-backed`)
-        Let users publish a section to a community store where others can browse and save it. Keep out of the first slice; account-backed storage needs to be solid first.
-
-- [x] Barriers (`No account required`)
-      TrackDraw now has a shared barrier category for obstacles that block sightlines, mark field boundaries, or otherwise serve as physical barriers rather than fly-through gates. The first slice includes the official MultiGP Hurdle plus TrackDraw banner, fence, and net entries with non-traversable race-line behavior, catalog-backed placement, 2D/3D rendering, inspector type switching, inventory counts, and export support.
-  - [x] Barrier kind, catalog entries
-        Defined the shared barrier kind and catalog entries for the MultiGP Hurdle, banner, fence panel, and net section, with official dimensions where applicable and free sizing elsewhere.
-  - [x] 2D representation
-        Gave each barrier type a recognizable 2D footprint that visually distinguishes it from gates and ladders without cluttering dense layouts.
-  - [x] 3D representation
-        Rendered barriers in the 3D preview with proportional geometry. The hurdle uses the official panel artwork, while banners, fencing, and nets stay lightweight and readable.
-  - [x] Inspector and type switching
-        Shows barrier catalog identity, source reference where applicable, and allows in-place type switching between barrier variants the same way gates and ladders already support it.
-  - [x] Inventory and Race Pack integration
-        Counts barriers as a distinct material category in the inventory validator and Race Pack setup output.
-
 - [ ] Path editing UX (`No account required`)
       Make drawing and adjusting a path feel more natural, especially for curved layouts where the current waypoint model forces extra points to avoid sharp corners.
   - [x] Path drawing interaction improvements
@@ -94,13 +68,6 @@ The completed release-sized work is archived below. The next TrackDraw priority 
 
 ## Later Product Follow-up
 
-- [x] Client-state persistence consolidation (`Lower priority`, `No account required`)
-      The codebase uses several patterns for localStorage: direct calls, `usePersistentBoolean`, and Zustand `persist`. Migrate the cases where state is shared across multiple components to Zustand `persist` so the read/write contract is consistent and reactive by default. Direct localStorage calls for truly local, single-consumer values (theme bootstrap, sidebar collapsed) can stay as-is.
-  - [x] Migrate `useMeasurementUnitSystem` to Zustand `persist`
-        Replaced the manual `useSyncExternalStore` + custom event pattern with a Zustand `persist` store (`src/store/measurement-unit.ts`). Legacy raw-string storage format is migrated transparently on first read. Hook interface unchanged.
-  - [x] Migrate `useEditorHints` to Zustand `persist`
-        Replaced five separate `localStorage` keys and manual get/set/remove calls with a single persisted Zustand store (`src/store/editor-hints.ts`) under `trackdraw.editorHints`. All five dismissed states are now stored as one object, making `resetGuidedHints` a single store reset. Hook interface unchanged.
-
 - [ ] Remove legacy localStorage migration shims (`Lower priority`, `No account required`)
       Two migration shims were added in v1.11.0 to preserve existing user preferences after the Zustand persist migration. Remove them once enough releases have passed that the old keys are no longer realistically present. The shims live in `src/store/measurement-unit.ts` (legacy raw-string format for `trackdraw.measurementUnitSystem`) and `src/store/editor-hints.ts` (legacy `trackdraw-hint-*-dismissed` per-key format). Safe to remove no earlier than v1.13.0.
 
@@ -113,17 +80,8 @@ The completed release-sized work is archived below. The next TrackDraw priority 
 - [ ] Gallery featured collections (`Lower priority`, `Account-backed`)
       Let admins curate small gallery collections such as indoor practice, beginner friendly, technical layouts, and race-day examples when gallery growth warrants it.
 
-- [x] Admin metrics dashboard — Tier 1 (`Account-backed`)
-      Admin Metrics page with KPI strip (total users, active users, active projects, active shares), user population cohort donut with center label, content overview bar chart, weekly new user growth area chart, plan limit simulation grouped bar chart, and detail stat rows for projects/shares/presets. All metrics derived from existing D1 tables via 14 parallel queries. Sidebar split into Platform and Admin sections. Research document: `docs/research/admin-metrics-analytics.md`.
-
-- [x] Dashboard operator tooling (`Lower priority`, `Account-backed`)
-      Give admins and moderators a way to inspect the state of specific accounts, shares, and API keys from within the existing dashboard surfaces — without digging through database records. This is about operational control over individual entities (who owns this share, why is this embed broken, which API keys are active), not aggregate product metrics. Fits as a follow-up pass on the existing Users, Gallery, and Audit modules once higher-priority editor and catalog work settles.
-  - [x] User context panel
-        Users table rows now open a Discord-style inspect sheet with a stats strip (projects, active shares, gallery entries, API keys), role badge, last login, created date, recent audit events, and a separate change-role section with self-role-change protection.
-  - [x] Share lifecycle inspector
-        Gallery rows are now clickable and open an inspect dialog showing share type (published/temporary), embed availability with a direct link, project ID (copyable), share created/updated dates, expiry/revocation detail, owner, gallery state, preview media status, and review outcome notice.
-  - [x] API usage overview
-        New /dashboard/api-keys page listing all API keys across all accounts with status badge, request count, last-used timestamp, and expiry. Clickable rows open an inspect sheet with rate limit config (max, window, remaining), permissions, key prefix, and owner details. Endpoint error patterns require a dedicated request log table and remain a follow-up.
+- [ ] Section store (`Lower priority`, `Account-backed`)
+      Let users publish a track section to a community store where others can browse and save it. Keep out of scope until account-backed section storage is proven in practice.
 
 - [ ] Race-day communication and briefing (`No account required`)
       The first Race Pack release and immediate QR/timing-marker slice are shipped. The remaining work here is larger race-day operations follow-up.
@@ -216,11 +174,23 @@ The completed release-sized work is archived below. The next TrackDraw priority 
 <details>
 <summary>Completed release work archived with v1.11.0</summary>
 
+- [x] Barriers (`No account required`)
+      Dedicated barrier category for obstacles that block sightlines, mark field boundaries, or serve as physical separators. Includes the MultiGP Hurdle with official dimensions and artwork, plus TrackDraw banner, fence panel, and net entries. Catalog-backed placement, 2D/3D rendering, inspector type switching, inventory counts, and Race Pack material output.
+
 - [x] User-defined track sections (`Account-backed`)
       The hard-coded section list is replaced with an account-backed section library. Users select non-path shapes on the canvas, name the selection, and save it as a reusable section. Sections sync with the account on sign-in and are cleared on sign-out or account switch. The section picker is hidden when not signed in. Rename, delete, and empty-state guidance are included. "Save section" is available from both the canvas context menu and the multi-selection inspector. Local-first storage and migration were intentionally deferred.
 
 - [x] 3D route maneuver review (`No account required`)
       The 3D route review surface now surfaces maneuver quality for powerloops, split-S, and similar moves through geometry-driven signals. Route curves are rendered more accurately and consistently across elevation changes, with first-pass powerloop and split-S detection visible in the elevation review.
+
+- [x] Admin metrics dashboard (`Account-backed`)
+      Admin Metrics page with KPI strip (total users, active users, active projects, active shares, active API keys), user population cohort donut, content overview bar chart, weekly new user growth area chart, plan limit simulation grouped bar chart, and detail stat rows. All metrics derived from existing D1 tables.
+
+- [x] Dashboard operator tooling (`Account-backed`)
+      Admins can inspect the state of specific accounts, shares, and API keys from existing dashboard surfaces without digging through database records. Users table rows open an inspect sheet with stats strip, role badge, last login, recent audit events, and change-role actions. Gallery rows open an inspect sheet with share type, embed availability, project ID, dates, and expiry/revocation detail. New `/dashboard/api-keys` page lists all keys across accounts with status, request count, last-used timestamp, and expiry; rows open an inspect sheet with rate limit config, permissions, and owner details.
+
+- [x] Client-state persistence consolidation (`No account required`)
+      Migrated `useMeasurementUnitSystem` from a manual `useSyncExternalStore` + custom event pattern to a Zustand `persist` store (`src/store/measurement-unit.ts`). Migrated `useEditorHints` from five separate localStorage keys to a single Zustand `persist` store (`src/store/editor-hints.ts`) under `trackdraw.editorHints`. Both hook interfaces unchanged. Legacy storage formats are migrated transparently on first read.
 
 </details>
 
@@ -286,50 +256,5 @@ The completed release-sized work is archived below. The next TrackDraw priority 
 
 - [x] Path and route reliability follow-up (`No account required`)
       Improved waypoint and path selection reliability, especially on mobile and when adjusting route elevation in 3D. Route warning geometry now shares the same 3D height offset as the visible route line and preview points.
-
-</details>
-
-## v1.8.0 Archive
-
-<details>
-<summary>Completed release work archived with v1.8.0</summary>
-
-- [x] Track element catalog (`Research`, `No account required`)
-      Built a catalog-backed element model for official gates with typed entries for names, dimensions, source references, 2D/3D rendering, and export compatibility. Includes placement selection, inspector identity display, in-place type switching, and catalog-driven visual rendering across 2D, 3D, and export paths.
-  - [x] Local element catalog foundation
-        Define typed catalog entries for official names, dimensions, source references, 2D defaults, 3D render hints, and export compatibility while keeping saved project geometry meter-based.
-  - [x] Official gate and obstacle entries
-        Covered by the placement selector, catalog identity in inspector, and in-place type switching sub-items. MultiGP-style gates are accessible through deliberate placement and inspector UI, custom sizing remains on the standard TrackDraw Gate, and no existing projects were migrated.
-  - [x] MultiGP gate placement selector
-        Keep Gate as the primary placement tool while letting users switch the active gate type between the generic TrackDraw gate and catalog-backed MultiGP-style 5x5 and 7x6 variants through compact desktop and mobile type pickers.
-  - [x] Catalog identity in inspector
-        Show placed catalog-backed elements with their official type, source, official size, and dimension status while keeping official gate width and height fixed in normal editing.
-  - [x] In-place catalog type switching (`No account required`)
-        Let users change the catalog type of an already-placed gate directly from the inspector without needing to delete and re-place. The type picker uses the shadcn Select and shows for all placed gates, including frame-only TrackDraw gates. Switching resets to the target entry's defaults while preserving position, rotation, and route connections, and preserves non-catalog meta such as timing markers. The source organization links to the entry's first source URL. getCatalogEntriesByKind replaces the gate-specific helper to support future element types.
-
-- [x] 3D preview realism and lighting (`Research`, `No account required`)
-      Improved the 3D preview's readability and realism with stronger contrast, sun/directional lighting, shadows, and more recognizable gates/flags while keeping mobile performance safe. Catalog metadata drives official variant rendering, including a realistic MultiGP Standard Gate 5x5.
-  - [x] 3D readability and realism pass
-        Tuned directional lighting with a warm sun tint, lowered ambient intensity for stronger shadow contrast, raised shadow map resolution to 2048, set shadow camera frustum to track bounds to eliminate shadow coverage gaps on large tracks, added shadow-bias to prevent acne, and removed polyline shadow casting to reduce visual noise. Unified the lighting theme across editor, share, and gallery into a single shared constant.
-  - [x] Catalog-aware 3D element rendering
-        Use catalog-owned visual metadata and extracted runtime textures to render catalog-backed MultiGP-style gates, ladders, and corner flags with recognizable panel sizes, PVC frame placement, and artwork across the live preview and flythrough export while keeping generic elements lightweight.
-
-- [x] Collapsible inspector workspace (`No account required`)
-      Let desktop/tablet users collapse the inspector sidebar to reclaim canvas space during dense editing while preserving selection context.
-  - [x] Collapsible inspector workspace
-        Add the collapse control to the inspector header, keep a reopen control in the collapsed rail, persist desktop workspace density locally, and verify it does not regress mobile drawer behavior.
-
-- [x] Regional measurement units (`No account required`)
-      Support regional Metric and Imperial display/input presets without changing the internal meter-based design model.
-  - [x] Unit preference model
-        Add a project-safe and user-friendly Metric/Imperial preference, with a Metric default that fits most international users and does not break existing projects.
-  - [x] Locale-informed defaults
-        Use browser locale signals to choose an initial measurement default when no explicit preference exists, while keeping the detected value transparent and manually overrideable.
-  - [x] Editor display formatting
-        Replace direct `m` labels in field size, rulers, inspectors, route/elevation summaries, gallery metadata, and export previews with shared unit formatting.
-  - [x] Unit-aware numeric input
-        Let users enter common Metric and Imperial values such as meters, feet, and inches while storing normalized meter values in the design.
-  - [x] Export and share presentation
-        Show the selected measurement preset in PDF/Race Pack/share-facing summaries while keeping JSON/API geometry and speed values compatible and meter-based/SI.
 
 </details>

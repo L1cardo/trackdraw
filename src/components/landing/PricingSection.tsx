@@ -1,11 +1,41 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Info, Minus } from "lucide-react";
 import { Reveal } from "@/components/landing/Motion";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/AppTooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { appTooltipContentClassName } from "@/components/AppTooltip";
+
+function InfoPopover({ info, label }: { info: string; label: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        type="button"
+        aria-label={`${label} details`}
+        className="text-muted-foreground hover:text-foreground ml-1 inline-flex align-[-2px] transition-colors"
+        onPointerEnter={() => setOpen(true)}
+        onPointerLeave={() => setOpen(false)}
+      >
+        <Info className="size-3" />
+      </PopoverTrigger>
+      <PopoverContent
+        side="top"
+        sideOffset={6}
+        className={`w-64 p-3 text-xs leading-relaxed ${appTooltipContentClassName}`}
+        onPointerEnter={() => setOpen(true)}
+        onPointerLeave={() => setOpen(false)}
+      >
+        {info}
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 type PlanKey = "guest" | "account";
 
@@ -51,9 +81,10 @@ const compareSections: Array<{ title: string; rows: CompareRow[] }> = [
         info: "Guest share links are temporary. Account-published links stay live until revoked and can also be embedded.",
       },
       {
-        label: "Embeds",
+        label: "Website embeds",
         guest: false,
         account: true,
+        accountDetail: "Embed on any website via iframe",
       },
       {
         label: "Gallery publishing",
@@ -159,18 +190,7 @@ function PlanFeatureList({ plan }: { plan: PlanKey }) {
                       {row.label}
                     </span>
                     {row.info ? (
-                      <Tooltip>
-                        <TooltipTrigger
-                          type="button"
-                          aria-label={`${row.label} details`}
-                          className="text-muted-foreground hover:text-foreground ml-1 inline-flex align-[-2px] transition-colors"
-                        >
-                          <Info className="size-3" />
-                        </TooltipTrigger>
-                        <TooltipContent side="top" sideOffset={6}>
-                          {row.info}
-                        </TooltipContent>
-                      </Tooltip>
+                      <InfoPopover info={row.info} label={row.label} />
                     ) : null}
                     {detail ? (
                       <span
