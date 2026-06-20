@@ -117,16 +117,14 @@ The completed release-sized work is archived below. The next TrackDraw priority 
 - [x] Admin metrics dashboard — Tier 1 (`Account-backed`)
       Admin Metrics page with KPI strip (total users, active users, active projects, active shares), user population cohort donut with center label, content overview bar chart, weekly new user growth area chart, plan limit simulation grouped bar chart, and detail stat rows for projects/shares/presets. All metrics derived from existing D1 tables via 14 parallel queries. Sidebar split into Platform and Admin sections. Research document: `docs/research/admin-metrics-analytics.md`.
 
-- [ ] Dashboard operator tooling (`Lower priority`, `Account-backed`)
+- [x] Dashboard operator tooling (`Lower priority`, `Account-backed`)
       Give admins and moderators a way to inspect the state of specific accounts, shares, and API keys from within the existing dashboard surfaces — without digging through database records. This is about operational control over individual entities (who owns this share, why is this embed broken, which API keys are active), not aggregate product metrics. Fits as a follow-up pass on the existing Users, Gallery, and Audit modules once higher-priority editor and catalog work settles.
-  - [ ] User context panel
-        Click through from the Users table to a read-only panel showing that user's projects, active shares, gallery entries, API keys, and recent audit events.
-  - [ ] Share lifecycle inspector
-        Per share token: owner, project, token state, gallery listing, embed availability, and publish/update history in one operator view.
-  - [ ] API usage overview
-        Active API keys across all accounts, last-used timestamps, rate-limit hits, and endpoint error patterns.
-  - [ ] Public track review queue
-        A moderator view for gallery entries with preview, title, owner context, field size, obstacle count, and feature/hide/restore actions.
+  - [x] User context panel
+        Users table rows now open a Discord-style inspect sheet with a stats strip (projects, active shares, gallery entries, API keys), role badge, last login, created date, recent audit events, and a separate change-role section with self-role-change protection.
+  - [x] Share lifecycle inspector
+        Gallery rows are now clickable and open an inspect dialog showing share type (published/temporary), embed availability with a direct link, project ID (copyable), share created/updated dates, expiry/revocation detail, owner, gallery state, preview media status, and review outcome notice.
+  - [x] API usage overview
+        New /dashboard/api-keys page listing all API keys across all accounts with status badge, request count, last-used timestamp, and expiry. Clickable rows open an inspect sheet with rate limit config (max, window, remaining), permissions, key prefix, and owner details. Endpoint error patterns require a dedicated request log table and remain a follow-up.
 
 - [ ] Race-day communication and briefing (`No account required`)
       The first Race Pack release and immediate QR/timing-marker slice are shipped. The remaining work here is larger race-day operations follow-up.

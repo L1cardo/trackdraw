@@ -21,6 +21,7 @@ import {
   ExternalLink,
   ImageOff,
   Info,
+  Link2,
   Loader2,
   MoreHorizontal,
   Sparkles,
@@ -200,6 +201,22 @@ function getPreviewImageUrl(entry: DashboardGalleryEntry) {
   return getSiteMediaUrl(entry.galleryPreviewImage);
 }
 
+function getEmbedAvailable(entry: DashboardGalleryEntry) {
+  return (
+    entry.shareType === "published" &&
+    getShareLifecycleState(entry) === "active"
+  );
+}
+
+function getEmbedUnavailableReason(entry: DashboardGalleryEntry) {
+  if (entry.shareType !== "published")
+    return "Temporary shares cannot be embedded";
+  const state = getShareLifecycleState(entry);
+  if (state === "revoked") return "Share has been revoked";
+  if (state === "expired") return "Share has expired";
+  return null;
+}
+
 function getInspectSummary(entry: DashboardGalleryEntry) {
   const shareState = getShareLifecycleState(entry);
 
@@ -276,7 +293,7 @@ function InspectDetail({
       <dt className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">
         {label}
       </dt>
-      <dd className="text-sm break-words">{value}</dd>
+      <dd className="text-sm wrap-break-word">{value}</dd>
     </div>
   );
 }
@@ -481,6 +498,15 @@ export default function DashboardGalleryManager({
     }
   };
 
+  const copyToClipboard = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied.`);
+    } catch {
+      toast.error(`Could not copy ${label}.`);
+    }
+  };
+
   function getFeatureAction(entry: DashboardGalleryEntry) {
     return entry.galleryState !== "featured"
       ? {
@@ -614,20 +640,11 @@ export default function DashboardGalleryManager({
         const VisibilityIcon = visibilityAction.icon;
 
         return (
-          <div className="flex justify-end">
+          <div
+            className="flex justify-end"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="hidden items-center justify-end gap-1 md:flex">
-              <ActionTooltip label="Inspect">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-muted hover:text-foreground size-7"
-                  aria-label={`Inspect ${entry.galleryTitle}`}
-                  onClick={() => setInspectCandidate(entry)}
-                >
-                  <Info className="size-4" />
-                </Button>
-              </ActionTooltip>
               <ActionTooltip label={featureAction.label}>
                 <Button
                   type="button"
@@ -693,11 +710,6 @@ export default function DashboardGalleryManager({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-44">
-                <DropdownMenuItem onClick={() => setInspectCandidate(entry)}>
-                  <Info className="size-4" />
-                  Inspect
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() =>
                     void updateEntry(entry.shareToken, featureAction.action)
@@ -838,6 +850,8 @@ export default function DashboardGalleryManager({
         emptyMessage={emptyMessage}
         minWidthClassName="min-w-[920px]"
         emptyClassName="py-8"
+        onRowClick={(row) => setInspectCandidate(row.original)}
+        getRowAriaLabel={(row) => `Inspect ${row.original.galleryTitle}`}
       />
 
       <p className="text-muted-foreground text-xs">
@@ -954,6 +968,93 @@ export default function DashboardGalleryManager({
                       </dl>
                     </InspectSection>
 
+                    <InspectSection title="Share lifecycle">
+                      <dl className="space-y-1">
+                        <InspectDetail
+                          label="Type"
+                          value={
+                            <Badge
+                              variant={
+                                inspectCandidate.shareType === "published"
+                                  ? "outline"
+                                  : "muted"
+                              }
+                            >
+                              {inspectCandidate.shareType === "published"
+                                ? "Published"
+                                : "Temporary"}
+                            </Badge>
+                          }
+                        />
+                        <InspectDetail
+                          label="Embed"
+                          value={
+                            getEmbedAvailable(inspectCandidate) ? (
+                              <Link
+                                href={`/embed/${inspectCandidate.shareToken}`}
+                                className="flex items-center gap-1 text-sm hover:underline"
+                              >
+                                <Link2 className="size-3.5 shrink-0" />
+                                Available
+                              </Link>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">
+                                {getEmbedUnavailableReason(inspectCandidate) ??
+                                  "Not available"}
+                              </span>
+                            )
+                          }
+                        />
+                        {inspectCandidate.projectId ? (
+                          <InspectDetail
+                            label="Project ID"
+                            value={
+                              <span className="flex items-center gap-1.5">
+                                <span className="truncate font-mono text-xs">
+                                  {inspectCandidate.projectId}
+                                </span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-5 shrink-0"
+                                  aria-label="Copy project ID"
+                                  onClick={() =>
+                                    void copyToClipboard(
+                                      inspectCandidate.projectId!,
+                                      "Project ID"
+                                    )
+                                  }
+                                >
+                                  <Copy className="size-3" />
+                                </Button>
+                              </span>
+                            }
+                          />
+                        ) : null}
+                        <InspectDetail
+                          label="Share created"
+                          value={formatDate(inspectCandidate.shareCreatedAt)}
+                        />
+                        <InspectDetail
+                          label="Entry updated"
+                          value={formatDate(inspectCandidate.updatedAt)}
+                        />
+                        {inspectCandidate.shareExpiresAt ? (
+                          <InspectDetail
+                            label="Expires"
+                            value={formatDate(inspectCandidate.shareExpiresAt)}
+                          />
+                        ) : null}
+                        {inspectCandidate.shareRevokedAt ? (
+                          <InspectDetail
+                            label="Revoked"
+                            value={formatDate(inspectCandidate.shareRevokedAt)}
+                          />
+                        ) : null}
+                      </dl>
+                    </InspectSection>
+
                     <InspectSection title="Record">
                       <dl className="space-y-1">
                         <InspectDetail
@@ -965,6 +1066,31 @@ export default function DashboardGalleryManager({
                           value={
                             inspectCandidate.ownerEmail ??
                             inspectCandidate.ownerUserId
+                          }
+                        />
+                        <InspectDetail
+                          label="Owner ID"
+                          value={
+                            <span className="flex items-center gap-1.5">
+                              <span className="truncate font-mono text-xs">
+                                {inspectCandidate.ownerUserId}
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-5 shrink-0"
+                                aria-label="Copy owner ID"
+                                onClick={() =>
+                                  void copyToClipboard(
+                                    inspectCandidate.ownerUserId,
+                                    "Owner ID"
+                                  )
+                                }
+                              >
+                                <Copy className="size-3" />
+                              </Button>
+                            </span>
                           }
                         />
                         <InspectDetail

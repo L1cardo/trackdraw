@@ -468,10 +468,9 @@ Why:
 Focus:
 
 - Gallery collections management: add dashboard controls for creating, ordering, publishing, and assigning curated gallery collections
-- Public track quality review: give moderators a review list with preview, title, description, field size, obstacle count, public indexing status, owner context, and feature/hide/restore/open actions
 - Share lifecycle inspector: expose share owner, project, token state, expiry/revocation, gallery listing, embed availability, and latest publish/update metadata in one operator view
 - Contextual account/project diagnostics: add inspect affordances inside existing Users, Gallery, Share, API, and Audit surfaces instead of a standalone diagnostics page
-- API usage dashboard: show API key activity, last-used timestamps, rate-limit hits, endpoint error patterns, and overlay readiness/API usage signals for account projects
+- API usage dashboard: show API key activity, last-used timestamps, rate-limit hits, endpoint error patterns, and overlay readiness/API usage signals for account projects — started with a /dashboard/api-keys page listing all keys across accounts with status, request count, last-used, expiry, and a clickable inspect sheet showing rate limit config, permissions, and owner details
 
 ##### Contextual Account/Project Diagnostics
 
@@ -487,13 +486,9 @@ Why:
 Suggested first slices:
 
 - Gallery/share inspect drawer
-  - Started with a read-only Inspect action on dashboard gallery rows that surfaces owner, share token, share lifecycle, gallery state, description, share title, field size, element count, preview media state, publish/update dates, and copy/open share actions
-  - Add an inspect action on gallery and share-related rows showing owner, project ID, share lifecycle, gallery state, embed availability, preview media state, and public/share links
-  - Highlight likely user-facing problems such as revoked or expired shares, missing gallery preview media, and unavailable embeds
-  - Link to existing user, gallery, share, and audit surfaces instead of duplicating moderation actions
+  - Started with a read-only inspect drawer on dashboard gallery rows that surfaces owner, share token, share lifecycle, gallery state, description, share title, field size, element count, preview media state, publish/update dates, copy/open share actions, copyable owner user ID, share type badge, embed availability (with link), project ID (copyable), share created/updated dates, and expiry/revocation detail; rows are now clickable to open the drawer directly
 - User context panel
-  - Add a user detail/inspect drawer from the Users table with role, created/updated dates, account-backed project count, active share count, gallery entry count, API key count, and recent account audit events
-  - Keep role management in the existing Users flow rather than adding another place to mutate account roles
+  - Started with a user detail/inspect sheet from the Users table surfacing role badge, created/updated dates, last login, account-backed project count, active share count, gallery entry count, and API key count in a stats strip, recent account audit events, and a separate change-role section with self-role-change protection
 - Project context panel
   - Surface account-backed project ID, owner, title, updated timestamp, active published share state, gallery state, API project ID, overlay readiness, field size, obstacle count, route presence, and timing-marker readiness
   - Keep raw project design data out of contextual diagnostics except for safe summaries

@@ -38,6 +38,8 @@ type DataTableProps<TData> = {
   wrapperClassName?: string;
   tableClassName?: string;
   emptyClassName?: string;
+  onRowClick?: (row: Row<TData>) => void;
+  getRowAriaLabel?: (row: Row<TData>) => string;
 };
 
 type DataTableEmptyStateProps = ComponentProps<typeof TableCell> & {
@@ -112,6 +114,8 @@ export default function DataTable<TData>({
   wrapperClassName,
   tableClassName,
   emptyClassName,
+  onRowClick,
+  getRowAriaLabel,
 }: DataTableProps<TData>) {
   return (
     <DataTableFrame
@@ -144,7 +148,23 @@ export default function DataTable<TData>({
       <TableBody>
         {rows.length ? (
           rows.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow
+              key={row.id}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
+              onKeyDown={
+                onRowClick
+                  ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onRowClick(row);
+                      }
+                    }
+                  : undefined
+              }
+              tabIndex={onRowClick ? 0 : undefined}
+              className={onRowClick ? "cursor-pointer" : undefined}
+              aria-label={getRowAriaLabel ? getRowAriaLabel(row) : undefined}
+            >
               {row.getVisibleCells().map((cell) => (
                 <DataTableBodyCell
                   key={cell.id}
