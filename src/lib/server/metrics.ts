@@ -43,12 +43,22 @@ export type PlanLimitRow = {
   usersExceedingProjects: number;
   usersExceedingShares: number;
   usersExceedingPresets: number;
+  usersExceedingAny: number;
 };
 
 export type GrowthPoint = {
   week: string;
   users: number;
 };
+
+export type GrowthRange = "3m" | "6m" | "1y";
+
+export type GrowthData = {
+  userGrowth: GrowthPoint[];
+  userGrowthCumulative: GrowthPoint[];
+};
+
+export type GrowthByRange = Record<GrowthRange, GrowthData>;
 
 export type ApiKeyMetrics = {
   active: number;
@@ -62,8 +72,7 @@ export type AdminMetrics = {
   presets: PresetMetrics;
   gallery: GalleryMetrics;
   apiKeys: ApiKeyMetrics;
-  planLimits: PlanLimitRow[];
-  userGrowth: GrowthPoint[];
+  userDistribution: [number, number, number][]; // [projects, shares, presets] per user
 };
 
 export async function getAdminMetrics(): Promise<AdminMetrics> {
@@ -80,11 +89,8 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
     presetTotalsRow,
     presetPerUserRow,
     galleryRow,
-    projectLimitsRow,
-    shareLimitsRow,
-    presetLimitsRow,
-    userGrowthResult,
     apiKeyRow,
+    userDistributionResult,
   ] = await Promise.all([
     db
       .prepare(
@@ -219,76 +225,40 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
       .prepare(
         `
         select
-          sum(case when cnt > 3 then 1 else 0 end) as exceeds_3,
-          sum(case when cnt > 5 then 1 else 0 end) as exceeds_5,
-          sum(case when cnt > 10 then 1 else 0 end) as exceeds_10
-        from (
-          select owner_user_id, count(*) as cnt
-          from projects
-          where archived_at is null
-          group by owner_user_id
-        )
-      `
-      )
-      .first<{ exceeds_3: number; exceeds_5: number; exceeds_10: number }>(),
-
-    db
-      .prepare(
-        `
-        select
-          sum(case when cnt > 3 then 1 else 0 end) as exceeds_3,
-          sum(case when cnt > 5 then 1 else 0 end) as exceeds_5,
-          sum(case when cnt > 10 then 1 else 0 end) as exceeds_10
-        from (
-          select owner_user_id, count(*) as cnt
-          from shares
-          where revoked_at is null and (expires_at is null or expires_at > datetime('now')) and owner_user_id is not null
-          group by owner_user_id
-        )
-      `
-      )
-      .first<{ exceeds_3: number; exceeds_5: number; exceeds_10: number }>(),
-
-    db
-      .prepare(
-        `
-        select
-          sum(case when cnt > 3 then 1 else 0 end) as exceeds_3,
-          sum(case when cnt > 5 then 1 else 0 end) as exceeds_5,
-          sum(case when cnt > 10 then 1 else 0 end) as exceeds_10
-        from (
-          select owner_user_id, count(*) as cnt
-          from layout_presets
-          group by owner_user_id
-        )
-      `
-      )
-      .first<{ exceeds_3: number; exceeds_5: number; exceeds_10: number }>(),
-
-    db
-      .prepare(
-        `
-        select
-          strftime('%Y-%W', createdAt) as week,
-          count(*) as users
-        from users
-        where createdAt > datetime('now', '-84 days')
-        group by week
-        order by week
-      `
-      )
-      .all<{ week: string; users: number }>(),
-
-    db
-      .prepare(
-        `
-        select
           count(*) as total,
           sum(case when enabled = 1 and (expiresAt is null or datetime(expiresAt) > datetime('now')) then 1 else 0 end) as active
         from apikey
       `
       )
       .first<{ total: number; active: number }>(),
+
+    db
+      .prepare(
+        `
+        select
+          coalesce(p.cnt, 0) as proj_cnt,
+          coalesce(s.cnt, 0) as share_cnt,
+          coalesce(pr.cnt, 0) as preset_cnt
+        from users u
+        left join (
+          select owner_user_id, count(*) as cnt
+          from projects where archived_at is null
+          group by owner_user_id
+        ) p on p.owner_user_id = u.id
+        left join (
+          select owner_user_id, count(*) as cnt
+          from shares
+          where revoked_at is null and (expires_at is null or expires_at > datetime('now')) and owner_user_id is not null
+          group by owner_user_id
+        ) s on s.owner_user_id = u.id
+        left join (
+          select owner_user_id, count(*) as cnt
+          from layout_presets
+          group by owner_user_id
+        ) pr on pr.owner_user_id = u.id
+        `
+      )
+      .all<{ proj_cnt: number; share_cnt: number; preset_cnt: number }>(),
   ]);
 
   return {
@@ -327,31 +297,137 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
       active: apiKeyRow?.active ?? 0,
       total: apiKeyRow?.total ?? 0,
     },
-    planLimits: [
-      {
-        limit: 3,
-        usersExceedingProjects: projectLimitsRow?.exceeds_3 ?? 0,
-        usersExceedingShares: shareLimitsRow?.exceeds_3 ?? 0,
-        usersExceedingPresets: presetLimitsRow?.exceeds_3 ?? 0,
-      },
-      {
-        limit: 5,
-        usersExceedingProjects: projectLimitsRow?.exceeds_5 ?? 0,
-        usersExceedingShares: shareLimitsRow?.exceeds_5 ?? 0,
-        usersExceedingPresets: presetLimitsRow?.exceeds_5 ?? 0,
-      },
-      {
-        limit: 10,
-        usersExceedingProjects: projectLimitsRow?.exceeds_10 ?? 0,
-        usersExceedingShares: shareLimitsRow?.exceeds_10 ?? 0,
-        usersExceedingPresets: presetLimitsRow?.exceeds_10 ?? 0,
-      },
-    ],
-    userGrowth: userGrowthResult.results.map((row) => ({
-      week: formatWeekLabel(row.week),
-      users: row.users,
-    })),
+    userDistribution: userDistributionResult.results.map((row) => [
+      row.proj_cnt,
+      row.share_cnt,
+      row.preset_cnt,
+    ]),
   };
+}
+
+function buildCumulativeGrowth(
+  weeklyRows: { week: string; users: number }[],
+  priorCount: number
+): GrowthPoint[] {
+  let running = priorCount;
+  return weeklyRows.map((row) => {
+    running += row.users;
+    return { week: formatWeekLabel(row.week), users: running };
+  });
+}
+
+export type RecentUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  createdAt: string;
+};
+
+export type OverviewStats = {
+  totalUsers: number;
+  newUsersThisMonth: number;
+  newUsersLastMonth: number;
+  activeProjects: number;
+  activeShares: number;
+  recentUsers: RecentUser[];
+};
+
+export async function getOverviewStats(): Promise<OverviewStats> {
+  const db = await getDatabase();
+  const [usersRow, projectsRow, sharesRow, recentUsersRows] = await Promise.all(
+    [
+      db
+        .prepare(
+          `select
+            count(*) as total,
+            sum(case when createdAt > datetime('now', '-30 days') then 1 else 0 end) as new_this_month,
+            sum(case when createdAt between datetime('now', '-60 days') and datetime('now', '-30 days') then 1 else 0 end) as new_last_month
+           from users`
+        )
+        .first<{
+          total: number;
+          new_this_month: number;
+          new_last_month: number;
+        }>(),
+      db
+        .prepare(
+          `select count(*) as count from projects where archived_at is null`
+        )
+        .first<{ count: number }>(),
+      db
+        .prepare(
+          `select count(*) as count from shares
+           where revoked_at is null
+             and (expires_at is null or expires_at > datetime('now'))
+             and owner_user_id is not null`
+        )
+        .first<{ count: number }>(),
+      db
+        .prepare(
+          `select id, name, email, createdAt from users order by createdAt desc limit 6`
+        )
+        .all<{
+          id: string;
+          name: string | null;
+          email: string;
+          createdAt: string;
+        }>(),
+    ]
+  );
+  return {
+    totalUsers: usersRow?.total ?? 0,
+    newUsersThisMonth: usersRow?.new_this_month ?? 0,
+    newUsersLastMonth: usersRow?.new_last_month ?? 0,
+    activeProjects: projectsRow?.count ?? 0,
+    activeShares: sharesRow?.count ?? 0,
+    recentUsers: recentUsersRows?.results ?? [],
+  };
+}
+
+export async function getGrowthByRange(): Promise<GrowthByRange> {
+  const db = await getDatabase();
+  const ranges: [GrowthRange, number][] = [
+    ["3m", 91],
+    ["6m", 182],
+    ["1y", 365],
+  ];
+
+  const pairs = await Promise.all(
+    ranges.map(async ([range, days]) => {
+      const cutoff = new Date(
+        Date.now() - days * 24 * 60 * 60 * 1000
+      ).toISOString();
+      const [growthResult, priorRow] = await Promise.all([
+        db
+          .prepare(
+            `select strftime('%Y-%W', createdAt) as week, count(*) as users
+             from users where createdAt > ? group by week order by week`
+          )
+          .bind(cutoff)
+          .all<{ week: string; users: number }>(),
+        db
+          .prepare(`select count(*) as count from users where createdAt < ?`)
+          .bind(cutoff)
+          .first<{ count: number }>(),
+      ]);
+      const weeklyRows = growthResult.results;
+      return [
+        range,
+        {
+          userGrowth: weeklyRows.map((row) => ({
+            week: formatWeekLabel(row.week),
+            users: row.users,
+          })),
+          userGrowthCumulative: buildCumulativeGrowth(
+            weeklyRows,
+            priorRow?.count ?? 0
+          ),
+        },
+      ] as [GrowthRange, GrowthData];
+    })
+  );
+
+  return Object.fromEntries(pairs) as GrowthByRange;
 }
 
 function formatWeekLabel(yearWeek: string): string {
