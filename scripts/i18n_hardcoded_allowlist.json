@@ -1,59 +1,5 @@
 [
   {
-    "file": "src/app/dashboard/api-keys/page.tsx",
-    "kind": "metadata property title",
-    "text": "Dashboard API Keys",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/dashboard/audit/page.tsx",
-    "kind": "metadata property title",
-    "text": "Dashboard Audit",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/dashboard/email-preview/page.tsx",
-    "kind": "metadata property title",
-    "text": "Dashboard Email Preview",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/dashboard/gallery/page.tsx",
-    "kind": "metadata property title",
-    "text": "Dashboard Gallery",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/dashboard/metrics/page.tsx",
-    "kind": "metadata property title",
-    "text": "Dashboard Metrics",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/dashboard/users/page.tsx",
-    "kind": "metadata property title",
-    "text": "Dashboard Users",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
     "file": "src/app/embed/EmbedUnavailable.tsx",
     "kind": "JSX prop alt",
     "text": "TrackDraw",
@@ -61,42 +7,6 @@
     "group": "intentional-brand-alt",
     "priority": "exception",
     "note": "Brand-only alt text is intentionally stable unless the image needs descriptive alt copy."
-  },
-  {
-    "file": "src/app/embed/layout.tsx",
-    "kind": "metadata property description",
-    "text": "Embedded TrackDraw read-only track view.",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/embed/layout.tsx",
-    "kind": "metadata property title",
-    "text": "Track Embed",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/login/layout.tsx",
-    "kind": "metadata property description",
-    "text": "Sign in to TrackDraw with a one-time magic link.",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/login/layout.tsx",
-    "kind": "metadata property title",
-    "text": "Sign in",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
   },
   {
     "file": "src/app/login/page.tsx",
@@ -144,87 +54,6 @@
     "note": "Visible product UI copy; translate when touching this surface."
   },
   {
-    "file": "src/app/page.tsx",
-    "kind": "metadata property description",
-    "text": "TrackDraw is a drone race track builder for FPV race directors. Design tracks to scale, review track flow in 3D, and share read-only race-day layouts.",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/page.tsx",
-    "kind": "metadata property description",
-    "text": "Use TrackDraw as a drone race track builder to plan FPV layouts to scale, review track flow in 3D, and share read-only race-day plans.",
-    "count": 2,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/page.tsx",
-    "kind": "metadata property title",
-    "text": "TrackDraw | Drone Race Track Builder",
-    "count": 2,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/share/[token]/layout.tsx",
-    "kind": "metadata property description",
-    "text": "This older TrackDraw share format is no longer supported. Ask the sender to publish a fresh link.",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/share/[token]/layout.tsx",
-    "kind": "metadata property description",
-    "text": "This TrackDraw share link has expired. Ask the sender to publish a fresh link.",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/share/[token]/layout.tsx",
-    "kind": "metadata property description",
-    "text": "View this FPV race track designed with TrackDraw.",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/share/[token]/layout.tsx",
-    "kind": "metadata property title",
-    "text": "Expired Track Share",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/share/[token]/layout.tsx",
-    "kind": "metadata property title",
-    "text": "Unsupported Track Share",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/share/[token]/layout.tsx",
-    "kind": "metadata property title",
-    "text": "View Track",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
     "file": "src/app/share/[token]/not-found.tsx",
     "kind": "JSX prop alt",
     "text": "TrackDraw",
@@ -250,42 +79,6 @@
     "group": "intentional-brand-alt",
     "priority": "exception",
     "note": "Brand-only alt text is intentionally stable unless the image needs descriptive alt copy."
-  },
-  {
-    "file": "src/app/studio/layout.tsx",
-    "kind": "metadata property description",
-    "text": "Design FPV drone race tracks to scale, add gates and obstacles, and preview track flow in 3D.",
-    "count": 2,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/studio/layout.tsx",
-    "kind": "metadata property description",
-    "text": "Open the TrackDraw drone race track builder to design FPV layouts to scale, add gates and obstacles, and preview track flow in 3D.",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/studio/layout.tsx",
-    "kind": "metadata property title",
-    "text": "Drone Race Track Builder",
-    "count": 1,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
-  },
-  {
-    "file": "src/app/studio/layout.tsx",
-    "kind": "metadata property title",
-    "text": "TrackDraw | Drone Race Track Builder",
-    "count": 2,
-    "group": "metadata-translate",
-    "priority": "high",
-    "note": "Hardcoded metadata should be localized or generated from translations."
   },
   {
     "file": "src/components/canvas/editor/TrackCanvas.tsx",
@@ -322,60 +115,6 @@
     "group": "dev-or-technical-ui",
     "priority": "low",
     "note": "Developer/debug/technical UI; translate later if exposed to normal users."
-  },
-  {
-    "file": "src/components/data-table/DataTableFacetFilter.tsx",
-    "kind": "JSX text",
-    "text": "Clear filters",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
-    "file": "src/components/data-table/DataTableFacetFilter.tsx",
-    "kind": "JSX text",
-    "text": "No results found.",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
-    "file": "src/components/data-table/DataTableFacetFilter.tsx",
-    "kind": "JSX text",
-    "text": "selected",
-    "count": 1,
-    "group": "dev-or-technical-ui",
-    "priority": "low",
-    "note": "Developer/debug/technical UI; translate later if exposed to normal users."
-  },
-  {
-    "file": "src/components/dialogs/CompleteProfileDialog.tsx",
-    "kind": "JSX text",
-    "text": "Display name",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
-    "file": "src/components/dialogs/CompleteProfileDialog.tsx",
-    "kind": "JSX text",
-    "text": "Skip",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
-    "file": "src/components/dialogs/CompleteProfileDialog.tsx",
-    "kind": "JSX text",
-    "text": "This is the name TrackDraw will show for cloud projects and shared layouts",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
   },
   {
     "file": "src/components/dialogs/ExportDialog.tsx",
@@ -493,24 +232,6 @@
     "group": "technical-token",
     "priority": "exception",
     "note": "Unit, file extension, coordinate label, or visual separator."
-  },
-  {
-    "file": "src/components/dialogs/ProjectManager/AccountTab.tsx",
-    "kind": "JSX text",
-    "text": "Could not load account projects",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
-    "file": "src/components/dialogs/ProjectManager/AccountTab.tsx",
-    "kind": "JSX text",
-    "text": "Loading account projects...",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
   },
   {
     "file": "src/components/dialogs/ProjectManager/DeviceTab.tsx",
@@ -720,24 +441,6 @@
     "note": "Visible product UI copy; prioritize replacing with translation keys."
   },
   {
-    "file": "src/components/dialogs/ProjectManager/shared.tsx",
-    "kind": "JSX text",
-    "text": "API project ID",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
-    "file": "src/components/dialogs/ProjectManager/shared.tsx",
-    "kind": "JSX text",
-    "text": "Copy",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
     "file": "src/components/dialogs/ProjectManager/SharesTab.tsx",
     "kind": "JSX text",
     "text": "Cancel",
@@ -934,24 +637,6 @@
     "group": "product-ui-translate",
     "priority": "medium",
     "note": "Visible product UI copy; translate when touching this surface."
-  },
-  {
-    "file": "src/components/editor/ElementPlacementControl.tsx",
-    "kind": "JSX text",
-    "text": "Official",
-    "count": 2,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
-    "file": "src/components/editor/ElementPlacementControl.tsx",
-    "kind": "JSX text",
-    "text": "type",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
   },
   {
     "file": "src/components/editor/Header.tsx",
@@ -1168,24 +853,6 @@
     "group": "dev-or-technical-ui",
     "priority": "low",
     "note": "Developer/debug/technical UI; translate later if exposed to normal users."
-  },
-  {
-    "file": "src/components/MeasurementUnitToggle.tsx",
-    "kind": "JSX text",
-    "text": "Measurement preset:",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
-  },
-  {
-    "file": "src/components/MeasurementUnitToggle.tsx",
-    "kind": "JSX text",
-    "text": "Switch displayed distances and compatible inputs.",
-    "count": 1,
-    "group": "product-ui-translate",
-    "priority": "high",
-    "note": "Visible product UI copy; prioritize replacing with translation keys."
   },
   {
     "file": "src/components/ThemeToggle.tsx",
