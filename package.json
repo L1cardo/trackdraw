@@ -78,7 +78,6 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@eslint/compat": "^2.1.0",
     "@eslint/eslintrc": "^3",
     "@opennextjs/cloudflare": "^1.18.0",
     "@tailwindcss/postcss": "^4",
@@ -89,10 +88,9 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.185.0",
     "@vitest/coverage-v8": "^4.1.4",
-    "eslint": "^10.0.0",
+    "eslint": "^9.39.4",
     "eslint-config-next": "^16.1.0",
     "eslint-config-prettier": "^10.1.8",
-    "espree": "^11.2.0",
     "happy-dom": "^20.8.9",
     "node-pg-migrate": "^8.0.3",
     "pg": "^8.20.0",
