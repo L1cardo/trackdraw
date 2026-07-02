@@ -6,6 +6,18 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+## [1.12.0]
+
+### Multilingual experience
+
+TrackDraw now supports English 🏴󠁧󠁢󠁥󠁮󠁧󠁿, Dutch 🇳🇱, and German 🇩🇪
+
+TrackDraw uses your browser language as the first default when possible, and you can change the language separately from your measurement units. The translations were created with AI assistance, so please open an issue if you spot wording that is incorrect or unclear.
+
+### Open-source licensing
+
+TrackDraw source code is now licensed under AGPL-3.0-only. This applies to the application source code, while the TrackDraw name, logo, brand assets, hosted service, and user-created content remain separate from the code license.
+
 ## [1.11.0]
 
 ### Barriers

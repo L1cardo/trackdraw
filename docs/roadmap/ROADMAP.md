@@ -19,14 +19,13 @@ TrackDraw is now strong in these areas:
 - Account-backed user presets where users save and reuse named canvas selections across devices
 - English, Dutch, and German multilingual product experience with explicit language choice, route-scoped message loading, and CI checks for catalog parity and new hardcoded UI copy
 
-The most useful next product move is deepening the race-day workflow, keeping the editor dependable, refining the account-backed project model, and completing the remaining 3D item control and path geometry work:
+After v1.12.0, the next product focus should be deliberately narrow:
 
-- Race director page with pilot line, timing/start box placement, and ops notes
-- Usability and reliability pass focused on recovery states, mobile ergonomics, editor interactions, exports, sharing, and larger layouts
-- 3D maneuver curve geometry for powerloops and split-S moves — detection and first-pass signals are shipped, true 3D curve replacement for detected maneuver sections is the remaining piece
-- Focused 3D item controls where direct manipulation is safer and faster than inspector-only editing
-- Account-backed custom banner texture support for official-size gates, ladders, and flags, so clubs can preview their own printed banners on MultiGP-sized hardware
-- Generated flightpath research as a separate route-authoring assist
+1. Export and handoff workflow polish: rebuild the export dialog around clearer handoff intent, closer to the Project Manager and Share dialog structure, so images, documents, editable data, Race Pack, simulator output, and export limitations are easier to understand.
+2. Generated flightpath assistance: prototype route generation from ordered obstacles as an optional editable starting point, not as an authoritative racing-line simulator.
+3. Editor reliability polish: harden recovery states, mobile ergonomics, selection/transforms, the Elevation Profile dialog, autosave/account sync edge cases, imports/exports, sharing, read-only viewing, and larger layouts.
+
+Race-day workflow depth, remaining focused 3D controls, account lifecycle depth, custom banner textures, share version history, gallery collections, billing, and community features should stay behind those priorities unless a concrete support issue or release risk forces them forward.
 
 Lower-priority follow-up such as share version history, gallery collections, Velocidrone export stabilization, AR, and build mode should stay parked until there is clearer need.
 
@@ -536,6 +535,8 @@ Current first pass:
 Later slices:
 
 - Race director page once TrackDraw can extend the existing start/finish and timing-marker foundation with the supporting race-day metadata and ops elements it depends on, including pilot line, director position, timing/start box placement, cable routing, and ops notes
+- Route duration estimate follow-up where the estimate helps race-day setup, timing/overlay preparation, or briefing copy without presenting it as a guaranteed race result prediction
+- Validation against real heats before relying on route duration estimates as a preferred baseline
 
 Important boundary:
 

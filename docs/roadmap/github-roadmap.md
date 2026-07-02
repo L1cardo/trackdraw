@@ -22,9 +22,38 @@ Labels used below:
 
 ## Current Priority
 
-The next TrackDraw priority is race-day workflow depth, editor reliability follow-up, remaining focused 3D item controls, generated flightpath assistance, account-backed project lifecycle depth beyond the shipped conflict/retry baseline, and powerloop 3D curve replacement in the route path.
+The next TrackDraw priority is export and handoff workflow polish first, generated flightpath assistance second, and editor reliability polish third. Keep larger race-day, account, community, billing, and platform expansion behind those unless a specific support or release risk forces it forward.
 
 ## Follow-up
+
+- [ ] Export and handoff workflow polish (`No account required`)
+      Rework the export dialog around the same clear structure as the Project Manager and Share dialogs. The goal is to make every handoff path easier to choose, explain what each export is for, and make export errors or limitations visible before users rely on the output.
+  - [ ] Export dialog information architecture
+        Group export options by user intent, such as images, documents, editable data, simulator output, and video/flythrough where applicable.
+  - [ ] Export purpose and limitations copy
+        Make each export explain whether it is read-only, editable, race-day handoff, backup, simulator-oriented, or experimental.
+  - [ ] Race Pack positioning
+        Present Race Pack as the race-day handoff export inside the refreshed dialog without starting a larger race-day-ops feature first.
+  - [ ] Export validation and feedback states
+        Show relevant missing-data, unsupported-output, disabled-action, and failure states consistently before and after export.
+  - [ ] Mobile export drawer refresh
+        Bring the mobile export flow closer to the same structure while preserving compact touch-friendly controls.
+
+- [ ] Generated flightpath assistance (`Research`, `No account required`)
+      Prototype generated flightpaths from placed obstacles as an optional drafting aid. The intended race sequence is defined by the obstacle order in the track items list (backed by `shapeOrder`), which users can set via drag-to-reorder once this feature ships. The generator connects obstacles in that order and produces an editable race line — it assists authoring rather than replacing it. Research document: `docs/research/generated-flightpath-assistance.md`.
+  - [ ] Generated flightpath prototype
+        Build the smallest useful route-generation prototype from the ordered obstacle list. The output should be a normal editable race line, not a locked result. Validate that the sequence-based model (list order → path) is intuitive before committing to the full UI.
+  - [ ] Drag-to-reorder obstacles (prerequisite)
+        Wire up the drag handles in the track items list so users can explicitly set the intended race sequence before generating a path. The store action is ready; this is a UI-only change gated on the path generator being useful enough to justify the interaction.
+
+- [ ] Editor reliability polish (`No account required`, `Account-backed`)
+      Run a focused stability pass over shipped workflows before adding another large surface. Prioritize recovery states, mobile ergonomics, selection/transforms, autosave/account sync edge cases, imports/exports, sharing, read-only viewing, and larger layouts.
+  - [ ] Recovery and failure states
+        Make autosave, import, export, share, account sync, and runtime failures explain what happened and what the user can do next.
+  - [ ] Mobile editor ergonomics pass
+        Tighten drawers, touch targets, compact labels, Project Manager flows, path tools, multi-select actions, map reference controls, and inspector panels.
+  - [ ] Selection and transform regression pass
+        Harden locked objects, grouped selections, route waypoint editing, snapping, rotation, resize handles, undo/redo, shortcuts, and mobile overlays.
 
 - [ ] Focused 3D item controls (`No account required`)
       Add direct 3D controls for common obstacle edits where they are faster than inspector-only editing and still respect lock state, undo/redo, and mobile constraints.
@@ -41,19 +70,14 @@ The next TrackDraw priority is race-day workflow depth, editor reliability follo
         Catmull-Rom splines (chord-length parameterized) were already the sole rendering path for committed polylines. The drawing overlay now also relies on the smooth preview exclusively, making the curve shape visible from the first waypoint onwards.
   - [ ] Per-waypoint curve strength (`Research`)
         Only pursue if automatic smoothing is not sufficient and if there is an interaction model that works on both desktop and mobile. Direct canvas handles are likely too fiddly on touch; validate an inspector- or gesture-based alternative first before committing to an approach.
+  - [ ] Interactive elevation profile dialog
+        Improve the Elevation Profile dialog as a route-review surface, not just a static chart. Add clearer dialog structure, hover/selection links between the profile and route, obstacle/timing/warning markers, and jump-to-segment behavior for warnings. Keep direct elevation editing in the chart out of the first slice until navigation and review interactions feel solid.
   - [ ] 3D maneuver curve optimization (`Research`)
         Powerloops, split-S maneuvers, and similar moves are inherently 3D: a powerloop is a full vertical circle back through a gate, a split-S is a downward half-loop with a direction reversal. The current CatmullRom route renders these as flat horizontal curves, which is physically wrong. The goal is geometry-driven optimization with no manual annotation — the user just draws waypoints that describe the spatial intent (a tight loop near a gate, a 180° arc with elevation change), and the optimizer automatically detects the pattern and generates the correct 3D curve. The 2D canvas shows a recognizable indicator for the detected maneuver section; the 3D preview renders the actual vertical loop or half-loop. Research document: `docs/research/maneuver-curve-optimization.md`.
   - [x] Research note and first-pass maneuver signals
         Added the maneuver optimization research note, kept route geometry schema-compatible, made 3D route smoothing respect vertical waypoint distance, rendered warning colors on one continuous 3D route tube, and added first-pass powerloop/split-S detection signals in the elevation review.
   - [ ] True 3D curve replacement for detected maneuvers
         Replace detected maneuver sections with physically plausible vertical loop or half-loop curve geometry and blend cleanly into surrounding route segments. Keep this open until the 3D preview renders the corrected maneuver shape rather than only detecting and reviewing it.
-
-- [ ] Generated flightpath assistance (`Research`, `No account required`)
-      Research generated flightpaths from placed obstacles as an optional drafting aid. The intended race sequence is defined by the obstacle order in the track items list (backed by `shapeOrder`), which users can set via drag-to-reorder once this feature ships. The generator connects obstacles in that order and produces an editable race line — it assists authoring rather than replacing it. Research document: `docs/research/generated-flightpath-assistance.md`.
-  - [ ] Generated flightpath research
-        Prototype flightpath generation from the ordered obstacle list as an assistive review/drafting feature. The output should be an editable race line, not a locked result. Validate that the sequence-based model (list order → path) is intuitive before committing to the full UI.
-  - [ ] Drag-to-reorder obstacles (prerequisite)
-        Wire up the drag handles in the track items list so users can explicitly set the intended race sequence before generating a path. The store action is ready; this is a UI-only change gated on the path generator being useful enough to justify the interaction.
 
 ## Later Product Follow-up
 
@@ -72,8 +96,8 @@ The next TrackDraw priority is race-day workflow depth, editor reliability follo
 - [ ] Presets store (`Lower priority`, `Account-backed`)
       Let users publish a preset to a community store where others can browse and save it. Keep out of scope until account-backed preset storage is proven in practice. Research document: `docs/research/presets-store.md`.
 
-- [ ] Race-day communication and briefing (`No account required`)
-      The first Race Pack release and immediate QR/timing-marker slice are shipped. The remaining work here is larger race-day operations follow-up.
+- [ ] Race-day workflow depth (`No account required`)
+      Keep this behind export/handoff polish. The first future slice should deepen the existing Race Pack and event-preparation flow only once the current export surface is clearer.
   - [ ] Race director page in Race Pack
         Add a race-director-oriented page to the Race Pack.
     - [ ] Race-day ops elements around the existing start area
@@ -84,9 +108,7 @@ The next TrackDraw priority is race-day workflow depth, editor reliability follo
           Define how race-day ops metadata lives in the project model.
     - [ ] Race director page layout
           Turn that metadata into a dedicated Race Pack page.
-
-- [ ] Route duration estimate follow-up (`No account required`)
-  - [ ] Race Pack and setup copy
+  - [ ] Route duration estimate follow-up
         Surface the estimate only where it helps race-day setup, such as timing/overlay preparation notes, and avoid presenting it as a guaranteed race result prediction.
   - [ ] Validation against real heats
         Compare the first-lap estimate with actual RotorHazard lap data across a few real tracks before relying on it as the preferred baseline.
