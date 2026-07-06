@@ -217,18 +217,21 @@
       "ready": "Cinematic FPV-export is klaar",
       "progressLabel": "Fly-through video renderen… {duration}"
     },
-    "sections": {
-      "visualExports": {
-        "title": "Visuele exports",
-        "description": "Alleen-lezen captures voor review, print of delen."
+    "categories": {
+      "visuals": {
+        "title": "Visueel"
       },
-      "projectHandoff": {
-        "title": "Project & handoff",
-        "description": "Bewerkbare back-up of alleen-lezen setup-handoff."
+      "raceDay": {
+        "title": "Race Day"
       },
-      "simulatorMotion": {
-        "title": "Simulator & motion",
-        "description": "Reviewvideo en experimentele simulatoroutput."
+      "projectData": {
+        "title": "Projectdata"
+      },
+      "motion": {
+        "title": "Video"
+      },
+      "simulatorLab": {
+        "title": "Experimenteel"
       }
     },
     "formats": {

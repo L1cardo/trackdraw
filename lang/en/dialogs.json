@@ -217,18 +217,21 @@
       "ready": "Cinematic FPV export ready",
       "progressLabel": "Rendering fly-through… video {duration}"
     },
-    "sections": {
-      "visualExports": {
-        "title": "Visual Exports",
-        "description": "Read-only captures for review, print, or sharing."
+    "categories": {
+      "visuals": {
+        "title": "Visuals"
       },
-      "projectHandoff": {
-        "title": "Project & Handoff",
-        "description": "Editable backup or read-only setup handoff."
+      "raceDay": {
+        "title": "Race Day"
       },
-      "simulatorMotion": {
-        "title": "Simulator & Motion",
-        "description": "Review video and experimental simulator output."
+      "projectData": {
+        "title": "Project Data"
+      },
+      "motion": {
+        "title": "Video"
+      },
+      "simulatorLab": {
+        "title": "Experimental"
       }
     },
     "formats": {
