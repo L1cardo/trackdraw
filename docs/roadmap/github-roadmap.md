@@ -46,14 +46,20 @@ The next TrackDraw priority is export and handoff workflow polish first, editor 
   - [ ] Generated flightpath validation follow-up
         Validate real layouts and tune warnings, route anchor heights, and unclear sequence feedback before treating generated routes as more than a first-pass drafting aid.
 
-- [ ] Editor reliability polish (`No account required`, `Account-backed`)
-      Run a focused stability pass over shipped workflows before adding another large surface. Prioritize recovery states, mobile ergonomics, selection/transforms, autosave/account sync edge cases, imports/exports, sharing, read-only viewing, and larger layouts.
-  - [ ] Recovery and failure states
-        Make autosave, import, export, share, account sync, and runtime failures explain what happened and what the user can do next.
-  - [ ] Mobile editor ergonomics pass
+- [x] Editor reliability polish (`No account required`, `Account-backed`)
+      Run focused stability passes over shipped editor workflows before adding another large surface. Keep each slice small enough to validate without risking import/export, autosave, share publish/read, read-only viewing, or mobile editor flows.
+  - [x] Locked selection action safeguards
+        Locked selections consistently block destructive or confusing actions such as duplicate, delete, route join, and route close across store actions, shortcuts, context menus, inspector controls, item lists, and mobile overlays, while group organization remains available.
+  - [x] Route editing regression pass
+        Harden waypoint insert, delete, drag, segment and vertex selection clearing, route close/join, snapping, undo/redo, and mobile path controls.
+  - [x] Transform and snapping regression pass
+        Validate move, nudge, rotate, resize handles, snapping, grouped selections, mixed locked/editable selections, and no-op history behavior.
+  - [x] Mobile editor ergonomics pass
         Tighten drawers, touch targets, compact labels, Project Manager flows, path tools, multi-select actions, map reference controls, and inspector panels.
-  - [ ] Selection and transform regression pass
-        Harden locked objects, grouped selections, route waypoint editing, snapping, rotation, resize handles, undo/redo, shortcuts, and mobile overlays.
+  - [x] Recovery and failure states
+        Make autosave, import, export, share, account sync, and runtime failures explain what happened and what the user can do next.
+  - [x] Large-layout stability pass
+        Stress-test dense layouts, long routes, map references, 3D preview, PDF/export, and make targeted performance or debounce fixes.
 
 - [ ] Focused 3D item controls (`No account required`)
       Add direct 3D controls for common obstacle edits where they are faster than inspector-only editing and still respect lock state, undo/redo, and mobile constraints.
