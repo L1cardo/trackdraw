@@ -13,19 +13,22 @@ TrackDraw is now strong in these areas:
 - Account-published embeds through a dedicated read-only `/embed/[token]` route
 - Real venue alignment through editor-only satellite map references
 - Practical mobile editing for quick venue-side changes
-- Portable outputs through PNG, SVG, PDF, 3D render capture, and JSON project files
+- Clear export handoff flows for visuals, Race Pack, editable project data, 3D renders, simulator output, and cinematic FPV video
 - Account-backed REST API with API key management and a live race overlay data endpoint
 - Catalog-backed official MultiGP obstacles including gates, ladders, flags, dive gate, launch gate, and a barrier category for hurdles, banners, fencing, and nets
 - Account-backed user presets where users save and reuse named canvas selections across devices
-- English, Dutch, and German multilingual product experience with explicit language choice, route-scoped message loading, and CI checks for catalog parity and new hardcoded UI copy
+- English, Dutch, and German multilingual product experience with explicit language choice, route-scoped message loading, generated locale assets, and CI checks for catalog parity and new hardcoded UI copy
+- Protected magic-link account handoff that avoids automatic email scanner sign-ins while keeping the sign-in flow simple
+- Optional generated race-line drafting from ordered obstacles, with warnings for layouts that need manual attention
+- Interactive elevation profile review with waypoint, obstacle, timing, and warning markers linked back to the canvas
 
-After v1.12.0, the next product focus should be deliberately narrow:
+After v1.13.0, the next product focus should stay deliberately narrow:
 
-1. Export and handoff workflow polish: rebuild the export dialog around clearer handoff intent, closer to the Project Manager and Share dialog structure, so images, documents, editable data, Race Pack, simulator output, and export limitations are easier to understand.
-2. Generated flightpath assistance: prototype route generation from ordered obstacles as an optional editable starting point, not as an authoritative racing-line simulator.
-3. Editor reliability polish: harden recovery states, mobile ergonomics, selection/transforms, the Elevation Profile dialog, autosave/account sync edge cases, imports/exports, sharing, read-only viewing, and larger layouts.
+1. Generated flightpath validation: test real layouts and tune warnings, route anchor heights, and unclear sequence feedback before treating generated routes as more than a first-pass drafting aid.
+2. Translation management: decide whether hosted Crowdin or self-hosted Weblate is the right contributor workflow, while keeping locale catalogs out of the Worker bundle.
+3. Focused 3D item controls: add direct 3D move/rotate controls only where they are predictable across desktop, mobile, undo/redo, and lock state.
 
-Race-day workflow depth, remaining focused 3D controls, account lifecycle depth, custom banner textures, share version history, gallery collections, billing, and community features should stay behind those priorities unless a concrete support issue or release risk forces them forward.
+Race-day workflow depth, account lifecycle depth, custom banner textures, share version history, gallery collections, billing, and community features should stay behind those priorities unless a concrete support issue or release risk forces them forward.
 
 Lower-priority follow-up such as share version history, gallery collections, Velocidrone export stabilization, AR, and build mode should stay parked until there is clearer need.
 
@@ -139,38 +142,11 @@ Important boundary:
 - Do not use this track to introduce new editing modes, social features, or simulation-heavy analysis
 - Keep changes small enough that import/export, autosave, share publish/read, read-only viewing, and mobile editor flows can be validated after each slice
 
-Suggested focused slices:
+Maintenance focus:
 
-- Locked selection action safeguards
-  - Locked selections consistently block destructive or confusing actions such as duplicate, delete, route join, and route close across store actions, shortcuts, context menus, inspector controls, item lists, and mobile overlays, while group organization remains available
-- Route editing regression pass
-  - Harden waypoint insert, delete, drag, segment and vertex selection clearing, route close/join, snapping, undo/redo, and mobile path controls
-  - Started by clearing stale segment and vertex selections after structural route edits such as waypoint insert/remove, append, reverse, route close, and route join
-  - Added route insert bounds guards and undo/redo coverage for route reverse, close, and join
-  - Completed with existing route snapping and context-menu coverage still passing alongside the expanded store regression coverage
-- Transform and snapping regression pass
-  - Validate move, nudge, rotate, resize handles, snapping, grouped selections, mixed locked/editable selections, and no-op history behavior
-  - Completed with no-op nudge/rotation history guards, mixed locked/editable rotate/resize/nudge coverage, grouped transform undo/redo coverage, and snap helper coverage for grid, object, route-line, route-waypoint, selected-item exclusion, and snap-toggle behavior
-- Mobile editor ergonomics pass
-  - Started with larger, more consistent mobile app-menu touch targets for project, share, transfer, account, dashboard, and sign-out actions
-  - Added steadier touch targets for path builder, quick adjust, and multi-select overlay actions during mobile editing
-  - Improved mobile map-reference controls with larger action targets and easier opacity adjustment
-  - Enlarged mobile inspector section headers so collapsible panels are easier to open and close on touch screens
-  - Improved mobile Project Manager action targets for opening and scanning local-project actions
-  - Completed with steadier mobile drawer/input handling, larger and fixed mobile tool/view controls, truncation-safe path and multi-select overlay labels, grouped-selection naming touch targets, bottom toolbar sizing, and existing Project Manager/map reference/inspector mobile coverage still passing
-- Recovery and failure states
-  - Started with a local autosave failure state that reports storage/quota failures and offers retry before users continue editing blindly
-  - Added clearer import failure states for invalid JSON, wrong file types, unreadable files, and non-TrackDraw project data
-  - Added shared JSON export feedback so Project Manager export failures are reported instead of silently ignored
-- Large-layout stability pass
-  - Started with bounded dense-grid rendering for SVG/PDF/PNG exports so fine grid settings do not explode export payload size
-  - Added long-route obstacle-numbering coverage with bounded route-segment scans for dense gate layouts
-  - Completed with bounded map-reference tile coverage for large high-density fields, duplicate in-flight map tile load prevention, and existing dense SVG/PDF export, long-route numbering, and large 3D preview coverage still passing
-- Export/share confidence pass
-  - Started by clarifying which exports are read-only visuals, which JSON files are editable backups, what Race Pack is for, and where simulator export remains experimental
-  - Moved the export dialog onto the same sidebar-and-panel structure used by Share and Project Manager, with export categories in the sidebar and available outputs plus per-export filename, theme, and route-number settings in the main panel
-  - Calmed the export dialog visuals: flattened the nested format/settings cards, gave the format picker a responsive layout (stacked tiles on mobile, inline row on desktop), and gave default export filenames a consistent theme suffix plus a date stamp so repeat exports do not silently overwrite each other
-  - Clarified managed shares as read-only review links and JSON export as the editable handoff path
+- Keep import/export, autosave, share publish/read, read-only viewing, account sync, and mobile editor flows covered when touching nearby code
+- Add regression tests when a fix affects selection, transforms, route editing, export generation, project recovery, sharing, or larger layouts
+- Treat future reliability work as targeted support-driven slices rather than a broad redesign track
 
 #### Regional Measurement Units
 
@@ -214,27 +190,37 @@ Why:
 
 - International users may benefit from familiar product language in addition to familiar measurement units
 - Locale-aware defaults, preference storage, shared formatting helpers, and text boundaries created for unit support can reduce the later cost of full i18n
-- Translation touches high-risk surfaces such as editor tools, import/export recovery, share pages, Race Pack/PDF copy, dashboard moderation, and legal pages, so it needs deliberate QA rather than ad hoc string replacement
+- Translation touches high-risk surfaces such as editor tools, import/export recovery, share pages, and Race Pack/PDF copy, so it needs deliberate QA rather than ad hoc string replacement
 
 Current shipped foundation:
 
 - `next-intl` is integrated without locale routing, preserving existing `/studio`, `/gallery`, `/share/[token]`, and `/embed/[token]` URLs
 - Browser language provides the first-run default when no saved language preference exists, while manual language choice remains separate from measurement units
-- English, Dutch, and German catalogs cover the public site, editor, share/embed/gallery surfaces, dashboard, dialogs, inspector, exported handoff copy, and metadata/API docs surfaces
+- English, Dutch, and German catalogs cover the public site, editor, share/embed/gallery surfaces, dialogs, inspector, exported handoff copy, and shared product vocabulary
+- Dashboard and legal surfaces remain English-only
 - English remains the stable fallback baseline, with route-scoped message loading and a centralized i18n catalog policy
+- Locale JSON is generated into OpenNext static assets for production builds so additional languages do not become full static catalog imports in the Cloudflare Worker script
 - Locale parity/unresolved-key validation and hardcoded-copy scanning run in CI so new UI copy is intentionally cataloged or explicitly allowlisted
 
 Maintenance focus:
 
 - Keep new product copy behind typed message catalogs instead of reopening hardcoded-copy debt
-- Add future languages only when there is enough user demand and maintenance capacity to review FPV terminology, compact UI labels, and export/legal copy
-- Continue checking translated UI on desktop and mobile, especially tight inspector panels, buttons, dialogs, share pages, exported PDFs/Race Packs, and legal pages where applicable
+- Treat translation management and Worker package size as a near-term operational track now that TrackDraw has three shipped languages and additional contributor languages are expected
+- Compare hosted Crowdin and self-hosted Weblate before accepting a larger volume of contributor translations, using the existing `lang/{locale}/{namespace}.json` layout and normal pull-request review for translatable namespaces
+- If Weblate is chosen, design it as production infrastructure before inviting contributors: pinned containers, TLS/reverse proxy, SMTP, access control, backups, restore testing, monitoring, and upgrade/rollback process
+- If Crowdin is chosen, verify plan eligibility and hosted-word costs before relying on the open-source or free plan, especially if TrackDraw gains paid plans
+- Keep `dashboard` and `legal` English-only regardless of the translation-management tool
+- Keep generated locale asset loading in place so each language does not automatically add a full catalog set to the Cloudflare Worker bundle
+- Add future languages only when there is enough user demand and maintenance capacity to review FPV terminology, compact UI labels, and export/PDF/Race Pack copy
+- Continue checking translated UI on desktop and mobile, especially tight inspector panels, buttons, dialogs, share pages, and exported PDFs/Race Packs
 
 Important boundary:
 
 - Do not block regional measurement support on full i18n; units can ship first as a smaller, lower-risk slice
 - Do not infer units only from language, because English users can prefer Metric and non-English users can work with Imperial venue expectations
-- Do not translate legal pages casually; any material legal translation needs a separate review standard
+- Do not translate dashboard or legal pages unless that product/legal boundary is deliberately changed later
+- Do not let translation tooling bypass CI locale checks, unresolved-key checks, or source review through pull requests
+- Do not accept linear Worker bundle growth as an unavoidable cost of adding languages
 
 #### Track Element Catalog
 
@@ -287,7 +273,7 @@ Why:
 
 Feature tracks:
 
-- Generated flightpath research: prototype route generation from ordered elements as an optional starting point that users can accept and edit
+- Generated flightpath validation: test real layouts, tune warning thresholds, route anchor heights, and unclear sequence feedback, and keep generated routes positioned as editable drafting assistance
 - Route ambiguity warnings: explore lightweight feedback for unclear order, direction, or corkscrew-like layouts before adding simulation-heavy path optimization
 
 Current foundation:
@@ -715,6 +701,71 @@ Likely account-backed follow-up:
 - Shared venue or club records, including shared inventory profiles
 - Identity-aware comments and review threads
 
+## v1.13.0 Archive
+
+<details>
+<summary>Completed release work to archive with v1.13.0</summary>
+
+### Generated Flightpath Assistance (`Research`, `No account required`)
+
+Shipped the first generated flightpath slice as an optional drafting aid. The intended race sequence is defined by the obstacle order in the track items list, and users can drag-to-reorder track items before generating a normal editable Race Line.
+
+Included:
+
+- Track item registry metadata for generated-route behavior on supported obstacles
+- Pure generated-route logic that creates an editable Race Line draft from ordered obstacles
+- Layout inspector action for generating or regenerating the Race Line
+- Warning feedback when the generated line is likely to need manual attention
+- Drag-to-reorder support in the track item list while keeping Race Lines outside the track-item stack ordering
+
+### Interactive Elevation Profile (`No account required`)
+
+Turned the Elevation Profile into a route-review surface linked to the canvas.
+
+Included:
+
+- Focusable waypoint, obstacle, timing, and warning markers in the profile
+- Warning-segment jump actions and clearer marker legends
+- Hover and selection links from the profile back to route points and track items on the canvas
+- Kept direct elevation editing out of scope until review/navigation interactions settle
+
+### Export And Handoff Workflow Polish (`No account required`)
+
+Reworked the export dialog around the same clear structure as the Project Manager and Share dialogs.
+
+Included:
+
+- Export categories in the sidebar with output-specific options in the main panel
+- Filename, theme, route-number, limitation, and readiness states scoped to the selected output
+- Race Pack positioned as the race-day handoff export without starting a larger race-day-ops feature
+- Mobile export flow brought closer to the same structure while preserving compact touch-friendly controls
+- Default export filenames with clearer suffixes and date stamps to reduce accidental overwrites
+
+### Editor Reliability Polish (`No account required`, `Account-backed`)
+
+Ran focused stability passes over shipped workflows without changing the product model.
+
+Included:
+
+- Locked selection safeguards across destructive actions, route joins, context menus, inspector controls, item lists, and mobile overlays
+- Route editing regression coverage for waypoint edits, segment/vertex selection clearing, close/join behavior, snapping, undo/redo, and mobile path controls
+- Transform and snapping regression coverage for move, nudge, rotate, resize, grouped selections, mixed locked/editable selections, and no-op history behavior
+- Mobile ergonomics improvements across drawers, touch targets, compact labels, Project Manager flows, path tools, multi-select actions, map reference controls, and inspector panels
+- Clearer recovery states for autosave, import, export, share, account sync, and runtime failures
+- Protected magic-link handoff so one-time sign-in links are less likely to be consumed by automatic email security checks before the user opens TrackDraw
+- Better project-save observability that separates invalid payloads from unexpected server failures and logs useful details for troubleshooting account-backed save failures
+- Large-layout stability work for dense grids, long routes, map references, 3D preview, and PDF/export paths
+
+### Locale Catalog Asset Loading (`No account required`, `Account-backed`)
+
+Moved locale JSON catalogs out of static server imports and into generated OpenNext assets. English, Dutch, German, and future contributor languages load per namespace through the Cloudflare `ASSETS` binding in production, while local development and tests can still read from `lang/{locale}`. Dashboard and legal namespaces remain English-only.
+
+### Legacy Client-State Cleanup (`No account required`)
+
+Removed the v1.11.0 one-time migration shims for the old raw-string `trackdraw.measurementUnitSystem` value and the old per-key `trackdraw-hint-*-dismissed` hint flags. The active Zustand persist keys remain unchanged.
+
+</details>
+
 ## v1.12.0 Archive
 
 <details>
@@ -722,13 +773,13 @@ Likely account-backed follow-up:
 
 ### Multilingual Product Experience (`No account required`)
 
-TrackDraw now has a full multilingual product layer across the public site, Studio, share/embed/gallery surfaces, dashboard, dialogs, inspector, exported handoff copy, and metadata/API docs. English, Dutch, and German are supported through explicit language choice and browser-language first-run defaults, while existing routes such as `/studio`, `/gallery`, `/share/[token]`, and `/embed/[token]` stay unchanged.
+TrackDraw now has a multilingual product layer across the public site, Studio, share/embed/gallery surfaces, dialogs, inspector, exported handoff copy, and shared product vocabulary. Dashboard and legal surfaces remain English-only. English, Dutch, and German are supported through explicit language choice and browser-language first-run defaults, while existing routes such as `/studio`, `/gallery`, `/share/[token]`, and `/embed/[token]` stay unchanged.
 
 Included:
 
 - next-intl integration without locale routing, preserving existing route and share-link compatibility
 - Route-scoped message loading, persisted locale preference, server-side locale/message resolution, and a language picker that works without an account
-- Dutch rollout across editor, dialogs, inspector, dashboard, gallery, share/embed views, export/PDF/Race Pack copy, and shared shape/tool vocabulary
+- Dutch rollout across editor, dialogs, inspector, gallery, share/embed views, export/PDF/Race Pack copy, and shared shape/tool vocabulary
 - German locale support on the same route-stable i18n foundation
 - Follow-up copy QA for Dutch and German terminology, missed strings, compact labels, account/delete/export copy, and `Path`/`waypoint` terminology
 - Centralized i18n catalog policy, locale parity/unresolved-key checks, hardcoded-copy scanning in CI, and an exception-only hardcoded allowlist baseline

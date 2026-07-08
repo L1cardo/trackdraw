@@ -6,9 +6,23 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+### Generated race lines
+
+TrackDraw can now generate a first editable race line from the ordered obstacle list. Reorder the track items to set the intended sequence, then use Generate race line from the project inspector to create a smooth starting path through supported route obstacles.
+
+Generated race lines are a drafting aid, not a complete track generator. Expect to adjust the path afterwards to match the intended flow, especially around ladders, towers, tight sequences, or more complex layouts. TrackDraw shows warnings when the generated line is likely to need extra attention, so you know where to fine-tune it before using it for sharing, exports, or race-day planning.
+
+### Interactive elevation profile
+
+The Elevation Profile is now a route-review surface. Waypoints, timing markers, numbered obstacles, warning markers, and warning segments can be selected from the profile, with hover and selection linked back to the canvas.
+
 ### Export handoff clarity
 
-The export dialog now uses the same sidebar-and-panel structure as Share and Project Manager, with export categories in the sidebar and the available outputs plus their filename, theme, and route-number settings scoped to the active category. The format picker adapts to a stacked layout on mobile, and default export filenames now include a date so repeat exports do not silently overwrite each other.
+The export dialog now uses the same sidebar-and-panel structure as Share and Project Manager. Export categories, filenames, theme choices, route-number settings, and readiness warnings are grouped with the output they affect, so it is clearer which export to use and what still needs attention.
+
+### Account sign-in reliability
+
+Magic-link sign-in now uses a protected handoff page before completing the one-time login. This makes account access more reliable with email clients and security scanners that open links automatically, while still letting users continue into Studio with a single confirmation.
 
 ## [1.12.0]
 

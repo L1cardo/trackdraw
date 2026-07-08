@@ -22,73 +22,41 @@ Labels used below:
 
 ## Current Priority
 
-The next TrackDraw priority is export and handoff workflow polish first, editor reliability polish second, and post-prototype generated flightpath validation third. Keep larger race-day, account, community, billing, and platform expansion behind those unless a specific support or release risk forces it forward.
+The next TrackDraw priority is generated flightpath validation first, translation management tooling second, and focused 3D item controls third. Selective race-day workflow depth can follow once those are stable. Keep larger account, community, billing, and platform expansion behind those unless a specific support or release risk forces it forward.
 
 ## Follow-up
 
-- [x] Export and handoff workflow polish (`No account required`)
-      Rework the export dialog around the same clear structure as the Project Manager and Share dialogs. The goal is to make every handoff path easier to choose, explain what each export is for, and make export errors or limitations visible before users rely on the output.
-  - [x] Export dialog information architecture
-        Group exports by category in the sidebar, then let users choose the concrete output and show only the filename, theme, route-number, and limitation details that apply to it.
-  - [x] Race Pack positioning
-        Present Race Pack as the race-day handoff export inside the refreshed dialog without starting a larger race-day-ops feature first.
-  - [x] Export validation and feedback states
-        Show relevant missing-data, unsupported-output, disabled-action, and failure states consistently before and after export.
-  - [x] Mobile export drawer refresh
-        Bring the mobile export flow closer to the same structure while preserving compact touch-friendly controls.
+- [ ] Generated flightpath validation follow-up (`Research`, `No account required`)
+      Validate real layouts and tune warnings, route anchor heights, and unclear sequence feedback before treating generated routes as more than a first-pass drafting aid. Research document: `docs/research/generated-flightpath-assistance.md`.
 
-- [x] Generated flightpath assistance (`Research`, `No account required`)
-      Shipped the first generated flightpath slice as an optional drafting aid. The intended race sequence is defined by the obstacle order in the track items list (backed by `shapeOrder`), and users can drag-to-reorder track items before generating a normal editable race line. The generator assists authoring rather than replacing explicit route editing. Research document: `docs/research/generated-flightpath-assistance.md`.
-  - [x] Generated flightpath prototype
-        Built the smallest useful route-generation prototype from the ordered obstacle list. The output is a normal editable race line, and the layout inspector surfaces unsupported or too-close obstacle warnings before users accept the result.
-  - [x] Drag-to-reorder obstacles (prerequisite)
-        Wired up drag handles in the track items list so users can explicitly set the intended race sequence before generating a path, while keeping race lines out of the track-item stack ordering.
-  - [ ] Generated flightpath validation follow-up
-        Validate real layouts and tune warnings, route anchor heights, and unclear sequence feedback before treating generated routes as more than a first-pass drafting aid.
-
-- [x] Editor reliability polish (`No account required`, `Account-backed`)
-      Run focused stability passes over shipped editor workflows before adding another large surface. Keep each slice small enough to validate without risking import/export, autosave, share publish/read, read-only viewing, or mobile editor flows.
-  - [x] Locked selection action safeguards
-        Locked selections consistently block destructive or confusing actions such as duplicate, delete, route join, and route close across store actions, shortcuts, context menus, inspector controls, item lists, and mobile overlays, while group organization remains available.
-  - [x] Route editing regression pass
-        Harden waypoint insert, delete, drag, segment and vertex selection clearing, route close/join, snapping, undo/redo, and mobile path controls.
-  - [x] Transform and snapping regression pass
-        Validate move, nudge, rotate, resize handles, snapping, grouped selections, mixed locked/editable selections, and no-op history behavior.
-  - [x] Mobile editor ergonomics pass
-        Tighten drawers, touch targets, compact labels, Project Manager flows, path tools, multi-select actions, map reference controls, and inspector panels.
-  - [x] Recovery and failure states
-        Make autosave, import, export, share, account sync, and runtime failures explain what happened and what the user can do next.
-  - [x] Large-layout stability pass
-        Stress-test dense layouts, long routes, map references, 3D preview, PDF/export, and make targeted performance or debounce fixes.
+- [ ] Translation management workflow (`Research`)
+      Evaluate hosted Crowdin versus self-hosted Weblate so TrackDraw can keep English, Dutch, German, and upcoming contributor languages manageable without forcing translators to edit JSON by hand. Keep `dashboard` and `legal` English-only, preserve PR-based review, and keep locale catalogs out of the Worker bundle.
+  - [ ] Hosted versus self-hosted decision
+        Compare Crowdin plan eligibility/costs, especially if TrackDraw gains paid plans, against the operational ownership of self-hosted Weblate.
+  - [ ] Weblate prototype if self-hosting remains preferred
+        Stand up a private/staging Weblate instance, import only translatable namespaces, and validate one namespace end to end before committing to full migration.
+  - [ ] Production deployment plan if Weblate is chosen
+        Design a production-worthy Weblate deployment with pinned containers, TLS/reverse-proxy setup, SMTP, access control, backups, restore testing, monitoring, upgrade/rollback process, and a no-direct-push-to-main security boundary.
+  - [ ] Repository sync workflow
+        Prototype source upload and translation pull requests through GitHub Actions while preserving normal code review and existing locale validation checks.
+  - [ ] Translator guidance
+        Document the language-leader model, suggestion-first contributor flow, FPV terminology, placeholders/ICU syntax, compact UI label expectations, and the `dashboard`/`legal` English-only boundary before inviting broader contributor translation work.
 
 - [ ] Focused 3D item controls (`No account required`)
       Add direct 3D controls for common obstacle edits where they are faster than inspector-only editing and still respect lock state, undo/redo, and mobile constraints.
-  - [x] Editable tower elevation handle
-        Selected custom towers can now be lifted directly in the 3D view with the same live-preview, undo/redo, lock-state, mobile drag behavior, and bounded elevation range used by existing 3D elevation controls. Fixed-dimension catalog towers remain protected.
   - [ ] 3D transform gizmo and edit mode toolbar
         Draft PVA: [3D Transform Controls PVA](../pva/3d-transform-controls-pva.md). Prototype selected-item move and rotate controls with orbit-friendly camera behavior only where the interaction is predictable across 2D and 3D. Do not add dimension handles until move/rotate are accepted.
 
 - [ ] Path editing UX (`No account required`)
       Make drawing and adjusting a path feel more natural, especially for curved layouts where the current waypoint model forces extra points to avoid sharp corners.
-  - [x] Path drawing interaction improvements
-        Removed the misleading straight rubber-band preview in favour of the live Catmull-Rom curve preview, added a persistent start-point ring so users can see where the path began during long-form drawing, and tightened the desktop minimum waypoint gap to 0.15 m to reduce accidental duplicate placements.
-  - [x] Automatic curve smoothing
-        Catmull-Rom splines (chord-length parameterized) were already the sole rendering path for committed polylines. The drawing overlay now also relies on the smooth preview exclusively, making the curve shape visible from the first waypoint onwards.
   - [ ] Per-waypoint curve strength (`Research`)
         Only pursue if automatic smoothing is not sufficient and if there is an interaction model that works on both desktop and mobile. Direct canvas handles are likely too fiddly on touch; validate an inspector- or gesture-based alternative first before committing to an approach.
-  - [x] Interactive elevation profile dialog
-        Turned the Elevation Profile into a route-review surface with focusable waypoint markers, obstacle/timing/warning markers, warning-segment jump actions, and profile-to-canvas selection/hover links. Direct elevation editing remains out of scope until navigation and review interactions have settled.
   - [ ] 3D maneuver curve optimization (`Research`)
         Powerloops, split-S maneuvers, and similar moves are inherently 3D: a powerloop is a full vertical circle back through a gate, a split-S is a downward half-loop with a direction reversal. The current CatmullRom route renders these as flat horizontal curves, which is physically wrong. The goal is geometry-driven optimization with no manual annotation — the user just draws waypoints that describe the spatial intent (a tight loop near a gate, a 180° arc with elevation change), and the optimizer automatically detects the pattern and generates the correct 3D curve. The 2D canvas shows a recognizable indicator for the detected maneuver section; the 3D preview renders the actual vertical loop or half-loop. Research document: `docs/research/maneuver-curve-optimization.md`.
-  - [x] Research note and first-pass maneuver signals
-        Added the maneuver optimization research note, kept route geometry schema-compatible, made 3D route smoothing respect vertical waypoint distance, rendered warning colors on one continuous 3D route tube, and added first-pass powerloop/split-S detection signals in the elevation review.
   - [ ] True 3D curve replacement for detected maneuvers
         Replace detected maneuver sections with physically plausible vertical loop or half-loop curve geometry and blend cleanly into surrounding route segments. Keep this open until the 3D preview renders the corrected maneuver shape rather than only detecting and reviewing it.
 
 ## Later Product Follow-up
-
-- [x] Remove legacy localStorage migration shims (`Lower priority`, `No account required`)
-      Removed the v1.11.0 one-time migration shims for the old raw-string `trackdraw.measurementUnitSystem` value and the old per-key `trackdraw-hint-*-dismissed` hint flags. The active Zustand persist keys remain unchanged.
 
 - [ ] VelociDrone experimental export stabilization (`Lower priority`, `No account required`)
       Keep this parked until there is appetite to validate more real layouts and tighten prefab mapping/orientation edge cases.
@@ -103,7 +71,7 @@ The next TrackDraw priority is export and handoff workflow polish first, editor 
       Let users publish a preset to a community store where others can browse and save it. Keep out of scope until account-backed preset storage is proven in practice. Research document: `docs/research/presets-store.md`.
 
 - [ ] Race-day workflow depth (`No account required`)
-      Keep this behind export/handoff polish. The first future slice should deepen the existing Race Pack and event-preparation flow only once the current export surface is clearer.
+      Keep this behind generated flightpath validation and focused 3D controls. The first future slice should deepen the existing Race Pack and event-preparation flow only where it improves practical setup and handoff.
   - [ ] Race director page in Race Pack
         Add a race-director-oriented page to the Race Pack.
     - [ ] Race-day ops elements around the existing start area
@@ -186,17 +154,70 @@ The next TrackDraw priority is export and handoff workflow polish first, editor 
   - [ ] Platform recommendation
         Recommend web-first, Electron, Capacitor, or no wrapper for now.
 
+## v1.13.0 Archive
+
+<details>
+<summary>Completed release work to archive with v1.13.0</summary>
+
+- [x] Generated flightpath assistance (`Research`, `No account required`)
+      Shipped the first generated flightpath slice as an optional drafting aid. The intended race sequence is defined by the obstacle order in the track items list, and users can drag-to-reorder track items before generating a normal editable race line. Generated routes remain assistive, editable, and non-authoritative.
+  - [x] Generated flightpath prototype
+        Built the smallest useful route-generation prototype from the ordered obstacle list. The output is a normal editable race line, and the layout inspector surfaces warnings when the generated line is likely to need extra attention.
+  - [x] Drag-to-reorder obstacles
+        Wired up drag handles in the track items list so users can explicitly set the intended race sequence before generating a path, while keeping race lines out of the track-item stack ordering.
+
+- [x] Interactive elevation profile dialog (`No account required`)
+      Turned the Elevation Profile into a route-review surface with focusable waypoint markers, obstacle/timing/warning markers, warning-segment jump actions, and profile-to-canvas selection/hover links. Direct elevation editing remains out of scope until navigation and review interactions have settled.
+
+- [x] Export and handoff workflow polish (`No account required`)
+      Reworked the export dialog around the same clear structure as the Project Manager and Share dialogs, with categories, formats, filename fields, theme controls, route-number settings, and readiness warnings scoped to the selected output.
+  - [x] Export dialog information architecture
+        Grouped exports by category in the sidebar, then let users choose the concrete output and show only the options and limitation details that apply to it.
+  - [x] Race Pack positioning
+        Presented Race Pack as the race-day handoff export inside the refreshed dialog without starting a larger race-day-ops feature first.
+  - [x] Export validation and feedback states
+        Show relevant missing-data, unsupported-output, disabled-action, and failure states consistently before and after export.
+  - [x] Mobile export drawer refresh
+        Brought the mobile export flow closer to the same structure while preserving compact touch-friendly controls.
+
+- [x] Editor reliability polish (`No account required`, `Account-backed`)
+      Ran focused stability passes over shipped editor workflows without changing the product model.
+  - [x] Locked selection action safeguards
+        Locked selections consistently block destructive or confusing actions such as duplicate, delete, route join, and route close across store actions, shortcuts, context menus, inspector controls, item lists, and mobile overlays, while group organization remains available.
+  - [x] Route editing regression pass
+        Hardened waypoint insert, delete, drag, segment and vertex selection clearing, route close/join, snapping, undo/redo, and mobile path controls.
+  - [x] Transform and snapping regression pass
+        Validated move, nudge, rotate, resize handles, snapping, grouped selections, mixed locked/editable selections, and no-op history behavior.
+  - [x] Mobile editor ergonomics pass
+        Tightened drawers, touch targets, compact labels, Project Manager flows, path tools, multi-select actions, map reference controls, and inspector panels.
+  - [x] Recovery and failure states
+        Made autosave, import, export, share, account sync, and runtime failures explain what happened and what the user can do next.
+  - [x] Magic-link handoff reliability
+        Added a protected confirmation step for one-time magic links so automatic email security checks are less likely to consume a sign-in link before the user opens TrackDraw.
+  - [x] Project save observability
+        Improved account project save diagnostics by treating malformed/invalid save payloads as bad requests and logging unexpected save failures with more useful server-side detail.
+  - [x] Large-layout stability pass
+        Stress-tested dense layouts, long routes, map references, 3D preview, PDF/export, and made targeted performance or debounce fixes.
+
+- [x] Locale catalog asset loading (`No account required`, `Account-backed`)
+      Moved English, Dutch, German, and future locale JSON catalogs out of static server imports and into generated OpenNext assets, while keeping local dev/tests able to read from `lang/{locale}`. Dashboard and legal namespaces remain English-only.
+
+- [x] Remove legacy localStorage migration shims (`No account required`)
+      Removed the v1.11.0 one-time migration shims for the old raw-string `trackdraw.measurementUnitSystem` value and the old per-key `trackdraw-hint-*-dismissed` hint flags. The active Zustand persist keys remain unchanged.
+
+</details>
+
 ## v1.12.0 Archive
 
 <details>
 <summary>Completed release work to archive with v1.12.0</summary>
 
 - [x] Multilingual product experience (`No account required`)
-      TrackDraw now has a full multilingual product layer across the public site, Studio, share/embed/gallery surfaces, dashboard, dialogs, inspector, exported handoff copy, and metadata/API docs. English, Dutch, and German are supported through explicit language choice and browser-language first-run defaults, while existing routes such as `/studio`, `/gallery`, `/share/[token]`, and `/embed/[token]` stay unchanged.
+      TrackDraw now has a multilingual product layer across the public site, Studio, share/embed/gallery surfaces, dialogs, inspector, exported handoff copy, and shared product vocabulary. Dashboard and legal surfaces remain English-only. English, Dutch, and German are supported through explicit language choice and browser-language first-run defaults, while existing routes such as `/studio`, `/gallery`, `/share/[token]`, and `/embed/[token]` stay unchanged.
   - [x] I18n architecture
         Added next-intl without locale routing, route-scoped message loading, a persisted locale preference, server-side locale/message resolution, and a language picker that works without an account.
   - [x] Dutch rollout and copy QA
-        Migrated the editor, dialogs, inspector, dashboard, gallery, share/embed views, export/PDF/Race Pack copy, and shared shape/tool vocabulary to message catalogs. Follow-up QA tightened Dutch FPV terminology, fixed missed strings, and corrected account/delete/export copy issues surfaced by the rollout.
+        Migrated the editor, dialogs, inspector, gallery, share/embed views, export/PDF/Race Pack copy, and shared shape/tool vocabulary to message catalogs. Follow-up QA tightened Dutch FPV terminology, fixed missed strings, and corrected account/delete/export copy issues surfaced by the rollout.
   - [x] German locale
         Added German message catalogs on the same route-stable i18n foundation, with follow-up copy tightening across Dutch and German.
   - [x] Translation guardrails
