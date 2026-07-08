@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDefaultDesign } from "@/lib/track/design";
 import type { StoredProject } from "@/lib/server/projects";
 import {
@@ -69,10 +69,22 @@ function postRequest(body: unknown) {
   return jsonRequest("http://localhost/api/projects", "POST", body);
 }
 
+function malformedJsonPostRequest() {
+  return new Request("http://localhost/api/projects", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{",
+  });
+}
+
 describe("projects API route", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(getCurrentUserFromHeaders).mockResolvedValue(testUser);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("lists account projects with design version metadata", async () => {
@@ -121,6 +133,43 @@ describe("projects API route", () => {
       forceWrite: undefined,
       baseDesignUpdatedAt: "2026-04-20T10:00:00.000Z",
     });
+  });
+
+  it("returns bad request for invalid project save payloads without logging an error", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const response = await POST(
+      postRequest({
+        title: "Race layout",
+        forceWrite: "yes",
+      })
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      ok: false,
+      error: "Invalid project payload",
+    });
+    expect(saveProjectForUser).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it("returns bad request for malformed project save JSON without logging an error", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const response = await POST(malformedJsonPostRequest());
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      ok: false,
+      error: "Invalid project payload",
+    });
+    expect(saveProjectForUser).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
   });
 
   it("returns a version conflict without overwriting the account project", async () => {
@@ -172,5 +221,67 @@ describe("projects API route", () => {
         shapeCount: 0,
       },
     });
+  });
+
+  it("logs useful details for unexpected project save failures", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const design = createDefaultDesign();
+    vi.mocked(saveProjectForUser).mockRejectedValue(
+      new Error("D1 insert failed")
+    );
+
+    const response = await POST(
+      postRequest({
+        projectId: "project-1",
+        title: "Race layout",
+        design,
+      })
+    );
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      ok: false,
+      error: "Failed to save project",
+    });
+    expect(consoleError).toHaveBeenCalledWith(
+      "[TrackDraw] Failed to save project: Error: D1 insert failed",
+      expect.objectContaining({
+        name: "Error",
+        message: "D1 insert failed",
+      })
+    );
+  });
+
+  it("keeps the raw thrown value when logging unexpected non-error failures", async () => {
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const design = createDefaultDesign();
+    const thrown = { code: "D1_BUSY", retryable: true };
+    vi.mocked(saveProjectForUser).mockRejectedValue(thrown);
+
+    const response = await POST(
+      postRequest({
+        projectId: "project-1",
+        title: "Race layout",
+        design,
+      })
+    );
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      ok: false,
+      error: "Failed to save project",
+    });
+    expect(consoleError).toHaveBeenCalledWith(
+      "[TrackDraw] Failed to save project: UnknownError: [object Object]",
+      expect.objectContaining({
+        name: "UnknownError",
+        message: "[object Object]",
+        thrown,
+      })
+    );
   });
 });
