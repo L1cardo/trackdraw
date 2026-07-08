@@ -63,6 +63,102 @@ function setupRoute() {
   return { routeId, timingGateId };
 }
 
+function setupRouteWithSplitMarkers() {
+  const state = resetEditorStore();
+  const routeId = state.addShape(
+    polylineDraft({
+      points: [
+        { x: 0, y: 0, z: 0 },
+        { x: 4, y: 0, z: 1 },
+      ],
+    })
+  );
+  state.addShape(
+    gateDraft({
+      x: 50,
+      y: 50,
+      meta: { timing: { role: "split" } },
+    })
+  );
+  const visibleSplitId = state.addShape(
+    gateDraft({
+      x: 4,
+      y: 0,
+      meta: { timing: { role: "split" } },
+    })
+  );
+  state.setSelection([routeId]);
+  return { routeId, visibleSplitId };
+}
+
+function setupRouteWithRouteOrderedSplitMarkers() {
+  const state = resetEditorStore();
+  const routeId = state.addShape(
+    polylineDraft({
+      points: [
+        { x: 0, y: 0, z: 0 },
+        { x: 10, y: 0, z: 1 },
+      ],
+    })
+  );
+  state.addShape(
+    gateDraft({
+      x: 8,
+      y: 0,
+      meta: { timing: { role: "split" } },
+    })
+  );
+  const firstRouteSplitId = state.addShape(
+    gateDraft({
+      x: 2,
+      y: 0,
+      meta: { timing: { role: "split" } },
+    })
+  );
+  state.setSelection([routeId]);
+  return { firstRouteSplitId, routeId };
+}
+
+function setupRouteWithOffRouteObstacle() {
+  const state = resetEditorStore();
+  const routeId = state.addShape(
+    polylineDraft({
+      points: [
+        { x: 0, y: 0, z: 0 },
+        { x: 4, y: 0, z: 1 },
+      ],
+    })
+  );
+  state.addShape(gateDraft({ x: 50, y: 50 }));
+  const visibleGateId = state.addShape(gateDraft({ x: 4, y: 0 }));
+  state.setSelection([routeId]);
+  return { routeId, visibleGateId };
+}
+
+function setupSelectedSecondaryRouteWithReversedObstacleOrder() {
+  const state = resetEditorStore();
+  state.addShape(
+    polylineDraft({
+      points: [
+        { x: 0, y: 0, z: 0 },
+        { x: 10, y: 0, z: 1 },
+      ],
+    })
+  );
+  const secondaryRouteId = state.addShape(
+    polylineDraft({
+      points: [
+        { x: 10, y: 0, z: 1 },
+        { x: 0, y: 0, z: 0 },
+      ],
+    })
+  );
+  const primaryFirstGateId = state.addShape(gateDraft({ x: 2, y: 0 }));
+  const secondaryFirstGateId = state.addShape(gateDraft({ x: 8, y: 0 }));
+  state.setSelection([secondaryRouteId]);
+  return { primaryFirstGateId, secondaryFirstGateId, secondaryRouteId };
+}
+
 describe("ElevationChart", () => {
   afterEach(() => {
     cleanup();
@@ -140,6 +236,102 @@ describe("ElevationChart", () => {
     );
 
     expect(useEditor.getState().session.selection).toEqual([timingGateId]);
+  });
+
+  it("numbers visible split timing markers without counting off-route splits", () => {
+    const { visibleSplitId } = setupRouteWithSplitMarkers();
+    renderElevationChart();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open elevation details" })
+    );
+
+    expect(
+      screen.queryByRole("button", {
+        name: "Select timing marker Split 2 in elevation profile",
+      })
+    ).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Select timing marker Split 1 in elevation profile",
+      })
+    );
+
+    expect(useEditor.getState().session.selection).toEqual([visibleSplitId]);
+  });
+
+  it("numbers split timing markers in visible route order", () => {
+    const { firstRouteSplitId } = setupRouteWithRouteOrderedSplitMarkers();
+    renderElevationChart();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open elevation details" })
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Select timing marker Split 1 in elevation profile",
+      })
+    );
+
+    expect(useEditor.getState().session.selection).toEqual([firstRouteSplitId]);
+  });
+
+  it("uses the rendered timing marker color in the marker legend", () => {
+    setupRoute();
+    renderElevationChart();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open elevation details" })
+    );
+
+    const timingLegendDot = screen.getByText("Timing")
+      .previousElementSibling as HTMLElement | null;
+
+    expect(timingLegendDot?.style.background).toBe("#f59e0b");
+  });
+
+  it("labels obstacle markers with route obstacle numbers", () => {
+    const { visibleGateId } = setupRouteWithOffRouteObstacle();
+    renderElevationChart();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open elevation details" })
+    );
+
+    expect(
+      screen.queryByRole("button", {
+        name: "Select obstacle 2 in elevation profile",
+      })
+    ).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Select obstacle 1 in elevation profile",
+      })
+    );
+
+    expect(useEditor.getState().session.selection).toEqual([visibleGateId]);
+  });
+
+  it("falls back to selected route order for obstacle labels on non-primary routes", () => {
+    const { primaryFirstGateId, secondaryFirstGateId } =
+      setupSelectedSecondaryRouteWithReversedObstacleOrder();
+    renderElevationChart();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open elevation details" })
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Select obstacle 1 in elevation profile",
+      })
+    );
+
+    expect(useEditor.getState().session.selection).toEqual([
+      secondaryFirstGateId,
+    ]);
+    expect(useEditor.getState().session.selection).not.toEqual([
+      primaryFirstGateId,
+    ]);
   });
 
   it("offers warning segment jump actions in the details dialog", () => {
