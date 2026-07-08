@@ -6,6 +6,8 @@ This changelog is intentionally concise. GitHub Releases and Release Drafter can
 
 ## [Unreleased]
 
+## [1.13.0]
+
 ### Generated race lines
 
 TrackDraw can now generate a first editable race line from the ordered obstacle list. Reorder the track items to set the intended sequence, then use Generate race line from the project inspector to create a smooth starting path through supported route obstacles.
