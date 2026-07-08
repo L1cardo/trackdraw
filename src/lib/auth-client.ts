@@ -34,6 +34,13 @@ type MagicLinkSignInOptions = {
   newUserCallbackURL?: string;
 };
 
+export type MagicLinkVerifyOptions = {
+  token: string;
+  callbackURL?: string;
+  newUserCallbackURL?: string;
+  errorCallbackURL?: string;
+};
+
 type SignOutOptions = {
   fetchOptions?: {
     onSuccess?: () => void;
@@ -43,6 +50,8 @@ type SignOutOptions = {
 const DEV_AUTH_SESSION_KEY = "trackdraw-dev-auth-session";
 const DEV_AUTH_PROFILES_KEY = "trackdraw-dev-auth-profiles";
 const DEV_AUTH_ROLE_KEY = "trackdraw-dev-auth-role";
+const MAGIC_LINK_REQUEST_KEY = "trackdraw-magic-link-request";
+const MAGIC_LINK_REQUEST_TTL_MS = 15 * 60 * 1000;
 const DEV_AUTH_EVENT = "trackdraw-dev-auth-change";
 let devSessionCache: AuthSessionData | null = null;
 let devSessionCacheLoaded = false;
@@ -95,6 +104,14 @@ const betterAuthClient = createAuthClient({
   plugins: [magicLinkClient(), passkeyClient()],
 });
 
+function removeLocalStorageItem(key: string) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    // Storage may be blocked in private or hardened browser contexts.
+  }
+}
+
 export function isDevAuthShimEnabled() {
   return process.env.NODE_ENV === "development";
 }
@@ -109,6 +126,91 @@ function readDevAuthRole() {
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+function readMagicLinkRequestMarker(now = Date.now()) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const rawValue = window.localStorage.getItem(MAGIC_LINK_REQUEST_KEY);
+    if (!rawValue) return null;
+
+    const parsedValue = JSON.parse(rawValue) as {
+      requestedAt?: unknown;
+      callbackURL?: unknown;
+    };
+    const requestedAt =
+      typeof parsedValue.requestedAt === "number"
+        ? parsedValue.requestedAt
+        : null;
+
+    if (!requestedAt || now - requestedAt > MAGIC_LINK_REQUEST_TTL_MS) {
+      removeLocalStorageItem(MAGIC_LINK_REQUEST_KEY);
+      return null;
+    }
+
+    return {
+      requestedAt,
+      callbackURL:
+        typeof parsedValue.callbackURL === "string"
+          ? parsedValue.callbackURL
+          : null,
+    };
+  } catch {
+    removeLocalStorageItem(MAGIC_LINK_REQUEST_KEY);
+    return null;
+  }
+}
+
+export function markMagicLinkRequested(callbackURL: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      MAGIC_LINK_REQUEST_KEY,
+      JSON.stringify({
+        requestedAt: Date.now(),
+        callbackURL,
+      })
+    );
+  } catch {
+    // Magic-link sign-in should still work when browser storage is unavailable.
+  }
+}
+
+export function clearMagicLinkRequestMarker() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  removeLocalStorageItem(MAGIC_LINK_REQUEST_KEY);
+}
+
+export function canAutoVerifyMagicLink(callbackURL: string | null) {
+  const marker = readMagicLinkRequestMarker();
+  if (!marker) return false;
+
+  return (
+    !callbackURL || !marker.callbackURL || marker.callbackURL === callbackURL
+  );
+}
+
+function normalizeMagicLinkSignInOptions(options: MagicLinkSignInOptions) {
+  if (
+    options.callbackURL &&
+    options.newUserCallbackURL &&
+    options.callbackURL === options.newUserCallbackURL
+  ) {
+    const normalizedOptions = { ...options };
+    delete normalizedOptions.newUserCallbackURL;
+    return normalizedOptions;
+  }
+
+  return options;
 }
 
 function readDevAuthProfiles(): Record<string, DevAuthProfileRecord> {
@@ -365,7 +467,9 @@ export const authClient = {
         return;
       }
 
-      return betterAuthClient.signIn.magicLink(options);
+      return betterAuthClient.signIn.magicLink(
+        normalizeMagicLinkSignInOptions(options)
+      );
     },
     async passkey() {
       if (isDevAuthShimEnabled()) {
@@ -390,6 +494,34 @@ export const authClient = {
       };
 
       return clientWithPasskey.signIn.passkey();
+    },
+  },
+  magicLink: {
+    async verify(options: MagicLinkVerifyOptions) {
+      if (isDevAuthShimEnabled()) {
+        if (typeof window !== "undefined") {
+          window.location.href = options.callbackURL ?? "/studio";
+        }
+        return;
+      }
+
+      const clientWithMagicLink =
+        betterAuthClient as typeof betterAuthClient & {
+          magicLink: {
+            verify: (input: {
+              query: Pick<MagicLinkVerifyOptions, "token">;
+            }) => Promise<{
+              data: unknown;
+              error: { message?: string; code?: string } | null;
+            }>;
+          };
+        };
+
+      return clientWithMagicLink.magicLink.verify({
+        query: {
+          token: options.token,
+        },
+      });
     },
   },
   async preloadPasskeyAutoFill() {

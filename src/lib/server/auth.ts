@@ -215,9 +215,9 @@ export async function getAuth() {
           window: 900,
           max: 3,
         },
-        sendMagicLink: async ({ email: recipient, url, token }) => {
+        sendMagicLink: async ({ email: recipient, url }) => {
           const [
-            { buildMagicLinkEmail },
+            { buildMagicLinkConfirmationUrl, buildMagicLinkEmail },
             { isPlunkConfigured, sendPlunkMail },
           ] = await Promise.all([loadAuthEmailModule(), loadPlunkModule()]);
 
@@ -242,8 +242,9 @@ export async function getAuth() {
           }
 
           if (isLocalAuthDeliveryFallbackAllowed()) {
+            const confirmationUrl = buildMagicLinkConfirmationUrl(url);
             console.info(
-              `[TrackDraw auth] Magic link for ${recipient}: ${url} (token: ${token})`
+              `[TrackDraw auth] Magic link for ${recipient}: ${confirmationUrl}`
             );
             return;
           }
