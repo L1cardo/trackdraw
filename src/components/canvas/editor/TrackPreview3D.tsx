@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
@@ -53,7 +53,10 @@ import {
   CameraCapture,
   GradientSky,
   MemoShape3D,
+  OrbitGroundConstraint,
+  ORBIT_MAX_POLAR_ANGLE,
   ScreenshotHelper,
+  TrackSurface3D,
   WheelBridge,
   type QuaternionState,
   useCatalogTextureWarmup,
@@ -505,34 +508,14 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
             color="#60a5fa"
           />
 
-          <mesh
-            position={[cx, -0.01, cz]}
-            rotation={[-Math.PI / 2, 0, 0]}
-            receiveShadow
-            onClick={(event) => {
+          <TrackSurface3D
+            field={field}
+            theme={t}
+            onGroundClick={(event) => {
               event.stopPropagation();
               if (event.delta > 3) return;
               setSelection([]);
             }}
-          >
-            <planeGeometry args={[field.width, field.height]} />
-            <meshStandardMaterial
-              color={t.groundColor}
-              roughness={0.98}
-              metalness={0}
-            />
-          </mesh>
-
-          <Grid
-            position={[cx, 0, cz]}
-            args={[field.width, field.height]}
-            cellSize={field.gridStep}
-            cellColor={t.gridCell}
-            sectionSize={field.gridStep * 5}
-            sectionColor={t.gridSection}
-            fadeDistance={Math.max(90, longest * 2)}
-            fadeStrength={1.15}
-            infiniteGrid={false}
           />
 
           {shapes.map((shape) => (
@@ -541,6 +524,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
                 isPrimaryPolyline={primaryPolyline?.id === shape.id}
                 isSelected={selectedIdSet.has(shape.id)}
                 onSelect={handleShapeSelect}
+                theme={t}
                 shape={
                   elevationDrag?.shapeId === shape.id && previewPolyline
                     ? previewPolyline
@@ -763,6 +747,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
             minDistance={8}
             maxDistance={Math.max(120, longest * 3)}
           />
+          <OrbitGroundConstraint controlsRef={orbitControlsRef} />
           {showGizmo ? (
             <CameraAxisTracker onChange={setAxisQuaternion} />
           ) : null}
@@ -791,7 +776,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               dampingFactor={0.08}
               screenSpacePanning
               target={[cx, 0, cz]}
-              maxPolarAngle={Math.PI / 2}
+              maxPolarAngle={ORBIT_MAX_POLAR_ANGLE}
               minDistance={8}
               maxDistance={Math.max(120, longest * 3)}
               mouseButtons={{
@@ -821,7 +806,7 @@ const TrackPreview3D = forwardRef<TrackPreview3DHandle, TrackPreview3DProps>(
               enableZoom={false}
               screenSpacePanning
               target={[cx, 0, cz]}
-              maxPolarAngle={Math.PI / 2}
+              maxPolarAngle={ORBIT_MAX_POLAR_ANGLE}
               minDistance={8}
               maxDistance={Math.max(120, longest * 3)}
               mouseButtons={{
