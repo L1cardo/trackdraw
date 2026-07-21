@@ -22,7 +22,7 @@ Labels used below:
 
 ## Current Priority
 
-The next TrackDraw priority is generated flightpath validation first, translation management tooling second, and focused 3D item controls third. Selective race-day workflow depth can follow once those are stable. Keep larger account, community, billing, and platform expansion behind those unless a specific support or release risk forces it forward.
+The next TrackDraw priority is generated flightpath validation first, Simplified Chinese product integration and translation management tooling second, and focused 3D item controls third. Selective race-day workflow depth can follow once those are stable. Keep larger account, community, billing, and platform expansion behind those unless a specific support or release risk forces it forward.
 
 ## Follow-up
 
@@ -30,7 +30,7 @@ The next TrackDraw priority is generated flightpath validation first, translatio
       Validate real layouts and tune warnings, route anchor heights, and unclear sequence feedback before treating generated routes as more than a first-pass drafting aid. Research document: `docs/research/generated-flightpath-assistance.md`.
 
 - [ ] Translation management workflow (`Research`)
-      Evaluate hosted Crowdin versus self-hosted Weblate so TrackDraw can keep English, Dutch, German, and upcoming contributor languages manageable without forcing translators to edit JSON by hand. Keep `dashboard` and `legal` English-only, preserve PR-based review, and keep locale catalogs out of the Worker bundle.
+      Evaluate hosted Crowdin versus self-hosted Weblate so TrackDraw can keep English, Dutch, German, Simplified Chinese, and upcoming contributor languages manageable without forcing translators to edit JSON by hand. Keep `dashboard` and `legal` English-only, preserve PR-based review, and keep locale catalogs out of the Worker bundle.
   - [ ] Hosted versus self-hosted decision
         Compare Crowdin plan eligibility/costs, especially if TrackDraw gains paid plans, against the operational ownership of self-hosted Weblate.
   - [ ] Weblate prototype if self-hosting remains preferred
@@ -41,6 +41,21 @@ The next TrackDraw priority is generated flightpath validation first, translatio
         Prototype source upload and translation pull requests through GitHub Actions while preserving normal code review and existing locale validation checks.
   - [ ] Translator guidance
         Document the language-leader model, suggestion-first contributor flow, FPV terminology, placeholders/ICU syntax, compact UI label expectations, and the `dashboard`/`legal` English-only boundary before inviting broader contributor translation work.
+
+- [ ] Simplified Chinese product-integration follow-up (`No account required`)
+      Finish the product integration left outside the locale-only merge in [#583](https://github.com/dutchdronesquad/trackdraw/pull/583). Use the earlier combined work in [#556](https://github.com/dutchdronesquad/trackdraw/pull/556) as reference, but reimplement each slice against current `main` instead of reviving or cherry-picking that PR.
+  - [ ] Reliable CJK PDF export
+        Bundle a documented, licensed CJK-capable font for lazy PDF-only loading, pass the active locale into PDF generation, clear failed font-load promises so export can retry, and validate actual jsPDF font registration/output rather than only mocking method calls.
+  - [ ] Locale-aware visual exports
+        Pass the active locale and localized untitled-track fallback through PNG, SVG, and PDF callers so dates and fallback copy follow the selected language.
+  - [ ] Catalog entry localization
+        Localize catalog-backed element names and dimension labels in placement controls, inspectors, and shape labels while retaining safe snapshot/default fallbacks for existing projects. Add deliberate entries for every supported locale instead of permanent English placeholders.
+  - [ ] Starter-layout localization
+        Localize starter-layout names, descriptions, and generated project titles across the starter flow and new-project dialog without changing stored geometry or coupling language to measurement units.
+  - [ ] Supporting locale cleanup
+        Format public-gallery dates with the active locale and extend API docs title/document-language selection to every supported locale.
+  - [ ] Focused localization regression coverage
+        Cover font-load retry behavior, real PDF font handling, locale propagation through export callers, catalog translation completeness, and starter-layout copy across supported locales.
 
 - [ ] Focused 3D item controls (`No account required`)
       Add direct 3D controls for common obstacle edits where they are faster than inspector-only editing and still respect lock state, undo/redo, and mobile constraints.
