@@ -180,7 +180,7 @@ export function useEditorProjects({
             performance.now() - startedAt
           );
           onSeedTokenImported?.();
-          // eslint-disable-next-line react-hooks/set-state-in-effect
+          // oxlint-disable-next-line react-compiler
           setSaveStatusLabel(tShell("editableCopyCreated"));
         } catch (error) {
           reportLocalSaveFailure(error, onSeedTokenImported);
