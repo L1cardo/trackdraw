@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   SidebarDialog,
   type SidebarDialogNavItem,
@@ -31,6 +31,7 @@ import type { TrackPreview3DHandle } from "@/components/canvas/editor/TrackPrevi
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslations } from "next-intl";
 import type { Translate } from "@/lib/editor/tool-registry";
+import { trackProductEvent } from "@/lib/product-events";
 
 export interface ExportDialogProps {
   open: boolean;
@@ -493,14 +494,22 @@ export default function ExportDialog({
   );
   const webmToastIdRef = useRef<string | number | null>(null);
   const [webmStartedAt, setWebmStartedAt] = useState<number | null>(null);
-  const [exportTheme, setExportTheme] = useState<Theme>("dark");
+  const [exportThemeSelection, setExportThemeSelection] = useState(() => ({
+    sourceTheme: currentTheme,
+    theme: currentTheme,
+  }));
+  const exportTheme =
+    exportThemeSelection.sourceTheme === currentTheme
+      ? exportThemeSelection.theme
+      : currentTheme;
+  const setExportTheme = useCallback(
+    (theme: Theme) => {
+      setExportThemeSelection({ sourceTheme: currentTheme, theme });
+    },
+    [currentTheme]
+  );
   const [includeObstacleNumbers, setIncludeObstacleNumbers] = useState(true);
   const [canvasReady, setCanvasReady] = useState(false);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setExportTheme(currentTheme);
-  }, [currentTheme]);
 
   useEffect(() => {
     if (!open) return;
@@ -553,6 +562,7 @@ export default function ExportDialog({
     fn: () => T | Promise<T>,
     options?: {
       closeOnStart?: boolean;
+      eventFormat?: ExportFormatId;
       successMessage?: string;
       toastId?: string | number;
     }
@@ -563,6 +573,12 @@ export default function ExportDialog({
     }
     try {
       const result = await fn();
+      if (options?.eventFormat) {
+        trackProductEvent("export.completed", {
+          projectId,
+          metadata: { format: options.eventFormat },
+        });
+      }
       const warningText =
         !!result &&
         typeof result === "object" &&
@@ -737,53 +753,72 @@ export default function ExportDialog({
 
     switch (formatId) {
       case "png":
-        return run("png", () =>
-          exportPngFile(design, filenameFor(format), exportTheme, 3, {
-            includeObstacleNumbers,
-            unitSystem,
-          })
+        return run(
+          "png",
+          () =>
+            exportPngFile(design, filenameFor(format), exportTheme, 3, {
+              includeObstacleNumbers,
+              unitSystem,
+            }),
+          { eventFormat: formatId }
         );
       case "svg":
-        return run("svg", () =>
-          exportSvgFile(design, filenameFor(format), exportTheme, {
-            includeObstacleNumbers,
-            unitSystem,
-          })
+        return run(
+          "svg",
+          () =>
+            exportSvgFile(design, filenameFor(format), exportTheme, {
+              includeObstacleNumbers,
+              unitSystem,
+            }),
+          { eventFormat: formatId }
         );
       case "render3d":
-        return run("3d", () => {
-          const dataUrl = preview3DRef?.current?.screenshot();
-          if (!dataUrl) throw new Error(t("export.messages.view3dUnavailable"));
-          const a = document.createElement("a");
-          a.href = dataUrl;
-          a.download = filenameFor(format);
-          a.click();
-        });
+        return run(
+          "3d",
+          () => {
+            const dataUrl = preview3DRef?.current?.screenshot();
+            if (!dataUrl)
+              throw new Error(t("export.messages.view3dUnavailable"));
+            const a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = filenameFor(format);
+            a.click();
+          },
+          { eventFormat: formatId }
+        );
       case "racePack":
-        return run("race-day-pdf", async () => {
-          const stage = canvasRef.current?.getStage();
-          if (!stage) throw new Error(t("export.messages.canvasNotReady"));
-          const { exportPdf } = await import("@/lib/export/exportPdf");
-          const shareUrl = await getRacePackShareUrl();
-          await exportPdf(
-            stage,
-            design,
-            filenameFor(format),
-            exportTheme,
-            { t: tExportPdf, tSetup: tSetupEstimate, tShapes },
-            {
-              includeObstacleNumbers,
-              preset: "race-day",
-              shareUrl,
-              unitSystem,
-            }
-          );
-        });
+        return run(
+          "race-day-pdf",
+          async () => {
+            const stage = canvasRef.current?.getStage();
+            if (!stage) throw new Error(t("export.messages.canvasNotReady"));
+            const { exportPdf } = await import("@/lib/export/exportPdf");
+            const shareUrl = await getRacePackShareUrl();
+            await exportPdf(
+              stage,
+              design,
+              filenameFor(format),
+              exportTheme,
+              { t: tExportPdf, tSetup: tSetupEstimate, tShapes },
+              {
+                includeObstacleNumbers,
+                preset: "race-day",
+                shareUrl,
+                unitSystem,
+              }
+            );
+          },
+          { eventFormat: formatId }
+        );
       case "json":
-        return run("json", () => {
-          const serialized = serializeDesign(design);
-          downloadJsonFile(filenameFor(format), serialized);
-        });
+        return run(
+          "json",
+          () => {
+            const serialized = serializeDesign(design);
+            downloadJsonFile(filenameFor(format), serialized);
+          },
+          { eventFormat: formatId }
+        );
       case "webm":
         return run(
           "webm",
@@ -821,13 +856,16 @@ export default function ExportDialog({
           },
           {
             closeOnStart: true,
+            eventFormat: formatId,
             successMessage: t("export.webm.ready"),
             toastId: "webm-flythrough-export",
           }
         );
       case "velocidrone":
-        return run("trk", () =>
-          exportVelocidroneFile(design, filenameFor(format))
+        return run(
+          "trk",
+          () => exportVelocidroneFile(design, filenameFor(format)),
+          { eventFormat: formatId }
         );
     }
   };

@@ -22,15 +22,18 @@ Labels used below:
 
 ## Current Priority
 
-The next TrackDraw priority is generated flightpath validation first, translation management tooling second, and focused 3D item controls third. Selective race-day workflow depth can follow once those are stable. Keep larger account, community, billing, and platform expansion behind those unless a specific support or release risk forces it forward.
+The next TrackDraw priority is generated flightpath validation first, Simplified Chinese product integration and translation management tooling second, and focused 3D item controls third. Selective race-day workflow depth can follow once those are stable. Keep larger account, community, billing, and platform expansion behind those unless a specific support or release risk forces it forward.
 
 ## Follow-up
 
 - [ ] Generated flightpath validation follow-up (`Research`, `No account required`)
       Validate real layouts and tune warnings, route anchor heights, and unclear sequence feedback before treating generated routes as more than a first-pass drafting aid. Research document: `docs/research/generated-flightpath-assistance.md`.
 
+- [ ] Static public app shell for Workers Free (`No account required`)
+      Move theme and locale preference initialization out of the request-time root layout so `/`, the `/studio` shell, `/privacy`, and `/terms` can be served as static assets. Keep gallery, share/embed, dashboard/account, auth, and API surfaces dynamic; preserve canonical routes, anonymous Studio use, theme stability, locale behavior, and hydration correctness. Validate the resulting static route output and compare Worker invocation and `exceededCpu` rates before and after deployment.
+
 - [ ] Translation management workflow (`Research`)
-      Evaluate hosted Crowdin versus self-hosted Weblate so TrackDraw can keep English, Dutch, German, and upcoming contributor languages manageable without forcing translators to edit JSON by hand. Keep `dashboard` and `legal` English-only, preserve PR-based review, and keep locale catalogs out of the Worker bundle.
+      Evaluate hosted Crowdin versus self-hosted Weblate so TrackDraw can keep English, Dutch, German, Simplified Chinese, and upcoming contributor languages manageable without forcing translators to edit JSON by hand. Keep `dashboard` and `legal` English-only, preserve PR-based review, and keep locale catalogs out of the Worker bundle.
   - [ ] Hosted versus self-hosted decision
         Compare Crowdin plan eligibility/costs, especially if TrackDraw gains paid plans, against the operational ownership of self-hosted Weblate.
   - [ ] Weblate prototype if self-hosting remains preferred
@@ -41,6 +44,21 @@ The next TrackDraw priority is generated flightpath validation first, translatio
         Prototype source upload and translation pull requests through GitHub Actions while preserving normal code review and existing locale validation checks.
   - [ ] Translator guidance
         Document the language-leader model, suggestion-first contributor flow, FPV terminology, placeholders/ICU syntax, compact UI label expectations, and the `dashboard`/`legal` English-only boundary before inviting broader contributor translation work.
+
+- [ ] Simplified Chinese product-integration follow-up (`No account required`)
+      Finish the product integration left outside the locale-only merge in [#583](https://github.com/dutchdronesquad/trackdraw/pull/583). Use the earlier combined work in [#556](https://github.com/dutchdronesquad/trackdraw/pull/556) as reference, but reimplement each slice against current `main` instead of reviving or cherry-picking that PR.
+  - [ ] Reliable CJK PDF export
+        Bundle a documented, licensed CJK-capable font for lazy PDF-only loading, pass the active locale into PDF generation, clear failed font-load promises so export can retry, and validate actual jsPDF font registration/output rather than only mocking method calls.
+  - [ ] Locale-aware visual exports
+        Pass the active locale and localized untitled-track fallback through PNG, SVG, and PDF callers so dates and fallback copy follow the selected language.
+  - [ ] Catalog entry localization
+        Localize catalog-backed element names and dimension labels in placement controls, inspectors, and shape labels while retaining safe snapshot/default fallbacks for existing projects. Add deliberate entries for every supported locale instead of permanent English placeholders.
+  - [ ] Starter-layout localization
+        Localize starter-layout names, descriptions, and generated project titles across the starter flow and new-project dialog without changing stored geometry or coupling language to measurement units.
+  - [ ] Supporting locale cleanup
+        Format public-gallery dates with the active locale and extend API docs title/document-language selection to every supported locale.
+  - [ ] Focused localization regression coverage
+        Cover font-load retry behavior, real PDF font handling, locale propagation through export callers, catalog translation completeness, and starter-layout copy across supported locales.
 
 - [ ] Focused 3D item controls (`No account required`)
       Add direct 3D controls for common obstacle edits where they are faster than inspector-only editing and still respect lock state, undo/redo, and mobile constraints.
@@ -139,14 +157,14 @@ The next TrackDraw priority is generated flightpath validation first, translatio
   - [ ] Threaded comments follow-up
         Consider richer review threads only if simple notes prove useful.
 
-- [ ] Usage analytics and event tracking (`Account-backed`)
+- [x] Usage analytics and event tracking (`Account-backed`)
       TrackDraw has Tier 1 internal metrics derived from existing tables. Tier 2 requires a lightweight `product_events` table to track share views, export format usage, and editor interactions. This table is kept separate from `audit_events` — audit events are identity-linked and security-sensitive, product events can be anonymous and have a different retention lifecycle. Research document: `docs/research/admin-metrics-analytics.md`.
-  - [ ] `product_events` table and schema
+  - [x] `product_events` table and schema
         Add a narrow D1 table with event name, nullable session ID, nullable user ID, nullable project/share reference, and timestamp. No IP addresses or device fingerprints. Purgeable per user on account deletion.
-  - [ ] First event instrumentation
+  - [x] First event instrumentation
         Instrument the highest-value events: `share.viewed` (public share page), `export.completed` (PDF/PNG/SVG/JSON), `editor.3d_opened` (first open per session), `editor.element_placed` (element type), `project.imported`.
-  - [ ] Tier 2 metrics in admin dashboard
-        Surface aggregate event data alongside existing Tier 1 query metrics in the admin Metrics page: share view counts, dead link detection, export format distribution, 3D preview adoption rate.
+  - [x] Tier 2 metrics in admin dashboard
+        Surface aggregate event data alongside existing Tier 1 query metrics in the admin Metrics page: share views, export format distribution, 3D preview use, element placement, anonymous/account sessions, and creator retention cohorts. Organize the page around product pulse, one baseline-aware focus banner, usage context, operational health, and plan decisions. Dead-link detection remains a possible follow-up.
 
 - [ ] Desktop and mobile wrapper evaluation (`Research`)
       Evaluate whether Electron or Capacitor would materially improve local project handling, native file workflows, or offline resilience.

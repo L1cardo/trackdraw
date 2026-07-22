@@ -17,7 +17,7 @@ TrackDraw is now strong in these areas:
 - Account-backed REST API with API key management and a live race overlay data endpoint
 - Catalog-backed official MultiGP obstacles including gates, ladders, flags, dive gate, launch gate, and a barrier category for hurdles, banners, fencing, and nets
 - Account-backed user presets where users save and reuse named canvas selections across devices
-- English, Dutch, and German multilingual product experience with explicit language choice, route-scoped message loading, generated locale assets, and CI checks for catalog parity and new hardcoded UI copy
+- English, Dutch, German, and Simplified Chinese multilingual product experience with explicit language choice, route-scoped message loading, generated locale assets, and CI checks for catalog parity and new hardcoded UI copy
 - Protected magic-link account handoff that avoids automatic email scanner sign-ins while keeping the sign-in flow simple
 - Optional generated race-line drafting from ordered obstacles, with warnings for layouts that need manual attention
 - Interactive elevation profile review with waypoint, obstacle, timing, and warning markers linked back to the canvas
@@ -25,7 +25,7 @@ TrackDraw is now strong in these areas:
 After v1.13.0, the next product focus should stay deliberately narrow:
 
 1. Generated flightpath validation: test real layouts and tune warnings, route anchor heights, and unclear sequence feedback before treating generated routes as more than a first-pass drafting aid.
-2. Translation management: decide whether hosted Crowdin or self-hosted Weblate is the right contributor workflow, while keeping locale catalogs out of the Worker bundle.
+2. Translation follow-up: finish the Simplified Chinese product integration and decide whether hosted Crowdin or self-hosted Weblate is the right contributor workflow, while keeping locale catalogs out of the Worker bundle.
 3. Focused 3D item controls: add direct 3D move/rotate controls only where they are predictable across desktop, mobile, undo/redo, and lock state.
 
 Race-day workflow depth, account lifecycle depth, custom banner textures, share version history, gallery collections, billing, and community features should stay behind those priorities unless a concrete support issue or release risk forces them forward.
@@ -149,6 +149,30 @@ Maintenance focus:
 - Add regression tests when a fix affects selection, transforms, route editing, export generation, project recovery, sharing, or larger layouts
 - Treat future reliability work as targeted support-driven slices rather than a broad redesign track
 
+#### Static Public App Shell for Workers Free (`No account required`)
+
+Reduce avoidable OpenNext invocations so TrackDraw remains practical on the Workers Free CPU budget without making account-backed or published data static.
+
+Why:
+
+- The root layout currently reads theme and locale state from cookies and request headers, which makes otherwise static routes execute through the Worker
+- Workers Free has a narrow per-request CPU budget that is easy for Next.js server rendering and authentication work to exceed during bursts
+- The landing page, Studio shell, and legal pages do not require request-time database or account data and should be eligible for static asset delivery
+
+Focus:
+
+- Remove request-time theme and locale resolution from the root layout while preserving the saved language and theme after client initialization
+- Pre-render `/`, the `/studio` shell, `/privacy`, and `/terms` so Cloudflare Static Assets can serve them without invoking OpenNext
+- Keep `/gallery`, `/share/[token]`, `/embed/[token]`, dashboard/account surfaces, auth handlers, and API routes dynamic
+- Prevent theme flashes, locale hydration mismatches, accessibility regressions, or route changes while moving preference initialization client-side
+- Confirm production build output marks the intended routes as static and measure Worker invocation and `exceededCpu` rates before and after deployment
+
+Important boundary:
+
+- Do not introduce locale-prefixed routes or break canonical share and embed URLs
+- Do not make editing, local persistence, import/export, or anonymous Studio use depend on an account
+- Do not cache account-backed, gallery, share, embed, auth, or API responses as static assets
+
 #### Regional Measurement Units
 
 International users should be able to work in familiar Metric or Imperial measurement presets without TrackDraw changing its internal geometry model.
@@ -197,7 +221,7 @@ Current shipped foundation:
 
 - `next-intl` is integrated without locale routing, preserving existing `/studio`, `/gallery`, `/share/[token]`, and `/embed/[token]` URLs
 - Browser language provides the first-run default when no saved language preference exists, while manual language choice remains separate from measurement units
-- English, Dutch, and German catalogs cover the public site, editor, share/embed/gallery surfaces, dialogs, inspector, exported handoff copy, and shared product vocabulary
+- English, Dutch, German, and Simplified Chinese catalogs cover the public site, editor, share/embed/gallery surfaces, dialogs, inspector, exported handoff copy, and shared product vocabulary
 - Dashboard and legal surfaces remain English-only
 - English remains the stable fallback baseline, with route-scoped message loading and a centralized i18n catalog policy
 - Locale JSON is generated into OpenNext static assets for production builds so additional languages do not become full static catalog imports in the Cloudflare Worker script
@@ -206,7 +230,7 @@ Current shipped foundation:
 Maintenance focus:
 
 - Keep new product copy behind typed message catalogs instead of reopening hardcoded-copy debt
-- Treat translation management and Worker package size as a near-term operational track now that TrackDraw has three shipped languages and additional contributor languages are expected
+- Treat translation management and Worker package size as a near-term operational track now that TrackDraw has four shipped languages and additional contributor languages are expected
 - Compare hosted Crowdin and self-hosted Weblate before accepting a larger volume of contributor translations, using the existing `lang/{locale}/{namespace}.json` layout and normal pull-request review for translatable namespaces
 - If Weblate is chosen, design it as production infrastructure before inviting contributors: pinned containers, TLS/reverse proxy, SMTP, access control, backups, restore testing, monitoring, and upgrade/rollback process
 - If Crowdin is chosen, verify plan eligibility and hosted-word costs before relying on the open-source or free plan, especially if TrackDraw gains paid plans
@@ -215,6 +239,16 @@ Maintenance focus:
 - Add future languages only when there is enough user demand and maintenance capacity to review FPV terminology, compact UI labels, and export/PDF/Race Pack copy
 - Continue checking translated UI on desktop and mobile, especially tight inspector panels, buttons, dialogs, share pages, and exported PDFs/Race Packs
 
+Simplified Chinese product-integration follow-up:
+
+- Treat the locale and message catalogs merged through [#583](https://github.com/dutchdronesquad/trackdraw/pull/583) as the baseline; use [#556](https://github.com/dutchdronesquad/trackdraw/pull/556) as implementation research rather than reviving or cherry-picking the old combined PR
+- Add reliable Chinese PDF output through a lazy-loaded CJK-capable font with its license and provenance included, retry-safe loading, and the active UI locale wired explicitly into PDF generation
+- Pass the active locale and localized untitled-track fallback through PNG, SVG, and PDF export paths so export dates and fallback copy match the selected product language
+- Localize catalog-backed element names and dimension labels across placement controls, inspectors, and shape display labels while preserving catalog snapshot fallbacks for existing projects
+- Localize starter-layout names, descriptions, and generated project titles without coupling stored geometry or measurement units to the selected language
+- Use locale-aware date formatting in the public gallery and extend the API docs title and document language handling to every supported locale
+- Add focused regression coverage for real jsPDF font registration/output, font-load retry behavior, catalog translation coverage, starter-layout copy, and locale propagation through export callers
+
 Important boundary:
 
 - Do not block regional measurement support on full i18n; units can ship first as a smaller, lower-risk slice
@@ -222,6 +256,8 @@ Important boundary:
 - Do not translate dashboard or legal pages unless that product/legal boundary is deliberately changed later
 - Do not let translation tooling bypass CI locale checks, unresolved-key checks, or source review through pull requests
 - Do not accept linear Worker bundle growth as an unavoidable cost of adding languages
+- Do not bundle a Chinese font for the regular UI; keep the additional font scoped and lazy-loaded for document export where browser/system font fallback is unavailable
+- Do not add Chinese-only catalog keys without matching English, Dutch, and German entries; keep locale parity intact and translate those values deliberately instead of using permanent English placeholders
 
 #### Track Element Catalog
 
@@ -649,7 +685,7 @@ Suggested first slices:
 
 #### Usage Analytics And Event Tracking (`Account-backed`)
 
-TrackDraw has Tier 1 internal metrics covering user population, content health, weekly growth, and plan limit simulation. Tier 2 requires a lightweight event log to answer questions that cannot be derived from the existing tables.
+TrackDraw now has Tier 1 internal metrics plus a privacy-safe Tier 2 event log for editor sessions, share views, exports, 3D preview use, imports, and element placement. The admin dashboard is organized from product pulse and one contextual focus banner through account journey, editor/export/share use, growth, operational health, and plan decisions. Period movements only appear after two complete 30-day tracking windows, and creator retention counts return visits to the editor from fully tracked mature cohorts.
 
 Supporting research document:
 
@@ -661,12 +697,18 @@ Why:
 - These signals are useful for understanding real usage patterns over time
 - A single narrow `events` table is enough for the first slice without requiring external analytics tooling
 
-Focus:
+Shipped first slice:
 
 - Add a `product_events` table separate from the existing `audit_events` table (audit events are identity-sensitive and actor-linked; product events can be anonymous and have a different retention lifecycle)
 - Schema: narrow, privacy-safe — event name, nullable session ID, nullable user ID, nullable project ID, nullable share token, timestamp. No IP addresses, no fingerprinting, purgeable per user on account deletion
-- Instrument the highest-value events first: `share.viewed`, `export.completed`, `editor.3d_opened`, `editor.element_placed`, `project.imported`
+- Instrument the highest-value events first: `editor.session_started`, `share.viewed`, `export.completed`, `editor.3d_opened`, `editor.element_placed`, `project.imported`
 - Surface aggregate event data in the existing admin Metrics page alongside Tier 1 query metrics
+- Purge account-linked events on account deletion and all raw events after 180 days
+
+Possible follow-ups:
+
+- Dead-share detection and guest-to-account conversion
+- Longer-lived anonymous aggregate rollups without retaining raw events
 
 Important boundary:
 
